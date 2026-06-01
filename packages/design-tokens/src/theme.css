@@ -1,0 +1,44 @@
+/**
+ * Tailwind v4 theme — wird von apps/web/src/app.css und apps/app/src/app.css importiert.
+ * Token-Werte spiegeln colors.ts / typography.ts / spacing.ts / radii.ts.
+ * PLATZHALTER bis Wix-Inspect (docs/wix-inspect.md).
+ */
+@theme {
+  /* Colors */
+  --color-bg: #000000;
+  --color-surface: #0a0a0a;
+  --color-surface-alt: #141414;
+  --color-border: #1f1f1f;
+  --color-fg: #ffffff;
+  --color-fg-muted: #a1a1a1;
+  --color-accent: #ffffff;
+  --color-accent-glow: rgba(255, 255, 255, 0.15);
+  --color-success: #00e08a;
+  --color-warn: #ffc53d;
+  --color-danger: #ff2d2d;
+
+  /* Typography */
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --font-body: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  --text-hero: clamp(3rem, 10vw, 7.5rem);
+  --text-hero--line-height: 1.05;
+  --text-hero--letter-spacing: -0.02em;
+
+  --tracking-claim: 0.1em;
+  --tracking-wide: 0.05em;
+
+  /* Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 9999px;
+
+  /* Shadow / Glow */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 24px rgba(255, 255, 255, 0.15);
+}

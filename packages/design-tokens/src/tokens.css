@@ -1,0 +1,17 @@
+/**
+ * Plain CSS variables — für Konsumenten, die kein Tailwind nutzen
+ * (z. B. Inline-SVG, dritter Code).
+ */
+:root {
+  --energize-color-bg: #000000;
+  --energize-color-surface: #0a0a0a;
+  --energize-color-border: #1f1f1f;
+  --energize-color-fg: #ffffff;
+  --energize-color-fg-muted: #a1a1a1;
+  --energize-color-accent: #ffffff;
+
+  --energize-font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+  --energize-font-body: Inter, system-ui, sans-serif;
+
+  --energize-tracking-claim: 0.1em;
+}

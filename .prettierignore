@@ -1,0 +1,10 @@
+node_modules
+build
+dist
+.svelte-kit
+.turbo
+pnpm-lock.yaml
+src/paraglide
+packages/i18n/src/paraglide
+apps/app/ios
+apps/app/android

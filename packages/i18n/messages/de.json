@@ -1,0 +1,23 @@
+{
+  "$schema": "https://inlang.com/schema/inlang-message-format",
+  "hero_eyebrow": "29. MAI 2027 — STOCKELSDORF/DISSAU",
+  "hero_headline": "ENERGIZE",
+  "hero_subline": "A NEW FESTIVAL EXPERIENCE — NEAR LÜBECK",
+  "hero_claim": "NO_MAINSTREAM_SHIT",
+  "cta_tickets": "TICKETS 2027",
+  "cta_lineup": "LINE-UP 2027",
+  "nav_home": "Start",
+  "nav_lineup": "Line-Up",
+  "nav_tickets": "Tickets",
+  "nav_faq": "FAQ",
+  "nav_anfahrt": "Anfahrt",
+  "nav_login": "Login",
+  "lang_toggle": "EN",
+  "lang_current": "DE",
+  "footer_imprint": "Impressum",
+  "footer_privacy": "Datenschutz",
+  "footer_terms": "AGB",
+  "footer_cashless_terms": "Cashless-AGB",
+  "hello_world_native": "Läuft als Capacitor-App",
+  "hello_world_web": "Läuft als Web-App"
+}

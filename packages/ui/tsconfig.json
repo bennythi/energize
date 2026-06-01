@@ -1,0 +1,7 @@
+{
+  "extends": "@energize/tsconfig/svelte.json",
+  "compilerOptions": {
+    "rootDir": "src"
+  },
+  "include": ["src/**/*"]
+}

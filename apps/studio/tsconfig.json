@@ -1,0 +1,13 @@
+{
+  "extends": "@energize/tsconfig/base.json",
+  "compilerOptions": {
+    "jsx": "preserve",
+    "moduleResolution": "bundler",
+    "allowJs": true,
+    "noEmit": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  },
+  "include": ["**/*.ts", "**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
+}

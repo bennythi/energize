@@ -1,0 +1,22 @@
+@import 'tailwindcss';
+@import '@energize/design-tokens/theme.css';
+
+@layer base {
+  html,
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-body);
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+@layer utilities {
+  .claim {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-claim);
+  }
+}

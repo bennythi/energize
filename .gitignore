@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+build/
+dist/
+.svelte-kit/
+.turbo/
+*.tsbuildinfo
+
+# Paraglide generated
+src/paraglide/
+packages/i18n/src/paraglide/
+
+# Capacitor native (kept for reference; native projects can be regenerated)
+# apps/app/ios/
+# apps/app/android/
+
+# Env + secrets
+.env
+.env.*
+!.env.example
+.envrc
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test outputs
+coverage/
+
+# Sanity
+apps/studio/dist/
