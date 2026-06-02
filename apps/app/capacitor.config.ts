@@ -6,10 +6,10 @@ const config: CapacitorConfig = {
   webDir: 'build',
   bundledWebRuntime: false,
   android: {
-    backgroundColor: '#000000',
+    backgroundColor: '#0A0A0A',
   },
   ios: {
-    backgroundColor: '#000000',
+    backgroundColor: '#0A0A0A',
     contentInset: 'always',
   },
   server: {
