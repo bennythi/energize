@@ -43,3 +43,8 @@ coverage/
 
 # Sanity
 apps/studio/dist/
+apps/studio/.sanity/
+
+# Inlang/Paraglide generated state
+packages/i18n/project.inlang/project_id
+packages/i18n/project.inlang/cache/

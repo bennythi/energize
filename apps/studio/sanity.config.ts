@@ -5,14 +5,12 @@ import { schemaTypes } from './schemas';
 
 /**
  * Sanity Studio Konfiguration.
- *
- * ⚠️ projectId ist ein PLATZHALTER — bitte ersetzen sobald das Sanity-Projekt
- * angelegt ist (siehe docs/sanity-setup.md). Bis dahin schlägt `pnpm dev` fehl.
+ * Project-ID + Dataset sind die echten Werte aus dem Sanity-Cloud-Projekt.
  */
 export default defineConfig({
   name: 'energize',
   title: 'ENERGIZE Festival',
-  projectId: 'REoxliq7rf',
+  projectId: 'oxliq7rf',
   dataset: 'production',
   plugins: [structureTool(), visionTool()],
   schema: {
