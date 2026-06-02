@@ -12,7 +12,7 @@ import { schemaTypes } from './schemas';
 export default defineConfig({
   name: 'energize',
   title: 'ENERGIZE Festival',
-  projectId: 'REPLACE_WITH_SANITY_PROJECT_ID',
+  projectId: 'REoxliq7rf',
   dataset: 'production',
   plugins: [structureTool(), visionTool()],
   schema: {
