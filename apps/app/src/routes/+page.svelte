@@ -58,7 +58,7 @@
     claim={m.hero_claim()}
   >
     {#snippet actions()}
-      <Button variant="primary" onclick={openTickets}>{m.cta_tickets()}</Button>
+      <Button variant="yellow" onclick={openTickets}>{m.cta_tickets()}</Button>
       <Button href="#lineup" variant="ghost">{m.cta_lineup()}</Button>
     {/snippet}
   </Hero>

@@ -2,7 +2,9 @@
   "extends": "@energize/tsconfig/svelte.json",
   "compilerOptions": {
     "rootDir": "src",
-    "allowJs": true
+    "allowJs": true,
+    "checkJs": false
   },
-  "include": ["src/**/*"]
+  "include": ["src/index.ts"],
+  "exclude": ["src/paraglide", "node_modules", "dist"]
 }

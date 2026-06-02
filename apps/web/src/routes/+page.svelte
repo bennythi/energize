@@ -36,7 +36,7 @@
     claim={m.hero_claim()}
   >
     {#snippet actions()}
-      <Button href="https://shop.tickee.de/shop/84/" variant="primary">
+      <Button href="https://shop.tickee.de/shop/84/" variant="yellow">
         {m.cta_tickets()}
       </Button>
       <Button href="#lineup" variant="ghost">{m.cta_lineup()}</Button>
