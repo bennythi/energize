@@ -31,12 +31,6 @@ export const artist = defineType({
       type: 'localizedText',
     }),
     defineField({
-      name: 'stage',
-      title: 'Bühne',
-      type: 'reference',
-      to: [{ type: 'stage' }],
-    }),
-    defineField({
       name: 'slotStart',
       title: 'Slot-Beginn',
       type: 'datetime',
@@ -99,12 +93,12 @@ export const artist = defineType({
     select: {
       title: 'name',
       media: 'photo',
-      stage: 'stage.name',
       live: 'isLive',
+      featured: 'featured',
     },
-    prepare: ({ title, media, stage, live }) => ({
+    prepare: ({ title, media, live, featured }) => ({
       title: live ? `${title} (LIVE)` : title,
-      subtitle: stage ?? undefined,
+      subtitle: featured ? 'Featured' : undefined,
       media,
     }),
   },

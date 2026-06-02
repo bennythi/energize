@@ -17,7 +17,6 @@ export const structure: StructureResolver = (S: StructureBuilder) =>
       S.divider(),
 
       S.documentTypeListItem('artist').title('Künstler / Line-Up'),
-      S.documentTypeListItem('stage').title('Bühnen'),
       S.documentTypeListItem('poi').title('Karten-POIs'),
 
       S.divider(),
