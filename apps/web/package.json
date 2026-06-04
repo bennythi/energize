@@ -13,6 +13,7 @@
   "dependencies": {
     "@energize/design-tokens": "workspace:*",
     "@energize/i18n": "workspace:*",
+    "@energize/sanity-client": "workspace:*",
     "@energize/ui": "workspace:*"
   },
   "devDependencies": {

@@ -1,0 +1,70 @@
+name: Deploy to ANPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy.yml'
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Build + rsync to ANPA
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    # Sicherheitsnetz: lauft erst, wenn alle Secrets gesetzt sind.
+    # Solange ein Secret fehlt, ist deploy.ANPA_USER leer und der Job wird gar
+    # nicht erst dispatched.
+    if: ${{ vars.DEPLOY_ENABLED == 'true' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build web app
+        run: pnpm --filter @energize/web build
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.ANPA_SSH_KEY }}" > ~/.ssh/anpa_deploy
+          chmod 600 ~/.ssh/anpa_deploy
+          echo "${{ secrets.ANPA_KNOWN_HOSTS }}" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy via rsync
+        run: |
+          rsync \
+            -avz \
+            --delete \
+            --exclude='.git' \
+            --exclude='.htaccess' \
+            -e "ssh -i ~/.ssh/anpa_deploy -p ${{ secrets.ANPA_PORT }} -o StrictHostKeyChecking=yes" \
+            apps/web/build/ \
+            ${{ secrets.ANPA_USER }}@${{ secrets.ANPA_HOST }}:${{ secrets.ANPA_TARGET }}
+
+      - name: Cleanup SSH
+        if: always()
+        run: rm -f ~/.ssh/anpa_deploy

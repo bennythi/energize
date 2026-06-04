@@ -23,6 +23,11 @@ packages/i18n/src/paraglide/
 !.env.example
 .envrc
 
+# CI deploy keys (private)
+.github/anpa_deploy_key
+.github/*_deploy_key
+.github/*_deploy_key.pub
+
 # Editor / OS
 .DS_Store
 Thumbs.db
