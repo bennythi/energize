@@ -10,27 +10,6 @@
     m.tickets_includes_3(),
     m.tickets_includes_4(),
   ]);
-
-  const phases = $derived([
-    {
-      key: 'early',
-      title: m.tickets_phase_early_title(),
-      body: m.tickets_phase_early_body(),
-      active: true,
-    },
-    {
-      key: 'regular',
-      title: m.tickets_phase_regular_title(),
-      body: m.tickets_phase_regular_body(),
-      active: false,
-    },
-    {
-      key: 'door',
-      title: m.tickets_phase_door_title(),
-      body: m.tickets_phase_door_body(),
-      active: false,
-    },
-  ]);
 </script>
 
 <svelte:head>
@@ -90,35 +69,46 @@
       {m.tickets_phases_title()}
     </h2>
 
-    <ul class="mt-10 grid gap-4 md:grid-cols-3">
-      {#each phases as phase, i (phase.key)}
-        <li
-          class="relative border-2 p-6 transition-all"
-          class:border-accent={phase.active}
-          class:bg-surface={phase.active}
-          class:border-border={!phase.active}
-          class:bg-bg={!phase.active}
-        >
-          {#if phase.active}
-            <span
-              class="absolute -top-3 left-4 bg-accent px-3 py-1 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-inverse"
-            >
-              Jetzt aktiv
-            </span>
-          {/if}
+    <article class="relative mt-10 overflow-hidden border-2 border-accent bg-surface p-6 md:p-10">
+      <span
+        class="absolute -top-3 left-6 bg-accent px-3 py-1 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-inverse"
+      >
+        ● Jetzt im Shop
+      </span>
+
+      <div class="grid gap-8 md:grid-cols-[2fr_1fr] md:items-center">
+        <div>
           <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-            {String(i + 1).padStart(2, '0')}
+            Phase 01
           </p>
           <h3
-            class="mt-2 font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-fg"
-            class:text-accent={phase.active}
+            class="mt-2 font-display font-black uppercase leading-[0.9] tracking-[-0.01em] text-accent"
+            style="font-size: clamp(1.75rem, 5vw, 3.25rem);"
           >
-            {phase.title}
+            {m.tickets_phase_loyalty_title()}
           </h3>
-          <p class="mt-2 text-sm text-fg-muted">{phase.body}</p>
-        </li>
-      {/each}
-    </ul>
+          <p class="mt-4 text-sm leading-relaxed text-fg-muted md:text-base">
+            {m.tickets_phase_loyalty_body()}
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-3">
+          <a
+            href={TICKETSHOP_URL}
+            target="_blank"
+            rel="noopener"
+            class="inline-flex items-center justify-center border-2 border-accent bg-accent px-6 py-4 font-display text-base font-black uppercase tracking-[var(--tracking-claim)] text-fg-inverse transition-all hover:bg-transparent hover:text-accent"
+          >
+            {m.tickets_cta_shop()}
+          </a>
+          <p
+            class="text-center font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+          >
+            ↗ shop.tickee.de
+          </p>
+        </div>
+      </div>
+    </article>
   </section>
 </Container>
 

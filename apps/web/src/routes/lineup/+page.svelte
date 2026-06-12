@@ -136,14 +136,16 @@
         </span>
       </div>
 
-      <ul class="mt-8 grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+      <ul
+        class="mt-8 grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7"
+      >
         {#each headliners as artist, idx (artist._id)}
-          {@const photo = photoUrl(artist.photo, 500, 500)}
+          {@const photo = photoUrl(artist.photo, 400, 400)}
           {@const isFav = favorites.has(artist._id)}
-          <li>
+          <li class="relative">
             <a
               href={`/lineup/${artist.slug}`}
-              class="group relative flex aspect-square flex-col justify-between overflow-hidden border-2 border-fg p-3 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
+              class="group relative flex aspect-square flex-col justify-between overflow-hidden border-2 border-fg p-2 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
               class:bg-accent={!photo}
               class:text-fg-inverse={!photo}
               class:bg-surface={photo}
@@ -163,53 +165,57 @@
                 <!-- Plakat-Style: Schwarz auf Gelb -->
                 <div class="absolute inset-0" aria-hidden="true">
                   <div
-                    class="absolute -bottom-6 -right-6 font-display text-[8rem] font-black leading-none text-fg-inverse opacity-10"
+                    class="absolute -bottom-4 -right-4 font-display text-[5rem] font-black leading-none text-fg-inverse opacity-10"
                   >
                     {String(idx + 1).padStart(2, '0')}
                   </div>
                 </div>
               {/if}
 
-              <!-- TOP: Nummer + Fav-Button -->
-              <div class="relative z-10 flex items-start justify-between gap-2">
+              <!-- TOP: Nummer + Live-Badge -->
+              <div class="relative z-10 flex items-start justify-between gap-1">
                 <span
-                  class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] {photo
+                  class="font-mono text-[9px] uppercase tracking-[var(--tracking-claim)] {photo
                     ? 'text-fg/80'
                     : 'text-fg-inverse/70'}"
                 >
                   {String(idx + 1).padStart(2, '0')}
                 </span>
-                <FavoriteButton artistId={artist._id} size="sm" onDark={!!photo} />
-              </div>
-
-              <!-- BOTTOM: Name + Live-Badge -->
-              <div class="relative z-10 mt-auto">
                 {#if artist.isLive}
                   <span
-                    class="mb-1 inline-block animate-pulse bg-danger px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-[var(--tracking-claim)] text-fg"
+                    class="animate-pulse bg-danger px-1 py-0.5 font-mono text-[8px] uppercase tracking-[var(--tracking-claim)] text-fg"
                   >
-                    ● LIVE
+                    ●
                   </span>
                 {/if}
+              </div>
+
+              <!-- BOTTOM: Name + Fav-Stern -->
+              <div class="relative z-10 mt-auto flex items-end justify-between gap-1">
                 <h3
                   class="font-display font-black uppercase leading-[0.95] tracking-[-0.01em]"
-                  style="font-size: clamp(0.95rem, 1.8vw, 1.25rem);"
+                  style="font-size: clamp(0.7rem, 1.4vw, 1rem);"
                   class:text-fg={photo}
                   class:text-fg-inverse={!photo}
                 >
                   {artist.name}
                 </h3>
                 {#if isFav}
-                  <p
-                    class="mt-1 font-mono text-[9px] uppercase tracking-[var(--tracking-claim)]"
+                  <span
+                    class="font-mono text-[10px] leading-none"
                     class:text-accent={photo}
                     class:text-fg-inverse={!photo}
                   >
                     ★
-                  </p>
+                  </span>
                 {/if}
               </div>
             </a>
+
+            <!-- Favorite-Button als Overlay (clickable, separat vom Link) -->
+            <div class="absolute right-1 top-1 z-20">
+              <FavoriteButton artistId={artist._id} size="sm" onDark={!!photo} />
+            </div>
           </li>
         {/each}
       </ul>

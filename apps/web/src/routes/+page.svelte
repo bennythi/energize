@@ -90,13 +90,15 @@
           </a>
         </div>
 
-        <ul class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4">
+        <ul
+          class="mt-10 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8"
+        >
           {#each featuredArtists as artist (artist._id)}
             {@const photo = photoUrl(artist.photo)}
             <li>
               <a
                 href={`/lineup/${artist.slug}`}
-                class="group relative flex aspect-square flex-col justify-end overflow-hidden border-2 border-fg p-3 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
+                class="group relative flex aspect-square flex-col justify-end overflow-hidden border-2 border-fg p-2 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
                 class:bg-accent={!photo}
                 class:bg-surface={photo}
               >
@@ -114,7 +116,7 @@
                 {/if}
                 <h3
                   class="relative z-10 font-display font-black uppercase leading-[0.95] tracking-[-0.01em]"
-                  style="font-size: clamp(0.9rem, 1.6vw, 1.15rem);"
+                  style="font-size: clamp(0.7rem, 1.3vw, 0.95rem);"
                   class:text-fg={photo}
                   class:text-fg-inverse={!photo}
                 >

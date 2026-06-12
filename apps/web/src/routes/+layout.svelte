@@ -1,6 +1,14 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+  import { browser } from '$app/environment';
   import '../app.css';
-  import { m, setLanguageTag, languageTag, type AvailableLanguageTag } from '@energize/i18n';
+  import {
+    m,
+    setLanguageTag,
+    languageTag,
+    isAvailableLanguageTag,
+    type AvailableLanguageTag,
+  } from '@energize/i18n';
   import { auth } from '$lib/auth.svelte';
   import { favorites } from '$lib/favorites.svelte';
 
@@ -10,8 +18,21 @@
 
   let { children }: Props = $props();
 
+  const LANG_STORAGE_KEY = 'energize.lang';
+
   let currentLang = $state<AvailableLanguageTag>(languageTag() as AvailableLanguageTag);
   let mobileOpen = $state(false);
+
+  onMount(() => {
+    // Persistierte Sprache aus localStorage anwenden; reload nötig weil
+    // Paraglide-Messages statisch eingebacken sind und beim Mount nur einmal
+    // evaluiert werden.
+    const stored = localStorage.getItem(LANG_STORAGE_KEY);
+    if (stored && isAvailableLanguageTag(stored) && stored !== languageTag()) {
+      setLanguageTag(stored);
+      location.reload();
+    }
+  });
 
   $effect(() => {
     auth.init();
@@ -28,8 +49,11 @@
 
   function toggleLang() {
     const next: AvailableLanguageTag = currentLang === 'de' ? 'en' : 'de';
+    if (!browser) return;
+    localStorage.setItem(LANG_STORAGE_KEY, next);
     setLanguageTag(next);
     currentLang = next;
+    location.reload();
   }
 
   const publicLinks = $derived([
