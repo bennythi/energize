@@ -1,0 +1,45 @@
+# Energize Festival 2027 — Apache config for adapter-static SvelteKit build
+# Liegt unter apps/web/static/.htaccess und landet im build-Root.
+
+Options +MultiViews
+DirectoryIndex index.html
+
+# Charset für alle textartigen Antworten
+AddDefaultCharset UTF-8
+
+# Lange Caches für gehashte Assets, kurz für HTML
+<IfModule mod_headers.c>
+  <FilesMatch "\.(js|css|woff2?|svg|png|jpg|webp|avif)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+  <FilesMatch "\.html$">
+    Header set Cache-Control "public, max-age=0, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# Brotli/Gzip-Kompression einschalten falls verfügbar
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# SPA-Fallback: alle Requests, die kein existierendes File/Directory treffen,
+# bekommen index.html — der SvelteKit-Client übernimmt das Routing
+# (z. B. /lineup/brennan-heart → SvelteKit-Router löst Dynamic-Route auf).
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Echte Files/Dirs durchlassen
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Sonst Fallback auf index.html
+  RewriteRule ^ /index.html [L]
+</IfModule>
+
+# Sicherheitsheader
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
