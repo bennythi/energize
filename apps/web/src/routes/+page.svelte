@@ -27,7 +27,7 @@
   function photoUrl(photo: unknown): string | null {
     if (!photo) return null;
     try {
-      return urlFor(photo).width(400).height(400).fit('crop').auto('format').url();
+      return urlFor(photo).width(450).height(600).fit('crop').auto('format').url();
     } catch {
       return null;
     }
@@ -98,7 +98,7 @@
             <li>
               <a
                 href={`/lineup/${artist.slug}`}
-                class="group relative flex aspect-square flex-col justify-end overflow-hidden border-2 border-fg p-2 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
+                class="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden border-2 border-fg p-2 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
                 class:bg-accent={!photo}
                 class:bg-surface={photo}
               >

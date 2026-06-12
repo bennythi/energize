@@ -50,6 +50,12 @@ coverage/
 apps/studio/dist/
 apps/studio/.sanity/
 
+# Lokales Seed-Material (Plakate / Photos) — gehört nicht ins public Repo,
+# die Source-of-Truth liegt nach dem Upload in Sanity. Ordner darf existieren
+# (für Re-Seeds), Inhalt wird ignoriert.
+apps/studio/seed-assets/*
+!apps/studio/seed-assets/.gitkeep
+
 # Inlang/Paraglide generated state
 packages/i18n/project.inlang/project_id
 packages/i18n/project.inlang/cache/

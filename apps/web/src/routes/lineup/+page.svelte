@@ -140,12 +140,12 @@
         class="mt-8 grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7"
       >
         {#each headliners as artist, idx (artist._id)}
-          {@const photo = photoUrl(artist.photo, 400, 400)}
+          {@const photo = photoUrl(artist.photo, 450, 600)}
           {@const isFav = favorites.has(artist._id)}
           <li class="relative">
             <a
               href={`/lineup/${artist.slug}`}
-              class="group relative flex aspect-square flex-col justify-between overflow-hidden border-2 border-fg p-2 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
+              class="group relative flex aspect-[3/4] flex-col justify-between overflow-hidden border-2 border-fg p-2 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
               class:bg-accent={!photo}
               class:text-fg-inverse={!photo}
               class:bg-surface={photo}
