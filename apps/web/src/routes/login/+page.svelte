@@ -66,6 +66,9 @@
           {m.login_sent_title()}
         </h2>
         <p class="mt-3 text-sm text-fg-muted">{m.login_sent_body()}</p>
+        <p class="mt-3 border-l-2 border-accent pl-3 text-sm text-fg">
+          ⚠ {m.community_login_step_3_body()}
+        </p>
       </div>
     {:else}
       <p class="mt-6 text-fg-muted">{m.login_lead()}</p>
@@ -94,6 +97,14 @@
           {submitting ? m.login_submitting() : m.login_submit()}
         </Button>
       </form>
+
+      <p
+        class="mt-12 border-t border-border pt-6 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+      >
+        <a href="/community" class="hover:text-accent transition-colors">
+          → {m.community_login_help()}
+        </a>
+      </p>
     {/if}
   </section>
 </Container>

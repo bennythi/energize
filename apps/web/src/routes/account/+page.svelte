@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { Container, Heading, Button } from '@energize/ui';
   import { m, languageTag, type AvailableLanguageTag } from '@energize/i18n';
@@ -31,6 +32,61 @@
       day: 'numeric',
     });
   });
+
+  // Profile-Editing (display_name)
+  let displayName = $state('');
+  let displayNameLoaded = $state(false);
+  let savingProfile = $state(false);
+  let profileSaved = $state(false);
+  let profileError = $state<string | null>(null);
+
+  async function loadProfile() {
+    const client = auth.client;
+    const user = auth.user;
+    if (!client || !user) return;
+    try {
+      const { data, error } = await client
+        .from('profiles')
+        .select('display_name')
+        .eq('id', user.id)
+        .maybeSingle();
+      if (error) throw error;
+      displayName = data?.display_name ?? '';
+    } catch (err) {
+      console.error('[account] profile load failed', err);
+    } finally {
+      displayNameLoaded = true;
+    }
+  }
+
+  onMount(() => {
+    void loadProfile();
+  });
+
+  async function handleProfileSave(event: SubmitEvent) {
+    event.preventDefault();
+    const client = auth.client;
+    const user = auth.user;
+    if (!client || !user) return;
+    profileError = null;
+    profileSaved = false;
+    savingProfile = true;
+    try {
+      const trimmed = displayName.trim();
+      const { error } = await client
+        .from('profiles')
+        .update({ display_name: trimmed || null })
+        .eq('id', user.id);
+      if (error) throw error;
+      profileSaved = true;
+      setTimeout(() => (profileSaved = false), 3000);
+    } catch (err) {
+      console.error('[account] profile save failed', err);
+      profileError = m.account_save_error();
+    } finally {
+      savingProfile = false;
+    }
+  }
 
   let signingOut = $state(false);
 
@@ -72,6 +128,42 @@
           </div>
         {/if}
       </dl>
+
+      <section class="mt-12">
+        <h2
+          class="font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-accent"
+        >
+          {m.account_profile_title()}
+        </h2>
+
+        <form onsubmit={handleProfileSave} class="mt-4 space-y-3">
+          <label class="block">
+            <span
+              class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+            >
+              {m.account_display_name_label()}
+            </span>
+            <input
+              type="text"
+              bind:value={displayName}
+              placeholder={m.account_display_name_placeholder()}
+              disabled={!displayNameLoaded || savingProfile}
+              maxlength="40"
+              class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+            />
+            <p class="mt-2 text-xs text-fg-muted">{m.account_display_name_hint()}</p>
+          </label>
+          {#if profileError}
+            <p class="text-sm text-danger" role="alert">{profileError}</p>
+          {/if}
+          {#if profileSaved}
+            <p class="text-sm text-success" aria-live="polite">✓ {m.account_saved()}</p>
+          {/if}
+          <Button type="submit" variant="yellow">
+            {savingProfile ? m.account_saving() : m.account_save()}
+          </Button>
+        </form>
+      </section>
 
       <section class="mt-12 border-2 border-accent bg-surface p-6">
         <p
