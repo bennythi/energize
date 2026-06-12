@@ -41,9 +41,7 @@
 
       <div class="mt-10 flex flex-wrap gap-3">
         <a
-          href={TICKETSHOP_URL}
-          target="_blank"
-          rel="noopener"
+          href="/tickets/buy"
           class="inline-flex items-center justify-center border-2 border-accent bg-accent px-8 py-4 font-display text-base font-black uppercase tracking-[var(--tracking-claim)] text-fg-inverse transition-all hover:bg-transparent hover:text-accent hover:shadow-[var(--shadow-glow-strong)] md:text-lg"
         >
           {m.tickets_cta_shop()}
@@ -94,18 +92,19 @@
 
         <div class="flex flex-col gap-3">
           <a
-            href={TICKETSHOP_URL}
-            target="_blank"
-            rel="noopener"
+            href="/tickets/buy"
             class="inline-flex items-center justify-center border-2 border-accent bg-accent px-6 py-4 font-display text-base font-black uppercase tracking-[var(--tracking-claim)] text-fg-inverse transition-all hover:bg-transparent hover:text-accent"
           >
             {m.tickets_cta_shop()}
           </a>
-          <p
-            class="text-center font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+          <a
+            href={TICKETSHOP_URL}
+            target="_blank"
+            rel="noopener"
+            class="text-center font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted transition-colors hover:text-accent"
           >
-            ↗ shop.tickee.de
-          </p>
+            ↗ in neuem Tab
+          </a>
         </div>
       </div>
     </article>
@@ -181,9 +180,7 @@
         Hol dir dein Ticket.
       </h2>
       <a
-        href={TICKETSHOP_URL}
-        target="_blank"
-        rel="noopener"
+        href="/tickets/buy"
         class="inline-flex items-center justify-center border-2 border-fg-inverse bg-fg-inverse px-10 py-4 font-display text-lg font-black uppercase tracking-[var(--tracking-claim)] text-accent transition-all hover:bg-transparent hover:text-fg-inverse"
       >
         {m.tickets_cta_shop()}

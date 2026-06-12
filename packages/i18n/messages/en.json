@@ -138,6 +138,11 @@
   "tickets_support_title": "Ticket support",
   "tickets_support_body": "Order issues, refunds, name changes — please write to tickee directly.",
   "tickets_external_note": "You'll be redirected to shop.tickee.de — a separate, secure payment platform.",
+  "tickets_iframe_title": "Ticket shop",
+  "tickets_iframe_hint": "Tickets are handled by our partner tickee. Payment & delivery are processed by tickee directly with you.",
+  "tickets_iframe_loading": "Loading shop …",
+  "tickets_iframe_fallback": "Shop can't be embedded? Go straight to shop.tickee.de →",
+  "tickets_iframe_open_external": "Open in new tab ↗",
 
   "account_profile_title": "Profile",
   "account_display_name_label": "Display name",
