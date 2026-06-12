@@ -47,5 +47,43 @@
   "account_email_label": "E-Mail",
   "account_member_since": "Mitglied seit",
   "account_logout": "Abmelden",
-  "account_login_required": "Du musst eingeloggt sein, um diese Seite zu sehen."
+  "account_login_required": "Du musst eingeloggt sein, um diese Seite zu sehen.",
+
+  "favorites_aria_add": "Zu Favoriten hinzufügen",
+  "favorites_aria_remove": "Aus Favoriten entfernen",
+  "favorites_login_hint": "Login zum Favorisieren",
+
+  "account_favorites_title": "Meine Favoriten",
+  "account_favorites_empty": "Du hast noch keinen Act favorisiert.",
+  "account_favorites_browse": "Lineup ansehen",
+  "account_favorites_loading": "Lade Favoriten …",
+
+  "lineup_demo_banner_title": "Demo-Lineup",
+  "lineup_demo_banner_body": "Dies sind Platzhalter aus der 2026er Edition. Die finalen Acts für 2027 werden im Herbst 2026 verkündet.",
+
+  "nav_feedback": "Feedback",
+
+  "feedback_title": "Dein Feedback zur Edition 2026",
+  "feedback_lead": "Hilf uns, das 2027er Festival noch besser zu machen. Unter allen Einsendern verlosen wir 2 × 50 € Freiverzehr für 2027.",
+  "feedback_rating_label": "Wie hat dir das Festival insgesamt gefallen?",
+  "feedback_rating_hint": "1 = schlecht, 5 = großartig",
+  "feedback_liked_label": "Was war besonders gut?",
+  "feedback_liked_placeholder": "z. B. Sound, Lichtshow, Awareness-Team, Essen …",
+  "feedback_disliked_label": "Was war besonders schlecht?",
+  "feedback_disliked_placeholder": "z. B. Wartezeiten am Cashless-Topup, Toiletten, Shuttle …",
+  "feedback_improvements_label": "Was sollen wir 2027 besser machen?",
+  "feedback_improvements_placeholder": "Konkrete Vorschläge, Wünsche, Ideen.",
+  "feedback_would_return_label": "Würdest du 2027 wieder kommen?",
+  "feedback_return_yes": "Auf jeden Fall",
+  "feedback_return_maybe": "Vielleicht",
+  "feedback_return_no": "Eher nicht",
+  "feedback_submit": "Feedback absenden",
+  "feedback_submitting": "Wird gespeichert …",
+  "feedback_thanks_title": "Danke!",
+  "feedback_thanks_body": "Dein Feedback ist eingegangen. Wir lesen jede Antwort.",
+  "feedback_update": "Aktualisieren",
+  "feedback_existing_note": "Du hast bereits Feedback abgegeben — du kannst es jederzeit anpassen.",
+  "feedback_error": "Speichern fehlgeschlagen. Versuch es bitte noch mal.",
+
+  "account_feedback_cta": "Feedback zur Edition 2026 geben"
 }

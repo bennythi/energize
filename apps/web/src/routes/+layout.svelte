@@ -2,6 +2,7 @@
   import '../app.css';
   import { m, setLanguageTag, languageTag, type AvailableLanguageTag } from '@energize/i18n';
   import { auth } from '$lib/auth.svelte';
+  import { favorites } from '$lib/favorites.svelte';
 
   interface Props {
     children?: import('svelte').Snippet;
@@ -13,6 +14,15 @@
 
   $effect(() => {
     auth.init();
+  });
+
+  $effect(() => {
+    const userId = auth.user?.id;
+    if (userId) {
+      void favorites.load();
+    } else if (auth.initialized) {
+      favorites.clear();
+    }
   });
 
   function toggleLang() {
@@ -48,17 +58,24 @@
         >{m.nav_anfahrt()}</a
       >
     </li>
-    <li>
-      {#if auth.user}
+    {#if auth.user}
+      <li>
+        <a href="/feedback" class="text-fg-muted hover:text-accent transition-colors"
+          >{m.nav_feedback()}</a
+        >
+      </li>
+      <li>
         <a href="/account" class="text-fg-muted hover:text-accent transition-colors"
           >{m.nav_account()}</a
         >
-      {:else}
+      </li>
+    {:else}
+      <li>
         <a href="/login" class="text-fg-muted hover:text-accent transition-colors"
           >{m.nav_login()}</a
         >
-      {/if}
-    </li>
+      </li>
+    {/if}
   </ul>
 
   <button

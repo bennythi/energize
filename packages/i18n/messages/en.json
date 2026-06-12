@@ -47,5 +47,43 @@
   "account_email_label": "Email",
   "account_member_since": "Member since",
   "account_logout": "Sign out",
-  "account_login_required": "You need to be signed in to view this page."
+  "account_login_required": "You need to be signed in to view this page.",
+
+  "favorites_aria_add": "Add to favorites",
+  "favorites_aria_remove": "Remove from favorites",
+  "favorites_login_hint": "Sign in to favorite",
+
+  "account_favorites_title": "My favorites",
+  "account_favorites_empty": "You haven't favorited any act yet.",
+  "account_favorites_browse": "Browse line-up",
+  "account_favorites_loading": "Loading favorites …",
+
+  "lineup_demo_banner_title": "Demo line-up",
+  "lineup_demo_banner_body": "These are placeholders from the 2026 edition. The final 2027 acts will be announced in autumn 2026.",
+
+  "nav_feedback": "Feedback",
+
+  "feedback_title": "Your feedback on the 2026 edition",
+  "feedback_lead": "Help us make 2027 even better. Among all entries we're raffling off 2 × €50 in food & drinks credit for 2027.",
+  "feedback_rating_label": "How was the festival overall?",
+  "feedback_rating_hint": "1 = bad, 5 = great",
+  "feedback_liked_label": "What did you like most?",
+  "feedback_liked_placeholder": "e.g. sound, light show, awareness team, food …",
+  "feedback_disliked_label": "What was particularly bad?",
+  "feedback_disliked_placeholder": "e.g. cashless top-up queues, toilets, shuttle …",
+  "feedback_improvements_label": "What should we improve for 2027?",
+  "feedback_improvements_placeholder": "Concrete suggestions, requests, ideas.",
+  "feedback_would_return_label": "Would you come back in 2027?",
+  "feedback_return_yes": "Absolutely",
+  "feedback_return_maybe": "Maybe",
+  "feedback_return_no": "Probably not",
+  "feedback_submit": "Submit feedback",
+  "feedback_submitting": "Saving …",
+  "feedback_thanks_title": "Thanks!",
+  "feedback_thanks_body": "Your feedback was saved. We read every response.",
+  "feedback_update": "Update",
+  "feedback_existing_note": "You already gave feedback — feel free to update it anytime.",
+  "feedback_error": "Saving failed. Please try again.",
+
+  "account_feedback_cta": "Give feedback on the 2026 edition"
 }

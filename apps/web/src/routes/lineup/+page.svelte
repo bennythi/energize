@@ -2,6 +2,8 @@
   import { Container, Heading } from '@energize/ui';
   import { m } from '@energize/i18n';
   import { urlFor } from '@energize/sanity-client';
+  import FavoriteButton from '$lib/FavoriteButton.svelte';
+  import { auth } from '$lib/auth.svelte';
   import type { PageData } from './$types';
 
   interface Props {
@@ -35,6 +37,22 @@
           Die Acts werden ca. 6 Monate vor Festival gebucht. Folgt uns auf Insta für die Drops.
         </p>
       </div>
+    {:else}
+      <div role="note" class="mt-8 border-2 border-accent bg-accent/10 p-4 text-sm text-fg">
+        <p
+          class="font-display text-base font-black uppercase tracking-[var(--tracking-claim)] text-accent"
+        >
+          {m.lineup_demo_banner_title()}
+        </p>
+        <p class="mt-1 text-fg-muted">{m.lineup_demo_banner_body()}</p>
+      </div>
+    {/if}
+
+    {#if !auth.user && data.artists.length > 0}
+      <p class="mt-6 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
+        <a href="/login" class="hover:text-accent transition-colors">→ {m.favorites_login_hint()}</a
+        >
+      </p>
     {/if}
 
     {#if featured.length > 0}
@@ -51,6 +69,9 @@
             {:else}
               <div class="aspect-square w-full bg-surface-alt"></div>
             {/if}
+            <div class="absolute right-3 top-3 z-10">
+              <FavoriteButton artistId={artist._id} onDark />
+            </div>
             <div
               class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg via-bg/80 to-transparent p-4"
             >
@@ -73,11 +94,16 @@
     {/if}
 
     {#if rest.length > 0}
-      <ul
-        class="mt-12 grid gap-2 font-display text-xl font-black uppercase tracking-[var(--tracking-claim)] sm:grid-cols-2 lg:grid-cols-3"
-      >
+      <ul class="mt-12 divide-y divide-border border-y border-border">
         {#each rest as artist (artist._id)}
-          <li class="border-b border-border py-3 text-fg">{artist.name}</li>
+          <li class="flex items-center justify-between gap-4 py-3">
+            <span
+              class="font-display text-xl font-black uppercase tracking-[var(--tracking-claim)] text-fg"
+            >
+              {artist.name}
+            </span>
+            <FavoriteButton artistId={artist._id} size="sm" />
+          </li>
         {/each}
       </ul>
     {/if}

@@ -34,6 +34,7 @@ export interface Database {
           push_token?: string | null;
           created_at?: string;
         };
+        Relationships: [];
       };
       favorites: {
         Row: {
@@ -51,6 +52,7 @@ export interface Database {
           artist_id?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       posts: {
         Row: {
@@ -77,6 +79,7 @@ export interface Database {
           status?: 'pending' | 'approved' | 'rejected';
           created_at?: string;
         };
+        Relationships: [];
       };
       post_likes: {
         Row: {
@@ -94,6 +97,7 @@ export interface Database {
           user_id?: string;
           created_at?: string;
         };
+        Relationships: [];
       };
       reports: {
         Row: {
@@ -117,7 +121,51 @@ export interface Database {
           reason?: string;
           created_at?: string;
         };
+        Relationships: [];
+      };
+      feedback: {
+        Row: {
+          id: string;
+          user_id: string;
+          edition: string;
+          rating: number | null;
+          liked: string | null;
+          disliked: string | null;
+          improvements: string | null;
+          would_return: 'yes' | 'maybe' | 'no' | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          edition: string;
+          rating?: number | null;
+          liked?: string | null;
+          disliked?: string | null;
+          improvements?: string | null;
+          would_return?: 'yes' | 'maybe' | 'no' | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          edition?: string;
+          rating?: number | null;
+          liked?: string | null;
+          disliked?: string | null;
+          improvements?: string | null;
+          would_return?: 'yes' | 'maybe' | 'no' | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
       };
     };
+    Views: Record<string, never>;
+    Functions: Record<string, never>;
+    Enums: Record<string, never>;
+    CompositeTypes: Record<string, never>;
   };
 }

@@ -1,2 +1,5 @@
+# Demo-Build — komplett von Suchmaschinen ausschließen.
+# Vor Go-Live (Cutover auf energize-festival.de) wieder auf
+# `User-agent: *` + `Allow: /` umstellen und Sitemap-Pfad ergänzen.
 User-agent: *
-Allow: /
+Disallow: /
