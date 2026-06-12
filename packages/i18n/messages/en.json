@@ -19,5 +19,33 @@
   "footer_terms": "Terms",
   "footer_cashless_terms": "Cashless Terms",
   "hello_world_native": "Running as Capacitor app",
-  "hello_world_web": "Running as web app"
+  "hello_world_web": "Running as web app",
+
+  "nav_account": "Account",
+  "nav_logout": "Sign out",
+
+  "login_title": "Sign in",
+  "login_lead": "Get a magic link by email — no password required.",
+  "login_email_label": "Email address",
+  "login_email_placeholder": "you@example.com",
+  "login_submit": "Send magic link",
+  "login_submitting": "Sending …",
+  "login_sent_title": "Check your inbox",
+  "login_sent_body": "We sent you a link. Open it on this device to sign in.",
+  "login_error_generic": "Something went wrong. Please try again.",
+  "login_error_invalid_email": "Please enter a valid email.",
+  "login_not_configured_title": "Sign-in not yet active",
+  "login_not_configured_body": "The account area is being prepared. Magic-link sign-in is coming soon.",
+
+  "callback_title": "Signing in",
+  "callback_body": "Just a moment — we're verifying your link.",
+  "callback_error_title": "Link invalid or expired",
+  "callback_error_body": "Please request a new magic link.",
+  "callback_retry": "Sign in again",
+
+  "account_title": "My account",
+  "account_email_label": "Email",
+  "account_member_since": "Member since",
+  "account_logout": "Sign out",
+  "account_login_required": "You need to be signed in to view this page."
 }

@@ -19,5 +19,33 @@
   "footer_terms": "AGB",
   "footer_cashless_terms": "Cashless-AGB",
   "hello_world_native": "Läuft als Capacitor-App",
-  "hello_world_web": "Läuft als Web-App"
+  "hello_world_web": "Läuft als Web-App",
+
+  "nav_account": "Account",
+  "nav_logout": "Logout",
+
+  "login_title": "Anmelden",
+  "login_lead": "Erhalte einen Magic-Link per E-Mail — kein Passwort.",
+  "login_email_label": "E-Mail-Adresse",
+  "login_email_placeholder": "du@example.com",
+  "login_submit": "Magic-Link senden",
+  "login_submitting": "Wird gesendet …",
+  "login_sent_title": "Check deine Mails",
+  "login_sent_body": "Wir haben dir einen Link geschickt. Öffne ihn auf diesem Gerät, um eingeloggt zu sein.",
+  "login_error_generic": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+  "login_error_invalid_email": "Bitte gib eine gültige E-Mail ein.",
+  "login_not_configured_title": "Login noch nicht aktiv",
+  "login_not_configured_body": "Der Account-Bereich wird vorbereitet. Bald kannst du dich hier mit Magic-Link anmelden.",
+
+  "callback_title": "Anmeldung läuft",
+  "callback_body": "Einen Moment — wir verifizieren deinen Link.",
+  "callback_error_title": "Link ungültig oder abgelaufen",
+  "callback_error_body": "Bitte fordere einen neuen Magic-Link an.",
+  "callback_retry": "Erneut anmelden",
+
+  "account_title": "Mein Account",
+  "account_email_label": "E-Mail",
+  "account_member_since": "Mitglied seit",
+  "account_logout": "Abmelden",
+  "account_login_required": "Du musst eingeloggt sein, um diese Seite zu sehen."
 }

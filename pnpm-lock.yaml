@@ -142,6 +142,9 @@ importers:
       '@energize/sanity-client':
         specifier: workspace:*
         version: link:../../packages/sanity-client
+      '@energize/supabase-client':
+        specifier: workspace:*
+        version: link:../../packages/supabase-client
       '@energize/ui':
         specifier: workspace:*
         version: link:../../packages/ui

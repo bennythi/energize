@@ -14,6 +14,7 @@
     "@energize/design-tokens": "workspace:*",
     "@energize/i18n": "workspace:*",
     "@energize/sanity-client": "workspace:*",
+    "@energize/supabase-client": "workspace:*",
     "@energize/ui": "workspace:*"
   },
   "devDependencies": {

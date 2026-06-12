@@ -1,6 +1,7 @@
 <script lang="ts">
   import '../app.css';
   import { m, setLanguageTag, languageTag, type AvailableLanguageTag } from '@energize/i18n';
+  import { auth } from '$lib/auth.svelte';
 
   interface Props {
     children?: import('svelte').Snippet;
@@ -9,6 +10,10 @@
   let { children }: Props = $props();
 
   let currentLang = $state<AvailableLanguageTag>(languageTag() as AvailableLanguageTag);
+
+  $effect(() => {
+    auth.init();
+  });
 
   function toggleLang() {
     const next: AvailableLanguageTag = currentLang === 'de' ? 'en' : 'de';
@@ -42,6 +47,17 @@
       <a href="/anfahrt" class="text-fg-muted hover:text-accent transition-colors"
         >{m.nav_anfahrt()}</a
       >
+    </li>
+    <li>
+      {#if auth.user}
+        <a href="/account" class="text-fg-muted hover:text-accent transition-colors"
+          >{m.nav_account()}</a
+        >
+      {:else}
+        <a href="/login" class="text-fg-muted hover:text-accent transition-colors"
+          >{m.nav_login()}</a
+        >
+      {/if}
     </li>
   </ul>
 
