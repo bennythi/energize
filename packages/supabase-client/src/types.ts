@@ -16,6 +16,7 @@ export interface Database {
         Row: {
           id: string;
           display_name: string | null;
+          handle: string | null;
           locale: 'de' | 'en' | null;
           push_token: string | null;
           created_at: string;
@@ -23,6 +24,7 @@ export interface Database {
         Insert: {
           id: string;
           display_name?: string | null;
+          handle?: string | null;
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
           created_at?: string;
@@ -30,8 +32,27 @@ export interface Database {
         Update: {
           id?: string;
           display_name?: string | null;
+          handle?: string | null;
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      follows: {
+        Row: {
+          follower_id: string;
+          followee_id: string;
+          created_at: string;
+        };
+        Insert: {
+          follower_id: string;
+          followee_id: string;
+          created_at?: string;
+        };
+        Update: {
+          follower_id?: string;
+          followee_id?: string;
           created_at?: string;
         };
         Relationships: [];

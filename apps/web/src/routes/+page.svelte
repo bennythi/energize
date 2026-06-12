@@ -3,6 +3,7 @@
   import { m } from '@energize/i18n';
   import { urlFor } from '@energize/sanity-client';
   import Countdown from '$lib/Countdown.svelte';
+  import AppComingBanner from '$lib/AppComingBanner.svelte';
   import { auth } from '$lib/auth.svelte';
   import type { PageData } from './$types';
 
@@ -90,9 +91,7 @@
           </a>
         </div>
 
-        <ul
-          class="mt-10 grid grid-cols-3 gap-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8"
-        >
+        <ul class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {#each featuredArtists as artist (artist._id)}
             {@const photo = photoUrl(artist.photo)}
             <li>
@@ -188,6 +187,9 @@
       </div>
     </Container>
   </section>
+
+  <!-- APP COMING -->
+  <AppComingBanner />
 
   <!-- ACCOUNT-CTA -->
   {#if !auth.user}

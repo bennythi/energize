@@ -136,9 +136,7 @@
         </span>
       </div>
 
-      <ul
-        class="mt-8 grid gap-2 grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7"
-      >
+      <ul class="mt-8 grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
         {#each headliners as artist, idx (artist._id)}
           {@const photo = photoUrl(artist.photo, 450, 600)}
           {@const isFav = favorites.has(artist._id)}

@@ -35,6 +35,7 @@
 
   // Profile-Editing (display_name)
   let displayName = $state('');
+  let handle = $state('');
   let displayNameLoaded = $state(false);
   let savingProfile = $state(false);
   let profileSaved = $state(false);
@@ -47,11 +48,12 @@
     try {
       const { data, error } = await client
         .from('profiles')
-        .select('display_name')
+        .select('display_name, handle')
         .eq('id', user.id)
         .maybeSingle();
       if (error) throw error;
       displayName = data?.display_name ?? '';
+      handle = data?.handle ?? '';
     } catch (err) {
       console.error('[account] profile load failed', err);
     } finally {
@@ -63,6 +65,14 @@
     void loadProfile();
   });
 
+  function normalizeHandle(raw: string): string {
+    return raw
+      .toLowerCase()
+      .replace(/^@/, '')
+      .replace(/[^a-z0-9_]/g, '')
+      .slice(0, 24);
+  }
+
   async function handleProfileSave(event: SubmitEvent) {
     event.preventDefault();
     const client = auth.client;
@@ -72,14 +82,26 @@
     profileSaved = false;
     savingProfile = true;
     try {
-      const trimmed = displayName.trim();
+      const trimmedName = displayName.trim();
+      const trimmedHandle = normalizeHandle(handle);
       const { error } = await client
         .from('profiles')
-        .update({ display_name: trimmed || null })
+        .update({
+          display_name: trimmedName || null,
+          handle: trimmedHandle || null,
+        })
         .eq('id', user.id);
-      if (error) throw error;
-      profileSaved = true;
-      setTimeout(() => (profileSaved = false), 3000);
+      if (error) {
+        if (error.code === '23505') {
+          profileError = 'Handle ist schon vergeben.';
+        } else {
+          throw error;
+        }
+      } else {
+        handle = trimmedHandle;
+        profileSaved = true;
+        setTimeout(() => (profileSaved = false), 3000);
+      }
     } catch (err) {
       console.error('[account] profile save failed', err);
       profileError = m.account_save_error();
@@ -136,7 +158,7 @@
           {m.account_profile_title()}
         </h2>
 
-        <form onsubmit={handleProfileSave} class="mt-4 space-y-3">
+        <form onsubmit={handleProfileSave} class="mt-4 space-y-4">
           <label class="block">
             <span
               class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
@@ -153,6 +175,37 @@
             />
             <p class="mt-2 text-xs text-fg-muted">{m.account_display_name_hint()}</p>
           </label>
+
+          <label class="block">
+            <span
+              class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+            >
+              Handle
+            </span>
+            <div
+              class="mt-2 flex items-stretch border-2 border-border bg-bg focus-within:border-accent"
+            >
+              <span
+                class="flex items-center px-3 font-mono text-base text-fg-muted"
+                aria-hidden="true"
+              >
+                @
+              </span>
+              <input
+                type="text"
+                bind:value={handle}
+                oninput={(e) => (handle = normalizeHandle((e.target as HTMLInputElement).value))}
+                placeholder="dein_handle"
+                disabled={!displayNameLoaded || savingProfile}
+                maxlength="24"
+                class="flex-1 bg-transparent py-3 pr-4 font-mono text-base text-fg placeholder:text-fg-muted focus:outline-none disabled:opacity-50"
+              />
+            </div>
+            <p class="mt-2 text-xs text-fg-muted">
+              Eindeutiger Username — a-z, 0-9, _ — wird in URLs verwendet.
+            </p>
+          </label>
+
           {#if profileError}
             <p class="text-sm text-danger" role="alert">{profileError}</p>
           {/if}
@@ -162,6 +215,14 @@
           <Button type="submit" variant="yellow">
             {savingProfile ? m.account_saving() : m.account_save()}
           </Button>
+
+          {#if handle}
+            <p class="text-xs text-fg-muted">
+              Dein Profil: <a href={`/u/${auth.user.id}`} class="text-accent hover:underline"
+                >/u/{auth.user.id.slice(0, 8)}…</a
+              >
+            </p>
+          {/if}
         </form>
       </section>
 

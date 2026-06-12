@@ -1,57 +1,24 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { Container, Button } from '@energize/ui';
+  import { m } from '@energize/i18n';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
-
-  interface PostRow {
-    id: string;
-    image_path: string;
-    caption: string | null;
-    created_at: string;
-    user_id: string;
-  }
-
-  let posts = $state<PostRow[]>([]);
-  let loading = $state(true);
-  let errorMsg = $state<string | null>(null);
-
-  async function loadPosts() {
-    const client = auth.client;
-    if (!client) {
-      loading = false;
-      return;
-    }
-    try {
-      const { data, error } = await client
-        .from('posts')
-        .select('id, image_path, caption, created_at, user_id')
-        .eq('status', 'approved')
-        .order('created_at', { ascending: false })
-        .limit(60);
-      if (error) throw error;
-      posts = data ?? [];
-    } catch (err) {
-      console.error('[wall] load failed', err);
-      errorMsg = err instanceof Error ? err.message : 'unknown';
-    } finally {
-      loading = false;
-    }
-  }
+  import { posts } from '$lib/posts.svelte';
+  import PostCard from '$lib/PostCard.svelte';
 
   $effect(() => {
-    if (auth.initialized) void loadPosts();
+    if (auth.initialized) void posts.load();
   });
 
   onMount(() => {
-    void loadPosts();
+    void posts.load();
   });
 </script>
 
 <svelte:head>
-  <title>Foto-Wall — ENERGIZE</title>
+  <title>{m.wall_title()} — ENERGIZE</title>
 </svelte:head>
 
-<!-- HERO -->
 <section class="relative overflow-hidden border-b border-border bg-bg">
   <Container>
     <div class="relative py-16 md:py-24">
@@ -62,80 +29,69 @@
         class="mt-4 font-display font-black uppercase leading-[0.9] tracking-[-0.02em] text-fg"
         style="font-size: clamp(2.5rem, 8vw, 5rem);"
       >
-        Foto-Wall
+        {m.wall_title()}
       </h1>
-      <p class="mt-4 max-w-2xl text-sm text-fg-muted md:text-base">
-        Eure besten Momente vom Festival. Alle Posts werden vorab moderiert — kein Bot-Spam, kein
-        Trash.
-      </p>
+      <p class="mt-4 max-w-2xl text-sm text-fg-muted md:text-base">{m.wall_lead()}</p>
 
-      {#if auth.user}
-        <div class="mt-8">
-          <Button href="/wall/upload" variant="yellow">Foto hochladen</Button>
-        </div>
-      {:else if isAuthConfigured}
-        <div class="mt-8">
-          <Button href="/login" variant="yellow">Login zum Hochladen</Button>
-        </div>
-      {/if}
+      <div class="mt-8 flex flex-wrap gap-3">
+        {#if auth.user}
+          <Button href="/wall/upload" variant="yellow">{m.wall_upload_cta()}</Button>
+          <Button href="/community/users" variant="ghost">Andere finden →</Button>
+        {:else if isAuthConfigured}
+          <Button href="/login" variant="yellow">{m.wall_login_cta()}</Button>
+        {/if}
+      </div>
     </div>
   </Container>
 </section>
 
-<!-- CONTENT -->
 <Container>
   <section class="py-12 md:py-16">
     {#if !isAuthConfigured}
       <p class="text-fg-muted">Wall ist bald für alle sichtbar.</p>
-    {:else if loading}
-      <div class="grid grid-cols-2 gap-2 md:grid-cols-4">
+    {:else if !posts.initialized || posts.loading}
+      <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
         {#each Array(8) as _, i (i)}
           <div class="aspect-square animate-pulse bg-surface"></div>
         {/each}
       </div>
-    {:else if errorMsg}
+    {:else if posts.errorMsg}
       <div class="border-2 border-danger bg-surface p-6">
         <p
           class="font-display text-lg font-black uppercase tracking-[var(--tracking-claim)] text-danger"
         >
           Wall konnte nicht geladen werden
         </p>
-        <p class="mt-2 font-mono text-xs text-fg-muted">{errorMsg}</p>
+        <p class="mt-2 font-mono text-xs text-fg-muted">{posts.errorMsg}</p>
       </div>
-    {:else if posts.length === 0}
-      <!-- Empty-State -->
+    {:else if posts.items.length === 0}
       <div class="border-2 border-fg bg-accent p-8 text-fg-inverse md:p-12">
         <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-inverse/70">
-          Noch leer
+          {m.wall_empty_eyebrow()}
         </p>
         <p
           class="mt-3 font-display font-black uppercase leading-[0.9] tracking-[-0.02em]"
           style="font-size: clamp(2rem, 6vw, 3.5rem);"
         >
-          Sei der erste.
+          {m.wall_empty_title()}
         </p>
-        <p class="mt-4 max-w-lg text-sm md:text-base">
-          Beim Festival 2027 startet die Wall. Bis dahin: Account anlegen, Favoriten markieren — und
-          nach dem Festival deine besten Shots posten.
-        </p>
+        <p class="mt-4 max-w-lg text-sm md:text-base">{m.wall_empty_body()}</p>
+        {#if auth.user}
+          <div class="mt-6">
+            <a
+              href="/wall/upload"
+              class="inline-flex items-center justify-center border-2 border-fg-inverse bg-fg-inverse px-6 py-3 font-display text-sm font-black uppercase tracking-[var(--tracking-claim)] text-accent"
+            >
+              {m.wall_upload_cta()}
+            </a>
+          </div>
+        {/if}
       </div>
     {:else}
-      <ul class="grid grid-cols-2 gap-2 md:grid-cols-3 lg:grid-cols-4">
-        {#each posts as post (post.id)}
-          <li class="group relative aspect-square overflow-hidden border-2 border-border">
-            <img
-              src={post.image_path}
-              alt={post.caption ?? 'Foto-Wall-Beitrag'}
-              loading="lazy"
-              class="h-full w-full object-cover transition-transform group-hover:scale-105"
-            />
-            {#if post.caption}
-              <div
-                class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-bg via-bg/60 to-transparent p-3"
-              >
-                <p class="font-mono text-xs text-fg">{post.caption}</p>
-              </div>
-            {/if}
+      <ul class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4">
+        {#each posts.items as post (post.id)}
+          <li>
+            <PostCard {post} />
           </li>
         {/each}
       </ul>

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Container, Button } from '@energize/ui';
   import { m } from '@energize/i18n';
+  import AppComingBanner from '$lib/AppComingBanner.svelte';
 </script>
 
 <svelte:head>
@@ -133,3 +134,6 @@
     </div>
   </section>
 </Container>
+
+<!-- APP COMING -->
+<AppComingBanner />
