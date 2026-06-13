@@ -18,6 +18,8 @@ class AuthStore {
   loading = $state(true);
   initialized = false;
   client: EnergizeSupabaseClient | null = null;
+  isAdmin = $state(false);
+  adminChecked = $state(false);
 
   init() {
     if (!browser || this.initialized) return;
@@ -34,13 +36,37 @@ class AuthStore {
       this.session = data.session;
       this.user = data.session?.user ?? null;
       this.loading = false;
+      void this.checkAdmin();
     });
 
     this.client.auth.onAuthStateChange((_event, session) => {
       this.session = session;
       this.user = session?.user ?? null;
       this.loading = false;
+      void this.checkAdmin();
     });
+  }
+
+  async checkAdmin(): Promise<void> {
+    if (!this.client || !this.user) {
+      this.isAdmin = false;
+      this.adminChecked = true;
+      return;
+    }
+    try {
+      const { data, error } = await this.client
+        .from('profiles')
+        .select('role')
+        .eq('id', this.user.id)
+        .maybeSingle();
+      if (error && error.code !== '42703') throw error;
+      this.isAdmin = data?.role === 'admin';
+    } catch (err) {
+      console.warn('[auth] checkAdmin failed (Migration 0005 nicht da?)', err);
+      this.isAdmin = false;
+    } finally {
+      this.adminChecked = true;
+    }
   }
 
   async signInWithMagicLink(email: string, locale: 'de' | 'en' = 'de'): Promise<void> {

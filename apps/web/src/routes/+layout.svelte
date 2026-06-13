@@ -130,6 +130,17 @@
             {m.nav_feedback()}
           </a>
         </li>
+        {#if auth.isAdmin}
+          <li>
+            <a
+              href="/admin"
+              class="border-2 border-danger px-3 py-1 text-danger transition-all hover:bg-danger hover:text-fg"
+              title="Admin-Bereich"
+            >
+              ★ Admin
+            </a>
+          </li>
+        {/if}
         <li>
           <a
             href="/account"
@@ -211,6 +222,17 @@
               {m.nav_feedback()}
             </a>
           </li>
+          {#if auth.isAdmin}
+            <li>
+              <a
+                href="/admin"
+                onclick={closeMobile}
+                class="drawer-link block border-l-4 border-danger px-6 py-4 text-danger hover:bg-surface"
+              >
+                ★ Admin
+              </a>
+            </li>
+          {/if}
           <li>
             <a
               href="/account"

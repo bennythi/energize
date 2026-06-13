@@ -17,6 +17,7 @@ export interface Database {
           id: string;
           display_name: string | null;
           handle: string | null;
+          role: 'user' | 'admin';
           locale: 'de' | 'en' | null;
           push_token: string | null;
           created_at: string;
@@ -25,6 +26,7 @@ export interface Database {
           id: string;
           display_name?: string | null;
           handle?: string | null;
+          role?: 'user' | 'admin';
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
           created_at?: string;
@@ -33,6 +35,7 @@ export interface Database {
           id?: string;
           display_name?: string | null;
           handle?: string | null;
+          role?: 'user' | 'admin';
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
           created_at?: string;
