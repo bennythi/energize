@@ -33,13 +33,15 @@
     });
   });
 
-  // Profile-Editing (display_name)
+  // Profile-Editing — User editiert nur den Display-Name,
+  // Handle wird automatisch aus dem Namen abgeleitet.
   let displayName = $state('');
   let handle = $state('');
   let displayNameLoaded = $state(false);
   let savingProfile = $state(false);
   let profileSaved = $state(false);
   let profileError = $state<string | null>(null);
+  let handleColumnAvailable = $state(true);
 
   async function loadProfile() {
     const client = auth.client;
@@ -51,9 +53,24 @@
         .select('display_name, handle')
         .eq('id', user.id)
         .maybeSingle();
-      if (error) throw error;
-      displayName = data?.display_name ?? '';
-      handle = data?.handle ?? '';
+      if (error) {
+        if (error.code === '42703') {
+          // handle-Spalte gibt's noch nicht (Migration 0004 fehlt)
+          handleColumnAvailable = false;
+          const fallback = await client
+            .from('profiles')
+            .select('display_name')
+            .eq('id', user.id)
+            .maybeSingle();
+          if (fallback.error) throw fallback.error;
+          displayName = fallback.data?.display_name ?? '';
+        } else {
+          throw error;
+        }
+      } else {
+        displayName = data?.display_name ?? '';
+        handle = data?.handle ?? '';
+      }
     } catch (err) {
       console.error('[account] profile load failed', err);
     } finally {
@@ -65,12 +82,43 @@
     void loadProfile();
   });
 
-  function normalizeHandle(raw: string): string {
+  function slugifyName(raw: string): string {
     return raw
       .toLowerCase()
-      .replace(/^@/, '')
-      .replace(/[^a-z0-9_]/g, '')
+      .replace(/[äÄ]/g, 'ae')
+      .replace(/[öÖ]/g, 'oe')
+      .replace(/[üÜ]/g, 'ue')
+      .replace(/[ß]/g, 'ss')
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '')
       .slice(0, 24);
+  }
+
+  async function generateUniqueHandle(
+    base: string,
+    userId: string,
+    maxTries = 8,
+  ): Promise<string | null> {
+    const client = auth.client;
+    if (!client) return null;
+    const root = base || 'energizer';
+    for (let attempt = 0; attempt < maxTries; attempt++) {
+      const candidate =
+        attempt === 0 ? root : `${root.slice(0, 24 - String(attempt).length - 1)}_${attempt}`;
+      const { data, error } = await client
+        .from('profiles')
+        .select('id')
+        .ilike('handle', candidate)
+        .neq('id', userId)
+        .maybeSingle();
+      if (error && error.code !== 'PGRST116') {
+        console.warn('[account] handle uniqueness check failed', error);
+        return candidate; // best effort
+      }
+      if (!data) return candidate;
+    }
+    // Fallback: short user-id-suffix
+    return `${root.slice(0, 17)}_${userId.slice(0, 6)}`;
   }
 
   async function handleProfileSave(event: SubmitEvent) {
@@ -83,25 +131,48 @@
     savingProfile = true;
     try {
       const trimmedName = displayName.trim();
-      const trimmedHandle = normalizeHandle(handle);
-      const { error } = await client
-        .from('profiles')
-        .update({
-          display_name: trimmedName || null,
-          handle: trimmedHandle || null,
-        })
-        .eq('id', user.id);
+      let nextHandle: string | null = handle || null;
+
+      if (handleColumnAvailable && trimmedName) {
+        const base = slugifyName(trimmedName);
+        if (!handle || slugifyName(handle) !== base) {
+          nextHandle = await generateUniqueHandle(base, user.id);
+        }
+      }
+
+      const payload: { display_name: string | null; handle?: string | null } = {
+        display_name: trimmedName || null,
+      };
+      if (handleColumnAvailable) payload.handle = nextHandle;
+
+      const { error } = await client.from('profiles').update(payload).eq('id', user.id);
+
       if (error) {
-        if (error.code === '23505') {
-          profileError = 'Handle ist schon vergeben.';
+        if (error.code === '42703') {
+          handleColumnAvailable = false;
+          const { error: retryErr } = await client
+            .from('profiles')
+            .update({ display_name: trimmedName || null })
+            .eq('id', user.id);
+          if (retryErr) throw retryErr;
+        } else if (error.code === '23505' && handleColumnAvailable) {
+          nextHandle = await generateUniqueHandle(
+            slugifyName(trimmedName) + '_' + user.id.slice(0, 4),
+            user.id,
+          );
+          const { error: retryErr } = await client
+            .from('profiles')
+            .update({ display_name: trimmedName || null, handle: nextHandle })
+            .eq('id', user.id);
+          if (retryErr) throw retryErr;
         } else {
           throw error;
         }
-      } else {
-        handle = trimmedHandle;
-        profileSaved = true;
-        setTimeout(() => (profileSaved = false), 3000);
       }
+
+      if (nextHandle) handle = nextHandle;
+      profileSaved = true;
+      setTimeout(() => (profileSaved = false), 3000);
     } catch (err) {
       console.error('[account] profile save failed', err);
       profileError = m.account_save_error();
@@ -176,49 +247,21 @@
             <p class="mt-2 text-xs text-fg-muted">{m.account_display_name_hint()}</p>
           </label>
 
-          <label class="block">
-            <span
-              class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
-            >
-              Handle
-            </span>
-            <div
-              class="mt-2 flex items-stretch border-2 border-border bg-bg focus-within:border-accent"
-            >
-              <span
-                class="flex items-center px-3 font-mono text-base text-fg-muted"
-                aria-hidden="true"
-              >
-                @
-              </span>
-              <input
-                type="text"
-                bind:value={handle}
-                oninput={(e) => (handle = normalizeHandle((e.target as HTMLInputElement).value))}
-                placeholder="dein_handle"
-                disabled={!displayNameLoaded || savingProfile}
-                maxlength="24"
-                class="flex-1 bg-transparent py-3 pr-4 font-mono text-base text-fg placeholder:text-fg-muted focus:outline-none disabled:opacity-50"
-              />
-            </div>
-            <p class="mt-2 text-xs text-fg-muted">
-              Eindeutiger Username — a-z, 0-9, _ — wird in URLs verwendet.
-            </p>
-          </label>
-
           {#if profileError}
             <p class="text-sm text-danger" role="alert">{profileError}</p>
           {/if}
           {#if profileSaved}
             <p class="text-sm text-success" aria-live="polite">✓ {m.account_saved()}</p>
           {/if}
+
           <Button type="submit" variant="yellow">
             {savingProfile ? m.account_saving() : m.account_save()}
           </Button>
 
-          {#if handle}
+          {#if handleColumnAvailable && handle}
             <p class="text-xs text-fg-muted">
-              Dein Profil: <a href={`/u/${auth.user.id}`} class="text-accent hover:underline"
+              Dein Handle: <span class="font-mono text-fg">@{handle}</span> · Profil:
+              <a href={`/u/${auth.user.id}`} class="font-mono text-accent hover:underline"
                 >/u/{auth.user.id.slice(0, 8)}…</a
               >
             </p>
