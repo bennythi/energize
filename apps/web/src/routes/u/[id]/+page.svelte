@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { page } from '$app/state';
   import { Container, Button } from '@energize/ui';
   import { auth } from '$lib/auth.svelte';
@@ -89,12 +88,9 @@
     }
   }
 
+  // load() ist guarded — kein doppel-Aufruf noetig.
   $effect(() => {
     if (auth.initialized && userId) void load();
-  });
-
-  onMount(() => {
-    if (userId) void load();
   });
 
   async function toggleFollow() {

@@ -27,8 +27,8 @@
   }
 
   const sizes = {
-    sm: 'h-8 w-8',
-    md: 'h-10 w-10',
+    sm: 'h-11 w-11',
+    md: 'h-12 w-12',
   } as const;
 
   const iconSize = $derived(size === 'sm' ? 16 : 20);
@@ -40,7 +40,7 @@
   aria-pressed={active}
   aria-label={active ? m.favorites_aria_remove() : m.favorites_aria_add()}
   class="
-    inline-flex items-center justify-center rounded-full border-2 transition-all
+    inline-flex items-center justify-center rounded-full border-2 transition-all active:scale-95
     {sizes[size]}
     {active
     ? 'border-accent bg-accent text-fg-inverse'

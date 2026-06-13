@@ -12,7 +12,7 @@
   }
   let { data }: Props = $props();
 
-  const FESTIVAL_DATE = '2027-05-29T20:00:00+02:00';
+  const FESTIVAL_DATE = '2027-05-29T14:30:00+02:00';
 
   const ticketUrl = $derived(data.settings?.ticketUrl ?? 'https://shop.tickee.de/shop/84/');
   const igUrl = $derived(

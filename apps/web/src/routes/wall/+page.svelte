@@ -1,17 +1,14 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { Container, Button } from '@energize/ui';
   import { m } from '@energize/i18n';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
   import { posts } from '$lib/posts.svelte';
   import PostCard from '$lib/PostCard.svelte';
 
+  // load() hat einen in-flight-Guard — $effect reicht, kein
+  // separates onMount mehr noetig (sonst racen sie).
   $effect(() => {
     if (auth.initialized) void posts.load();
-  });
-
-  onMount(() => {
-    void posts.load();
   });
 </script>
 

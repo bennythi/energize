@@ -176,7 +176,7 @@
             placeholder={m.feedback_liked_placeholder()}
             rows="3"
             disabled={submitting}
-            class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-sm text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+            class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
           ></textarea>
         </label>
 
@@ -189,7 +189,7 @@
             placeholder={m.feedback_disliked_placeholder()}
             rows="3"
             disabled={submitting}
-            class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-sm text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+            class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
           ></textarea>
         </label>
 
@@ -202,7 +202,7 @@
             placeholder={m.feedback_improvements_placeholder()}
             rows="3"
             disabled={submitting}
-            class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-sm text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+            class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
           ></textarea>
         </label>
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { Container, Heading, Button } from '@energize/ui';
   import { m } from '@energize/i18n';
@@ -7,26 +8,39 @@
   let errored = $state(false);
   let errorTimer: ReturnType<typeof setTimeout> | undefined;
 
-  $effect(() => {
+  onMount(() => {
     if (!isAuthConfigured) {
       errored = true;
       return;
     }
+
+    // PKCE-Flow: Supabase legt nach Magic-Link-Klick ?code= in die URL.
+    // `detectSessionInUrl: true` triggert das automatisch, aber bei
+    // langsamer Netzanbindung oder wenn der Router den URL-Hash
+    // umschreibt, geht das schief. Wir tauschen den Code explizit um.
+    const url = window.location.href;
+    if (auth.client && (url.includes('code=') || url.includes('access_token='))) {
+      void auth.client.auth
+        .exchangeCodeForSession(url)
+        .catch((err) => console.warn('[callback] exchange failed', err));
+    }
+
+    // Fallback-Timer: wenn nach 8s immer noch kein User → Fehler-State.
+    errorTimer = setTimeout(() => {
+      if (!auth.user) errored = true;
+    }, 8000);
+
+    return () => {
+      if (errorTimer) clearTimeout(errorTimer);
+    };
+  });
+
+  // Sobald der User auftaucht (durch exchangeCodeForSession oder
+  // detectSessionInUrl), redirecten.
+  $effect(() => {
     if (auth.user) {
       void goto('/account', { replaceState: true });
-      return;
     }
-    if (!errorTimer) {
-      errorTimer = setTimeout(() => {
-        if (!auth.user) errored = true;
-      }, 8000);
-    }
-    return () => {
-      if (errorTimer) {
-        clearTimeout(errorTimer);
-        errorTimer = undefined;
-      }
-    };
   });
 </script>
 

@@ -18,7 +18,10 @@
   /* Vordergrund / Text */
   --color-fg: #f5f5f2;
   --color-fg-inverse: #0a0a0a;
-  --color-fg-muted: #666666;
+  /* Frueher #666 — fiel WCAG AA durch (3.66:1 auf #0a0a0a).
+   * #9a9a9a hat 4.71:1 (AA fuer normalen Text), bleibt aber dunkel
+   * genug fuer den Plakat-Vibe. */
+  --color-fg-muted: #9a9a9a;
 
   /* Akzent */
   --color-accent: #ffec00;

@@ -42,6 +42,22 @@ const ARTISTS_QUERY = `
   }
 `;
 
+const ARTIST_BY_SLUG_QUERY = `
+  *[_type == "artist" && slug.current == $slug][0]{
+    _id,
+    name,
+    "slug": slug.current,
+    photo,
+    bio,
+    slotStart,
+    slotEnd,
+    isLive,
+    featured,
+    links,
+    order
+  }
+`;
+
 const FAQ_QUERY = `
   *[_type == "faqEntry"] | order(category asc, order asc){
     _id,
@@ -113,6 +129,7 @@ const PAGE_BY_SLUG_QUERY = `
 export const queries = {
   siteSettings: () => sanity.fetch<SiteSettings | null>(SITE_SETTINGS_QUERY),
   artists: () => sanity.fetch<Artist[]>(ARTISTS_QUERY),
+  artistBySlug: (slug: string) => sanity.fetch<Artist | null>(ARTIST_BY_SLUG_QUERY, { slug }),
   faq: () => sanity.fetch<FaqEntry[]>(FAQ_QUERY),
   pois: () => sanity.fetch<Poi[]>(POIS_QUERY),
   sponsors: () => sanity.fetch<Sponsor[]>(SPONSORS_QUERY),

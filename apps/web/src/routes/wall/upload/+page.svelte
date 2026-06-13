@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from 'svelte';
   import { goto } from '$app/navigation';
   import { Container, Button } from '@energize/ui';
   import { m } from '@energize/i18n';
@@ -95,6 +96,12 @@
     status = 'idle';
     errorMsg = null;
   }
+
+  // Falls die Seite waehrend in-flight upload unmountet wird
+  // (Back-Button, Tab-Wechsel), die Object-URL freigeben.
+  onDestroy(() => {
+    if (preview) URL.revokeObjectURL(preview);
+  });
 </script>
 
 <svelte:head>

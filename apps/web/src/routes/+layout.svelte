@@ -17,11 +17,10 @@
   // Init aus localStorage gelesen und setLanguageTag() aufgerufen hat.
   let currentLang = $state<AvailableLanguageTag>(languageTag() as AvailableLanguageTag);
   let mobileOpen = $state(false);
+  let burgerButton = $state<HTMLButtonElement | null>(null);
 
-  $effect(() => {
-    auth.init();
-  });
-
+  // auth.init() läuft schon in +layout.ts (Module-Init, vor jedem Render)
+  // — hier nur favorites an Auth-Status koppeln.
   $effect(() => {
     const userId = auth.user?.id;
     if (userId) {
@@ -30,6 +29,31 @@
       favorites.clear();
     }
   });
+
+  // Drawer-A11y: Escape schliesst, scroll-lock auf body, Focus zurueck
+  // auf den Burger nach Schliessen.
+  $effect(() => {
+    if (!browser) return;
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+      function onKeydown(e: KeyboardEvent) {
+        if (e.key === 'Escape') {
+          mobileOpen = false;
+        }
+      }
+      window.addEventListener('keydown', onKeydown);
+      return () => {
+        window.removeEventListener('keydown', onKeydown);
+        document.body.style.overflow = '';
+        // Focus zurueck auf Burger, nachdem der Drawer zu ist
+        queueMicrotask(() => burgerButton?.focus());
+      };
+    }
+  });
+
+  function closeMobile() {
+    mobileOpen = false;
+  }
 
   function toggleLang() {
     if (!browser) return;
@@ -101,20 +125,21 @@
       <button
         onclick={toggleLang}
         class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted transition-colors hover:text-accent"
-        aria-label="Sprache wechseln"
+        aria-label={m.nav_lang_switch()}
       >
         {m.lang_current()} / {m.lang_toggle()}
       </button>
 
       <!-- Mobile burger -->
       <button
+        bind:this={burgerButton}
         type="button"
         onclick={() => (mobileOpen = !mobileOpen)}
-        aria-label="Menü öffnen"
+        aria-label={mobileOpen ? m.nav_menu_close() : m.nav_menu_open()}
         aria-expanded={mobileOpen}
-        class="flex h-9 w-9 items-center justify-center border-2 border-border text-fg hover:border-accent hover:text-accent lg:hidden"
+        aria-controls="mobile-drawer"
+        class="flex h-11 w-11 items-center justify-center border-2 border-border text-fg transition-all hover:border-accent hover:text-accent active:scale-95 lg:hidden"
       >
-        <span class="sr-only">Menü</span>
         {#if mobileOpen}
           <span aria-hidden="true">✕</span>
         {:else}
@@ -126,7 +151,13 @@
 
   <!-- Mobile Drawer -->
   {#if mobileOpen}
-    <div class="border-t border-border bg-bg lg:hidden">
+    <div
+      id="mobile-drawer"
+      class="drawer border-t border-border bg-bg lg:hidden"
+      role="dialog"
+      aria-modal="true"
+      aria-label={m.nav_community()}
+    >
       <ul
         class="flex flex-col divide-y divide-border font-mono text-sm uppercase tracking-[var(--tracking-claim)]"
       >
@@ -134,8 +165,8 @@
           <li>
             <a
               href={link.href}
-              onclick={() => (mobileOpen = false)}
-              class="block px-6 py-4 text-fg-muted hover:bg-surface hover:text-accent"
+              onclick={closeMobile}
+              class="drawer-link block px-6 py-4 text-fg-muted hover:bg-surface hover:text-accent"
             >
               {link.label}
             </a>
@@ -145,8 +176,8 @@
           <li>
             <a
               href="/feedback"
-              onclick={() => (mobileOpen = false)}
-              class="block px-6 py-4 text-fg-muted hover:bg-surface hover:text-accent"
+              onclick={closeMobile}
+              class="drawer-link block px-6 py-4 text-fg-muted hover:bg-surface hover:text-accent"
             >
               {m.nav_feedback()}
             </a>
@@ -154,8 +185,8 @@
           <li>
             <a
               href="/account"
-              onclick={() => (mobileOpen = false)}
-              class="block bg-accent px-6 py-4 text-fg-inverse"
+              onclick={closeMobile}
+              class="drawer-link block bg-accent px-6 py-4 text-fg-inverse"
             >
               {m.nav_account()}
             </a>
@@ -164,8 +195,8 @@
           <li>
             <a
               href="/login"
-              onclick={() => (mobileOpen = false)}
-              class="block bg-accent px-6 py-4 text-fg-inverse"
+              onclick={closeMobile}
+              class="drawer-link block bg-accent px-6 py-4 text-fg-inverse"
             >
               {m.nav_login()}
             </a>
@@ -177,3 +208,69 @@
 </nav>
 
 {@render children?.()}
+
+<style>
+  /* Emil-Pattern: enter mit ease-out, short duration, stagger.
+   * scale(0.97) statt scale(0) — "nothing in the real world appears from nothing".
+   * prefers-reduced-motion entfernt die Translate-Komponente. */
+  .drawer {
+    animation: drawer-in 180ms cubic-bezier(0.23, 1, 0.32, 1);
+    transform-origin: top center;
+  }
+  @keyframes drawer-in {
+    from {
+      opacity: 0;
+      transform: translateY(-8px) scale(0.99);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  .drawer-link {
+    opacity: 0;
+    animation: drawer-link-in 220ms cubic-bezier(0.23, 1, 0.32, 1) forwards;
+  }
+  .drawer-link:nth-child(1) {
+    animation-delay: 40ms;
+  }
+  .drawer-link:nth-child(2) {
+    animation-delay: 70ms;
+  }
+  .drawer-link:nth-child(3) {
+    animation-delay: 100ms;
+  }
+  .drawer-link:nth-child(4) {
+    animation-delay: 130ms;
+  }
+  .drawer-link:nth-child(5) {
+    animation-delay: 160ms;
+  }
+  .drawer-link:nth-child(6) {
+    animation-delay: 190ms;
+  }
+  .drawer-link:nth-child(7) {
+    animation-delay: 220ms;
+  }
+  .drawer-link:nth-child(8) {
+    animation-delay: 250ms;
+  }
+  @keyframes drawer-link-in {
+    from {
+      opacity: 0;
+      transform: translateX(-6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .drawer,
+    .drawer-link {
+      animation: none;
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

@@ -11,8 +11,11 @@
 
   const locale = $derived(languageTag() as AvailableLanguageTag);
 
+  // Erst nach Auth-Resolution redirecten — sonst rendert die Form
+  // fuer ~50-300ms bevor wir feststellen dass der User schon
+  // eingeloggt ist.
   $effect(() => {
-    if (auth.user) {
+    if (!auth.loading && auth.user) {
       void goto('/account', { replaceState: true });
     }
   });

@@ -14,7 +14,6 @@
   let reportSubmitting = $state(false);
   let reported = $state(false);
 
-  const imageUrl = $derived(posts.publicUrl(post.image_path));
   const profileHref = $derived(`/u/${post.user_id}`);
   const authorName = $derived(post.author_display_name ?? 'Anonym');
 
@@ -30,14 +29,24 @@
 
   async function submitReport(event: SubmitEvent) {
     event.preventDefault();
+    // Race-Schutz: sofort setzen, bevor ueberhaupt validiert wird.
+    // Verhindert Enter-Doppel-Submit waehrend Network in-flight.
+    if (reportSubmitting || reported) return;
     if (!reportReason.trim()) return;
     reportSubmitting = true;
     const ok = await posts.report(post.id, reportReason.trim());
-    reportSubmitting = false;
     reported = ok;
     if (ok) {
       reportReason = '';
-      setTimeout(() => (showReport = false), 1500);
+      // reportSubmitting bleibt true bis die Form weg ist — sonst
+      // koennte Enter waehrend des 1.5s-Timeouts neu submitten.
+      setTimeout(() => {
+        showReport = false;
+        reportSubmitting = false;
+        reported = false;
+      }, 1500);
+    } else {
+      reportSubmitting = false;
     }
   }
 </script>
@@ -46,7 +55,7 @@
   <!-- IMAGE -->
   <div class="relative aspect-square overflow-hidden">
     <img
-      src={imageUrl}
+      src={post.image_url}
       alt={post.caption ?? 'Foto-Wall'}
       loading="lazy"
       class="h-full w-full object-cover"
@@ -54,10 +63,10 @@
     <button
       type="button"
       onclick={() => (showReport = !showReport)}
-      aria-label="Melden"
-      class="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center border-2 border-fg-muted bg-bg/60 backdrop-blur font-mono text-xs text-fg-muted transition-colors hover:border-danger hover:text-danger"
+      aria-label="Beitrag melden"
+      class="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center border-2 border-fg-muted bg-bg/60 backdrop-blur font-mono text-sm text-fg-muted transition-all hover:border-danger hover:text-danger active:scale-95"
     >
-      !
+      <span aria-hidden="true">!</span>
     </button>
   </div>
 
@@ -79,7 +88,8 @@
       type="button"
       onclick={handleLike}
       aria-pressed={post.liked_by_me}
-      class="inline-flex items-center gap-1 border-2 px-2 py-1 font-mono text-xs transition-all
+      aria-label={post.liked_by_me ? 'Like entfernen' : 'Liken'}
+      class="inline-flex min-h-11 min-w-11 items-center justify-center gap-1.5 border-2 px-3 py-2 font-mono text-sm transition-all active:scale-95
         {post.liked_by_me
         ? 'border-accent bg-accent text-fg-inverse'
         : 'border-border bg-bg text-fg-muted hover:border-accent hover:text-accent'}"
@@ -107,7 +117,7 @@
           placeholder="Warum sollten wir das prüfen?"
           maxlength="200"
           disabled={reportSubmitting}
-          class="mt-2 w-full border-2 border-border bg-surface px-2 py-1 font-mono text-xs text-fg placeholder:text-fg-muted focus:border-danger focus:outline-none disabled:opacity-50"
+          class="mt-2 w-full border-2 border-border bg-surface px-2 py-2 font-mono text-base text-fg placeholder:text-fg-muted focus:border-danger focus:outline-none disabled:opacity-50"
         ></textarea>
         <div class="mt-2 flex justify-end gap-2">
           <button

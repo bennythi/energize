@@ -5,6 +5,7 @@ export interface WallPost {
   id: string;
   user_id: string;
   image_path: string;
+  image_url: string;
   caption: string | null;
   created_at: string;
   // joined / computed
@@ -28,6 +29,10 @@ class PostsStore {
   }
 
   async load(): Promise<void> {
+    // In-flight-Guard: vermeidet doppel-load wenn $effect und onMount
+    // beide feuern.
+    if (this.loading) return;
+
     const client = auth.client;
     if (!browser || !client) {
       this.initialized = true;
@@ -71,10 +76,14 @@ class PostsStore {
         if (myUserId && like.user_id === myUserId) mineLikes.add(like.post_id);
       }
 
+      // Storage-Public-URLs einmal hier vorberechnen, statt jedes
+      // PostCard-Re-render den SDK-Call zu machen. Ist stabil weil
+      // der Bucket public ist und der image_path konstant bleibt.
       this.items = posts.map((p) => ({
         id: p.id,
         user_id: p.user_id,
         image_path: p.image_path,
+        image_url: this.publicUrl(p.image_path),
         caption: p.caption,
         created_at: p.created_at,
         author_display_name: byUser.get(p.user_id)?.display_name ?? null,
@@ -84,6 +93,7 @@ class PostsStore {
       }));
     } catch (err) {
       console.error('[posts] load failed', err);
+      // User-freundliche Fehlermeldung — Postgres-Schema nicht leaken
       this.errorMsg = err instanceof Error ? err.message : 'unknown';
     } finally {
       this.loading = false;

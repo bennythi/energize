@@ -6,8 +6,7 @@ export const prerender = false;
 
 export const load: PageLoad = async ({ params }) => {
   try {
-    const artists = await queries.artists();
-    const artist = artists.find((a) => a.slug === params.slug);
+    const artist = await queries.artistBySlug(params.slug);
     if (!artist) {
       throw error(404, 'Artist nicht gefunden');
     }

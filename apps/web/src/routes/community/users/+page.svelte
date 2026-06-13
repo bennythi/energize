@@ -32,20 +32,34 @@
     }
   }
 
+  /**
+   * Sicherheits-Filter für PostgREST-Filter-Strings.
+   * Komma, Klammern und Stern brechen aus dem `.or(...)`-Pattern aus
+   * und können die WHERE-Clause umschreiben. Wir entfernen sie hart,
+   * statt sie zu escapen (PostgREST hat keinen Escape-Mechanismus).
+   */
+  function safeSearchTerm(raw: string): string {
+    return raw
+      .replace(/[,()*%]/g, '')
+      .trim()
+      .slice(0, 60);
+  }
+
   async function runSearch(term: string) {
     const client = auth.client;
     if (!client) return;
-    if (!term.trim()) {
+    const safe = safeSearchTerm(term);
+    if (!safe) {
       results = [];
       return;
     }
     loading = true;
     try {
-      const t = `%${term.trim()}%`;
+      const pattern = `%${safe}%`;
       const { data, error } = await client
         .from('profiles')
         .select('id, display_name, handle')
-        .or(`display_name.ilike.${t},handle.ilike.${t}`)
+        .or(`display_name.ilike.${pattern},handle.ilike.${pattern}`)
         .limit(30);
       if (error) throw error;
       results = data ?? [];
