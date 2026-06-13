@@ -64,7 +64,7 @@
           <p
             class="mt-2 font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-fg md:text-3xl"
           >
-            29. Mai 2027 · 20:00 Uhr
+            29. Mai 2027 · 14:30 Uhr
           </p>
         </div>
         <Countdown target={FESTIVAL_DATE} />

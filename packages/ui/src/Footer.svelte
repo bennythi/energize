@@ -20,17 +20,20 @@
   }: Props = $props();
 </script>
 
-<!-- Plakat-Strip: Schwarz auf Gelb, animated marquee feel -->
+<!-- Plakat-Strip: Schwarz auf Gelb, animated marquee -->
 {#if plakat}
-  <div class="overflow-hidden bg-accent text-fg-inverse">
-    <div class="flex animate-[marquee_30s_linear_infinite] whitespace-nowrap py-4">
-      {#each Array(8) as _, i (i)}
-        <span
-          class="mx-6 font-display font-black uppercase leading-none tracking-[var(--tracking-claim)]"
-          style="font-size: clamp(1.5rem, 4vw, 3rem);"
-        >
-          {plakat} ·
-        </span>
+  <div class="marquee-wrap bg-accent text-fg-inverse">
+    <div class="marquee-track">
+      <!-- Track wird zweimal gerendert für seamless -50% Loop -->
+      {#each Array(2) as _, group (group)}
+        <ul class="marquee-group" aria-hidden={group === 1 ? 'true' : undefined}>
+          {#each Array(6) as _, i (i)}
+            <li class="marquee-item">
+              <span class="marquee-text">{plakat}</span>
+              <span class="marquee-sep" aria-hidden="true">⚡</span>
+            </li>
+          {/each}
+        </ul>
       {/each}
     </div>
   </div>
@@ -78,12 +81,52 @@
 </footer>
 
 <style>
+  .marquee-wrap {
+    overflow: hidden;
+    padding: 1rem 0;
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 40s linear infinite;
+  }
+  .marquee-group {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .marquee-item {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding-right: 2rem;
+  }
+  .marquee-text {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    line-height: 1;
+    font-size: clamp(1.25rem, 3.5vw, 2.25rem);
+  }
+  .marquee-sep {
+    font-size: clamp(1rem, 2.5vw, 1.5rem);
+    opacity: 0.55;
+  }
   @keyframes marquee {
     from {
       transform: translateX(0);
     }
     to {
       transform: translateX(-50%);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-track {
+      animation: none;
     }
   }
 </style>
