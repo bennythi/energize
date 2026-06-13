@@ -16,6 +16,7 @@
     postal_code: string | null;
     country: string;
     festivals_attended: number;
+    festivals_attended_editions: string[];
     created_at: string;
     email_confirmed_at: string | null;
     last_sign_in_at: string | null;
@@ -245,13 +246,11 @@
                     <dd class="text-fg">{user.country}</dd>
                   </div>
                   <div class="contents">
-                    <dt>Festivals besucht</dt>
+                    <dt>Editionen besucht</dt>
                     <dd class="text-fg">
-                      {user.festivals_attended === 0
-                        ? '—'
-                        : user.festivals_attended === 6
-                          ? '6+ (Veteran)'
-                          : `${user.festivals_attended}x`}
+                      {user.festivals_attended_editions?.length
+                        ? user.festivals_attended_editions.join(', ')
+                        : '—'}
                     </dd>
                   </div>
                 </dl>

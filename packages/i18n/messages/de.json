@@ -175,8 +175,8 @@
   "account_postal_code_invalid": "Postleitzahl: 3–12 Zeichen.",
   "account_phone_invalid": "Handynummer: 5–25 Zeichen.",
   "account_country_label": "Land",
-  "account_festivals_label": "Bisher besuchte Energize-Festivals",
-  "account_festivals_hint": "Loyalty zählt: für Wiederkommer gibt's Vergünstigungen.",
+  "account_festivals_label": "Bei welchen Editionen warst du dabei?",
+  "account_festivals_hint": "Hak alle Editionen an, bei denen du dabei warst.",
 
   "wall_title": "Foto-Wall",
   "wall_lead": "Eure besten Momente vom Festival. Alle Posts werden vorab moderiert — kein Bot-Spam, kein Trash.",

@@ -23,6 +23,7 @@ export interface Database {
           postal_code: string | null;
           country: string;
           festivals_attended: number;
+          festivals_attended_editions: string[];
           locale: 'de' | 'en' | null;
           push_token: string | null;
           created_at: string;
@@ -37,6 +38,7 @@ export interface Database {
           postal_code?: string | null;
           country?: string;
           festivals_attended?: number;
+          festivals_attended_editions?: string[];
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
           created_at?: string;
@@ -51,6 +53,7 @@ export interface Database {
           postal_code?: string | null;
           country?: string;
           festivals_attended?: number;
+          festivals_attended_editions?: string[];
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
           created_at?: string;
@@ -221,6 +224,7 @@ export interface Database {
           postal_code: string | null;
           country: string;
           festivals_attended: number;
+          festivals_attended_editions: string[];
           created_at: string;
           email_confirmed_at: string | null;
           last_sign_in_at: string | null;

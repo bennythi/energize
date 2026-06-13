@@ -41,8 +41,26 @@
   let birthdate = $state('');
   let postalCode = $state('');
   let country = $state('DE');
-  let festivalsAttended = $state(0);
+  let editions = $state<string[]>([]);
   let displayNameLoaded = $state(false);
+
+  const allEditions: { year: string; slogan: string }[] = [
+    { year: '2020', slogan: 'Gartenparty' },
+    { year: '2021', slogan: 'Private Party · 250 People' },
+    { year: '2022', slogan: 'The First Official Edition' },
+    { year: '2023', slogan: 'The Edge of Nowhere' },
+    { year: '2024', slogan: 'The Yellow Insanity' },
+    { year: '2025', slogan: 'Rise of the Redemption' },
+    { year: '2026', slogan: 'The Ultimate Reality' },
+  ];
+
+  function toggleEdition(year: string) {
+    if (editions.includes(year)) {
+      editions = editions.filter((y) => y !== year);
+    } else {
+      editions = [...editions, year].sort();
+    }
+  }
   let savingProfile = $state(false);
   let profileSaved = $state(false);
   let profileError = $state<string | null>(null);
@@ -74,7 +92,9 @@
     try {
       const { data, error } = await client
         .from('profiles')
-        .select('display_name, handle, phone, birthdate, postal_code, country, festivals_attended')
+        .select(
+          'display_name, handle, phone, birthdate, postal_code, country, festivals_attended_editions',
+        )
         .eq('id', user.id)
         .maybeSingle();
       if (error) {
@@ -112,7 +132,7 @@
         birthdate = data?.birthdate ?? '';
         postalCode = data?.postal_code ?? '';
         country = data?.country ?? 'DE';
-        festivalsAttended = data?.festivals_attended ?? 0;
+        editions = data?.festivals_attended_editions ?? [];
       }
     } catch (err) {
       console.error('[account] profile load failed', err);
@@ -212,7 +232,7 @@
         birthdate?: string | null;
         postal_code?: string | null;
         country?: string;
-        festivals_attended?: number;
+        festivals_attended_editions?: string[];
       } = {
         display_name: trimmedName || null,
       };
@@ -222,7 +242,9 @@
         payload.birthdate = birthdate || null;
         payload.postal_code = postalCode.trim() || null;
         payload.country = country || 'DE';
-        payload.festivals_attended = Math.max(0, Math.min(6, festivalsAttended));
+        payload.festivals_attended_editions = editions.filter((y) =>
+          allEditions.some((e) => e.year === y),
+        );
       }
 
       const { error } = await client.from('profiles').update(payload).eq('id', user.id);
@@ -425,33 +447,59 @@
                 </label>
               </div>
 
-              <!-- Festivals besucht -->
+              <!-- Editions besucht -->
               <div>
                 <span
                   class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
                 >
                   {m.account_festivals_label()}
                 </span>
-                <div class="mt-2 flex flex-wrap gap-2" role="radiogroup">
-                  {#each [0, 1, 2, 3, 4, 5, 6] as n (n)}
-                    <button
-                      type="button"
-                      onclick={() => (festivalsAttended = n)}
-                      role="radio"
-                      aria-checked={festivalsAttended === n}
-                      disabled={!displayNameLoaded || savingProfile}
-                      class="flex h-11 w-11 items-center justify-center border-2 font-display text-lg font-black transition-all active:scale-95 disabled:opacity-50"
-                      class:border-accent={festivalsAttended === n}
-                      class:bg-accent={festivalsAttended === n}
-                      class:text-fg-inverse={festivalsAttended === n}
-                      class:border-border={festivalsAttended !== n}
-                      class:bg-surface={festivalsAttended !== n}
-                      class:text-fg-muted={festivalsAttended !== n}
-                    >
-                      {n === 6 ? '6+' : n}
-                    </button>
+                <ul class="mt-3 space-y-2" role="group">
+                  {#each allEditions as e (e.year)}
+                    {@const checked = editions.includes(e.year)}
+                    <li>
+                      <button
+                        type="button"
+                        onclick={() => toggleEdition(e.year)}
+                        aria-pressed={checked}
+                        disabled={!displayNameLoaded || savingProfile}
+                        class="flex w-full items-center gap-3 border-2 px-4 py-3 text-left transition-all active:scale-[0.99] disabled:opacity-50"
+                        class:border-accent={checked}
+                        class:bg-accent={checked}
+                        class:text-fg-inverse={checked}
+                        class:border-border={!checked}
+                        class:bg-surface={!checked}
+                      >
+                        <span
+                          class="flex h-6 w-6 shrink-0 items-center justify-center border-2 font-mono text-xs font-black"
+                          class:border-fg-inverse={checked}
+                          class:bg-fg-inverse={checked}
+                          class:text-accent={checked}
+                          class:border-fg-muted={!checked}
+                        >
+                          {checked ? '✓' : ''}
+                        </span>
+                        <div class="min-w-0 flex-1">
+                          <p
+                            class="font-display text-base font-black uppercase tracking-[var(--tracking-claim)] leading-none"
+                            class:text-fg-inverse={checked}
+                            class:text-fg={!checked}
+                          >
+                            {e.year}
+                          </p>
+                          <p
+                            class="mt-0.5 font-mono text-xs"
+                            class:text-fg-inverse={checked}
+                            class:opacity-70={checked}
+                            class:text-fg-muted={!checked}
+                          >
+                            {e.slogan}
+                          </p>
+                        </div>
+                      </button>
+                    </li>
                   {/each}
-                </div>
+                </ul>
                 <p class="mt-2 text-xs text-fg-muted">{m.account_festivals_hint()}</p>
               </div>
             </fieldset>
