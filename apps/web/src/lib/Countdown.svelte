@@ -36,17 +36,29 @@
   function pad(n: number): string {
     return String(n).padStart(2, '0');
   }
+
+  const cells = $derived([
+    { label: 'Tage', value: remaining.days, key: 'd' },
+    { label: 'Std', value: remaining.hours, key: 'h' },
+    { label: 'Min', value: remaining.minutes, key: 'm' },
+    { label: 'Sek', value: remaining.seconds, key: 's' },
+  ]);
 </script>
 
 {#if !remaining.past}
-  <div class="flex gap-3 sm:gap-6" aria-label="Countdown bis Festival">
-    {#each [{ label: 'Tage', value: remaining.days }, { label: 'Std', value: remaining.hours }, { label: 'Min', value: remaining.minutes }, { label: 'Sek', value: remaining.seconds }] as cell (cell.label)}
+  <div class="countdown flex gap-3 sm:gap-6" aria-label="Countdown bis Festival">
+    {#each cells as cell (cell.key)}
       <div class="text-center">
+        <!-- Key-Block macht ein Element-Swap pro Wert-Aenderung,
+             damit die digit-up Animation triggert. Emil: animate
+             state-changes for spatial consistency. -->
         <div
-          class="font-display font-black tabular-nums leading-none text-accent"
+          class="digit font-display font-black tabular-nums leading-none text-accent"
           style="font-size: clamp(2rem, 6vw, 4rem);"
         >
-          {pad(cell.value)}
+          {#key cell.value}
+            <span class="digit-frame">{pad(cell.value)}</span>
+          {/key}
         </div>
         <div
           class="mt-1 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
@@ -63,3 +75,30 @@
     Es ist soweit!
   </p>
 {/if}
+
+<style>
+  .digit {
+    position: relative;
+    overflow: hidden;
+    height: 1em;
+  }
+  .digit-frame {
+    display: inline-block;
+    animation: digit-up 280ms var(--ease-out);
+  }
+  @keyframes digit-up {
+    from {
+      transform: translateY(60%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .digit-frame {
+      animation: none;
+    }
+  }
+</style>

@@ -13,6 +13,72 @@
     background-color: var(--color-accent);
     color: var(--color-fg-inverse);
   }
+
+  /* Custom focus-Ring (statt Browser-default). Pulsiert nicht,
+   * ist nur scharf — Emil: "make focus visible but not loud" */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Default Pre-Animation: alles was beim Load eintritt soll
+   * unsichtbar starten, dann gestaffelt einsteigen. */
+  @media (prefers-reduced-motion: no-preference) {
+    .enter-up {
+      animation: enter-up var(--dur-enter) var(--ease-out) backwards;
+    }
+    .enter-fade {
+      animation: enter-fade var(--dur-enter) var(--ease-out) backwards;
+    }
+    /* Stagger: pro Index 60ms verzögern */
+    .stagger-1 {
+      animation-delay: 60ms;
+    }
+    .stagger-2 {
+      animation-delay: 120ms;
+    }
+    .stagger-3 {
+      animation-delay: 180ms;
+    }
+    .stagger-4 {
+      animation-delay: 240ms;
+    }
+    .stagger-5 {
+      animation-delay: 300ms;
+    }
+    .stagger-6 {
+      animation-delay: 360ms;
+    }
+  }
+
+  @keyframes enter-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes enter-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Smooth scroll für anchor-Links */
+  html {
+    scroll-behavior: smooth;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+  }
 }
 
 @layer utilities {
@@ -31,5 +97,80 @@
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: var(--tracking-claim);
+  }
+
+  /* Card-Hover-Pattern: lift + glow auf desktop, press-feedback
+   * auf alle Devices (Emil: scale(0.97) bei :active). */
+  .card-press {
+    transition:
+      transform var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out),
+      box-shadow var(--dur-hover) var(--ease-out);
+    will-change: transform;
+  }
+  .card-press:active {
+    transform: scale(0.98);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .card-press:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card-press,
+    .card-press:hover,
+    .card-press:active {
+      transform: none;
+      transition:
+        border-color 100ms linear,
+        box-shadow 100ms linear;
+    }
+  }
+
+  /* Stagger-Index-Helper für lange Listen — pro Index 40ms.
+   * Emil: 30-80ms zwischen Items für natürliches Kaskade-Gefühl. */
+  .stagger-list > * {
+    opacity: 0;
+    animation: enter-up var(--dur-enter) var(--ease-out) forwards;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .stagger-list > * {
+      opacity: 1;
+      animation: none;
+    }
+  }
+  .stagger-list > *:nth-child(1) {
+    animation-delay: 0ms;
+  }
+  .stagger-list > *:nth-child(2) {
+    animation-delay: 40ms;
+  }
+  .stagger-list > *:nth-child(3) {
+    animation-delay: 80ms;
+  }
+  .stagger-list > *:nth-child(4) {
+    animation-delay: 120ms;
+  }
+  .stagger-list > *:nth-child(5) {
+    animation-delay: 160ms;
+  }
+  .stagger-list > *:nth-child(6) {
+    animation-delay: 200ms;
+  }
+  .stagger-list > *:nth-child(7) {
+    animation-delay: 240ms;
+  }
+  .stagger-list > *:nth-child(8) {
+    animation-delay: 280ms;
+  }
+  .stagger-list > *:nth-child(9) {
+    animation-delay: 320ms;
+  }
+  .stagger-list > *:nth-child(10) {
+    animation-delay: 360ms;
+  }
+  .stagger-list > *:nth-child(n + 11) {
+    animation-delay: 400ms;
   }
 }

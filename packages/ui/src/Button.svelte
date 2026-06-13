@@ -22,23 +22,99 @@
     class: className = '',
     children,
   }: Props = $props();
-
-  const base =
-    'inline-flex items-center justify-center font-display font-black uppercase tracking-[var(--tracking-claim)] px-6 py-3 text-sm md:text-base transition-all duration-150 border-2 select-none';
-  const variants = {
-    yellow:
-      'bg-accent text-fg-inverse border-accent hover:bg-transparent hover:text-accent hover:shadow-[var(--shadow-glow)]',
-    inverse: 'bg-fg-inverse text-accent border-accent hover:bg-accent hover:text-fg-inverse',
-    ghost: 'bg-transparent text-fg border-fg hover:bg-fg hover:text-fg-inverse',
-  };
 </script>
 
 {#if href}
-  <a {href} class="{base} {variants[variant]} {className}" rel="noopener">
-    {@render children?.()}
+  <a {href} class="btn btn-{variant} {className}" rel="noopener">
+    <span class="btn-inner">{@render children?.()}</span>
   </a>
 {:else}
-  <button {type} {onclick} class="{base} {variants[variant]} {className}">
-    {@render children?.()}
+  <button {type} {onclick} class="btn btn-{variant} {className}">
+    <span class="btn-inner">{@render children?.()}</span>
   </button>
 {/if}
+
+<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.75rem 1.5rem;
+    border-width: 2px;
+    border-style: solid;
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 0.875rem;
+    line-height: 1;
+    letter-spacing: var(--tracking-claim);
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    user-select: none;
+    /* Transitionen explizit — kein `transition: all` (Emil) */
+    transition:
+      background-color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out),
+      color var(--dur-hover) var(--ease-out),
+      box-shadow var(--dur-hover) var(--ease-out),
+      transform var(--dur-press) var(--ease-out);
+    will-change: transform;
+  }
+  @media (min-width: 768px) {
+    .btn {
+      font-size: 1rem;
+    }
+  }
+
+  /* Press-Feedback: leichtes scale, schnell zurueck */
+  .btn:active {
+    transform: scale(0.97);
+  }
+
+  /* Hover-State NUR auf echten Pointer-Devices — sonst stuck-hover
+   * auf Touch-Screens nach Tap */
+  @media (hover: hover) and (pointer: fine) {
+    .btn-yellow:hover {
+      background-color: transparent;
+      color: var(--color-accent);
+      box-shadow: var(--shadow-glow);
+    }
+    .btn-inverse:hover {
+      background-color: var(--color-accent);
+      color: var(--color-fg-inverse);
+    }
+    .btn-ghost:hover {
+      background-color: var(--color-fg);
+      color: var(--color-fg-inverse);
+    }
+  }
+
+  /* Varianten */
+  .btn-yellow {
+    background-color: var(--color-accent);
+    color: var(--color-fg-inverse);
+    border-color: var(--color-accent);
+  }
+  .btn-inverse {
+    background-color: var(--color-fg-inverse);
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--color-fg);
+    border-color: var(--color-fg);
+  }
+
+  /* Reduced-Motion: transitions auf 0, scale wegnehmen */
+  @media (prefers-reduced-motion: reduce) {
+    .btn {
+      transition:
+        background-color 100ms linear,
+        color 100ms linear;
+    }
+    .btn:active {
+      transform: none;
+    }
+  }
+</style>

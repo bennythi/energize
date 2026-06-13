@@ -26,20 +26,22 @@
 
   <Container>
     <div class="relative py-20 md:py-32">
-      <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
+      <p
+        class="enter-up stagger-1 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent"
+      >
         ⚡ {m.tickets_subline()}
       </p>
       <h1
-        class="mt-6 font-display font-black uppercase leading-[0.85] tracking-[-0.02em] text-fg"
+        class="enter-up stagger-2 mt-6 font-display font-black uppercase leading-[0.85] tracking-[-0.02em] text-fg"
         style="font-size: clamp(3rem, 12vw, 9rem);"
       >
         Tickets <span class="text-accent">2027</span>
       </h1>
-      <p class="mt-6 max-w-2xl text-base text-fg-muted md:text-lg">
+      <p class="enter-up stagger-3 mt-6 max-w-2xl text-base text-fg-muted md:text-lg">
         {m.tickets_lead()}
       </p>
 
-      <div class="mt-10 flex flex-wrap gap-3">
+      <div class="enter-up stagger-4 mt-10 flex flex-wrap gap-3">
         <a
           href="/tickets/buy"
           class="inline-flex items-center justify-center border-2 border-accent bg-accent px-8 py-4 font-display text-base font-black uppercase tracking-[var(--tracking-claim)] text-fg-inverse transition-all hover:bg-transparent hover:text-accent hover:shadow-[var(--shadow-glow-strong)] md:text-lg"

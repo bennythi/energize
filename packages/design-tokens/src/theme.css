@@ -58,4 +58,20 @@
   --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.7);
   --shadow-glow: 0 0 24px rgba(255, 236, 0, 0.25);
   --shadow-glow-strong: 0 0 48px rgba(255, 236, 0, 0.45);
+
+  /* Easing (Emil-Kowalski-Curves — staerker als CSS-Defaults).
+   * - out: enter feels instant, ease-out-power3
+   * - in-out: on-screen movement (drawer, modal swap)
+   * - drawer: iOS-like bottom-sheet curve aus Ionic
+   * - spring: subtle overshoot fuer playful elements */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Standard-Durations */
+  --dur-press: 140ms;
+  --dur-hover: 180ms;
+  --dur-enter: 220ms;
+  --dur-page: 280ms;
 }

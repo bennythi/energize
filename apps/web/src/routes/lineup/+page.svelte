@@ -42,18 +42,20 @@
 
   <Container>
     <div class="relative py-20 md:py-32">
-      <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
+      <p
+        class="enter-up stagger-1 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+      >
         29.05.2027 · Stockelsdorf / Dissau
       </p>
 
       <h1
-        class="mt-6 font-display font-black uppercase leading-[0.85] tracking-[-0.02em] text-fg"
+        class="enter-up stagger-2 mt-6 font-display font-black uppercase leading-[0.85] tracking-[-0.02em] text-fg"
         style="font-size: clamp(4rem, 14vw, 12rem);"
       >
         Line<span class="text-accent">/</span>Up
       </h1>
 
-      <div class="mt-6 flex flex-wrap items-center gap-3">
+      <div class="enter-up stagger-3 mt-6 flex flex-wrap items-center gap-3">
         <span class="plakat px-3 py-1 text-base">2027</span>
         <span
           class="border-2 border-fg-muted px-3 py-1 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
@@ -178,14 +180,14 @@
         </span>
       </div>
 
-      <ul class="mt-8 grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+      <ul class="stagger-list mt-8 grid gap-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
         {#each headliners as artist, idx (artist._id)}
           {@const photo = photoUrl(artist.photo, 450, 600)}
           {@const isFav = favorites.has(artist._id)}
           <li class="relative">
             <a
               href={`/lineup/${artist.slug}`}
-              class="group relative flex aspect-[3/4] flex-col justify-between overflow-hidden border-2 border-fg p-2 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
+              class="card-press group relative flex aspect-[3/4] flex-col justify-between overflow-hidden border-2 border-fg p-2 hover:border-accent"
               class:bg-accent={!photo}
               class:text-fg-inverse={!photo}
               class:bg-surface={photo}

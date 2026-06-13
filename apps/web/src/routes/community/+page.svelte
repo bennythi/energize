@@ -18,19 +18,21 @@
 
   <Container>
     <div class="relative py-20 md:py-32">
-      <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
+      <p
+        class="enter-up stagger-1 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent"
+      >
         ⚡ {m.community_eyebrow()}
       </p>
       <h1
-        class="mt-6 font-display font-black uppercase leading-[0.9] tracking-[-0.02em] text-fg"
+        class="enter-up stagger-2 mt-6 font-display font-black uppercase leading-[0.9] tracking-[-0.02em] text-fg"
         style="font-size: clamp(2.5rem, 8vw, 6rem);"
       >
         {m.community_title()}
       </h1>
-      <p class="mt-6 max-w-2xl text-base text-fg-muted md:text-lg">
+      <p class="enter-up stagger-3 mt-6 max-w-2xl text-base text-fg-muted md:text-lg">
         {m.community_lead()}
       </p>
-      <div class="mt-8 flex flex-wrap gap-3">
+      <div class="enter-up stagger-4 mt-8 flex flex-wrap gap-3">
         <Button href="/login" variant="yellow">{m.community_cta()}</Button>
       </div>
     </div>

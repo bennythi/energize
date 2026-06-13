@@ -1,5 +1,6 @@
 <script lang="ts">
   import { browser } from '$app/environment';
+  import { page } from '$app/state';
   import '../app.css';
   import { m, languageTag, type AvailableLanguageTag } from '@energize/i18n';
   import { auth } from '$lib/auth.svelte';
@@ -17,7 +18,27 @@
   // Init aus localStorage gelesen und setLanguageTag() aufgerufen hat.
   let currentLang = $state<AvailableLanguageTag>(languageTag() as AvailableLanguageTag);
   let mobileOpen = $state(false);
+  let scrolled = $state(false);
   let burgerButton = $state<HTMLButtonElement | null>(null);
+
+  const currentPath = $derived(page.url.pathname.replace(/\/$/, '') || '/');
+
+  function isActive(href: string): boolean {
+    if (href === '/') return currentPath === '/';
+    return currentPath === href || currentPath.startsWith(href + '/');
+  }
+
+  // Sticky-Nav: ab 24px scroll wechselt der Background zu opak +
+  // staerkerer Border. Subtle, aber bringt visuell separation.
+  $effect(() => {
+    if (!browser) return;
+    function onScroll() {
+      scrolled = window.scrollY > 24;
+    }
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  });
 
   // auth.init() läuft schon in +layout.ts (Module-Init, vor jedem Render)
   // — hier nur favorites an Auth-Status koppeln.
@@ -74,7 +95,7 @@
   ]);
 </script>
 
-<nav class="sticky top-0 z-30 border-b border-border bg-bg/85 backdrop-blur">
+<nav class="nav-bar sticky top-0 z-30 border-b" class:nav-scrolled={scrolled}>
   <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
     <a
       href="/"
@@ -90,7 +111,12 @@
     >
       {#each publicLinks as link (link.href)}
         <li>
-          <a href={link.href} class="text-fg-muted transition-colors hover:text-accent">
+          <a
+            href={link.href}
+            class="nav-link"
+            class:nav-link-active={isActive(link.href)}
+            aria-current={isActive(link.href) ? 'page' : undefined}
+          >
             {link.label}
           </a>
         </li>
@@ -210,6 +236,61 @@
 {@render children?.()}
 
 <style>
+  /* Nav-Background-Progression: am Top transparent + thin border,
+   * nach 24px scroll opaker + glow-Border. Cheap visual separation. */
+  .nav-bar {
+    background-color: rgba(10, 10, 10, 0.6);
+    border-color: transparent;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition:
+      background-color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out),
+      backdrop-filter var(--dur-hover) var(--ease-out);
+  }
+  .nav-scrolled {
+    background-color: rgba(10, 10, 10, 0.92);
+    border-color: var(--color-border);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+
+  /* Nav-Link: active-Underline via after-pseudo (anti-aliased
+   * smoother als border-bottom-Toggle). */
+  .nav-link {
+    position: relative;
+    color: var(--color-fg-muted);
+    padding-bottom: 4px;
+    transition: color var(--dur-hover) var(--ease-out);
+  }
+  .nav-link::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: 2px;
+    width: 100%;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform var(--dur-enter) var(--ease-out);
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .nav-link:hover {
+      color: var(--color-accent);
+    }
+    .nav-link:hover::after {
+      transform: scaleX(0.5);
+      transform-origin: left;
+    }
+  }
+  .nav-link-active {
+    color: var(--color-fg);
+  }
+  .nav-link-active::after {
+    transform: scaleX(1);
+  }
+
   /* Emil-Pattern: enter mit ease-out, short duration, stagger.
    * scale(0.97) statt scale(0) — "nothing in the real world appears from nothing".
    * prefers-reduced-motion entfernt die Translate-Komponente. */

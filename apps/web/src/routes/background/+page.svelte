@@ -70,16 +70,20 @@
 
   <Container>
     <div class="relative py-20 md:py-32">
-      <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
+      <p
+        class="enter-up stagger-1 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent"
+      >
         ⚡ {t.eyebrow}
       </p>
       <h1
-        class="mt-6 font-display font-black uppercase leading-[0.9] tracking-[-0.02em] text-fg"
+        class="enter-up stagger-2 mt-6 font-display font-black uppercase leading-[0.9] tracking-[-0.02em] text-fg"
         style="font-size: clamp(2.5rem, 8vw, 6rem);"
       >
         {t.title}
       </h1>
-      <p class="mt-6 max-w-2xl text-base text-fg-muted md:text-lg">{t.lead}</p>
+      <p class="enter-up stagger-3 mt-6 max-w-2xl text-base text-fg-muted md:text-lg">
+        {t.lead}
+      </p>
     </div>
   </Container>
 </section>

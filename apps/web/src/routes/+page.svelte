@@ -91,13 +91,13 @@
           </a>
         </div>
 
-        <ul class="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+        <ul class="stagger-list mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
           {#each featuredArtists as artist (artist._id)}
             {@const photo = photoUrl(artist.photo)}
             <li>
               <a
                 href={`/lineup/${artist.slug}`}
-                class="group relative flex aspect-[3/4] flex-col justify-end overflow-hidden border-2 border-fg p-2 transition-all hover:border-accent hover:shadow-[var(--shadow-glow)]"
+                class="card-press group relative flex aspect-[3/4] flex-col justify-end overflow-hidden border-2 border-fg p-2 hover:border-accent"
                 class:bg-accent={!photo}
                 class:bg-surface={photo}
               >
