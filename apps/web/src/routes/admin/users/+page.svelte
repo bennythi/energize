@@ -46,6 +46,42 @@
     }
   }
 
+  async function deleteUser(user: UserRow) {
+    const client = auth.client;
+    if (!client) return;
+    const isMe = user.id === auth.user?.id;
+    const isFounder = user.email === FOUNDER_EMAIL;
+    if (isFounder) {
+      alert('Founder-Account kann nicht gelöscht werden.');
+      return;
+    }
+    if (isMe) {
+      alert('Du kannst dich nicht selbst löschen.');
+      return;
+    }
+    const c1 = confirm(
+      `${user.display_name ?? user.email} ENDGÜLTIG löschen?\n\nAlle Posts, Likes, Follows und Feedback werden mitgelöscht. Nicht rückgängig.`,
+    );
+    if (!c1) return;
+    const localPart = user.email.split('@')[0];
+    const c2 = prompt(`Zur Sicherheit: Tippe "${localPart}" ein.`);
+    if (c2 !== localPart) {
+      alert('Falsch eingetippt — abgebrochen.');
+      return;
+    }
+    actingOn = user.id;
+    try {
+      const { error } = await client.rpc('admin_delete_user', { target_user_id: user.id });
+      if (error) throw error;
+      items = items.filter((u) => u.id !== user.id);
+    } catch (err) {
+      console.error('[admin/users] delete failed', err);
+      alert(`Löschen fehlgeschlagen: ${err instanceof Error ? err.message : 'unbekannt'}`);
+    } finally {
+      actingOn = null;
+    }
+  }
+
   async function setRole(user: UserRow, newRole: 'user' | 'admin') {
     const client = auth.client;
     if (!client) return;
@@ -284,6 +320,19 @@
                 >
                   Profil öffnen →
                 </a>
+                <button
+                  type="button"
+                  onclick={() => deleteUser(user)}
+                  disabled={isFounder || isMe || actingOn === user.id}
+                  class="border-2 border-border bg-bg px-3 py-2 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted transition-colors hover:border-danger hover:text-danger active:scale-95 disabled:cursor-not-allowed disabled:opacity-30"
+                  title={isFounder
+                    ? 'Founder ist geschützt'
+                    : isMe
+                      ? 'Du kannst dich nicht selbst löschen'
+                      : 'Profil endgültig löschen'}
+                >
+                  🗑 Löschen
+                </button>
               </div>
             </div>
           </li>

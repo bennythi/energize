@@ -234,6 +234,10 @@ export interface Database {
         Args: { target_user_id: string; new_role: 'user' | 'admin' };
         Returns: void;
       };
+      admin_delete_user: {
+        Args: { target_user_id: string };
+        Returns: void;
+      };
       community_locations: {
         Args: Record<string, never>;
         Returns: Array<{

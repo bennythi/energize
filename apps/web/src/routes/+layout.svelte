@@ -88,6 +88,7 @@
   const publicLinks = $derived([
     { href: '/lineup', label: m.nav_lineup() },
     { href: '/tickets', label: m.nav_tickets_short() },
+    { href: '/media', label: 'Media' },
     { href: '/background', label: 'Background' },
     { href: '/community', label: m.nav_community() },
     { href: '/faq', label: m.nav_faq() },
