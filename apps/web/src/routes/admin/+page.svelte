@@ -54,9 +54,10 @@
       accent: (reportsCount ?? 0) > 0,
     },
     { label: 'Feedback', value: feedbackCount, href: '/admin/feedback' },
-    { label: 'User-Profile', value: usersCount, href: '/admin' },
+    { label: 'User-Profile', value: usersCount, href: '/admin/users' },
     { label: 'Approved Posts', value: approvedCount, href: '/wall' },
     { label: 'Rejected Posts', value: rejectedCount, href: '/admin/moderation' },
+    { label: 'Externe Tools', value: 6, href: '/admin/tools' },
   ]);
 </script>
 

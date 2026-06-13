@@ -2,6 +2,7 @@
   import { Container, Button } from '@energize/ui';
   import { m } from '@energize/i18n';
   import AppComingBanner from '$lib/AppComingBanner.svelte';
+  import CommunityMap from '$lib/CommunityMap.svelte';
 </script>
 
 <svelte:head>
@@ -66,6 +67,31 @@
     </div>
   </section>
 </Container>
+
+<!-- COMMUNITY-KARTE -->
+<section class="border-y border-border bg-bg py-16 md:py-24">
+  <Container>
+    <div class="flex flex-col gap-2 md:flex-row md:items-baseline md:justify-between">
+      <div>
+        <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
+          Anonyme Karte
+        </p>
+        <h2
+          class="mt-2 font-display font-black uppercase leading-[0.9] tracking-[-0.02em] text-fg"
+          style="font-size: clamp(2rem, 5vw, 3.5rem);"
+        >
+          Woher die Energizer kommen.
+        </h2>
+      </div>
+      <p class="max-w-sm text-sm text-fg-muted">
+        Aggregiert nach PLZ-Bereich und Land — niemand sieht einzelne User, nur Cluster.
+      </p>
+    </div>
+    <div class="mt-8">
+      <CommunityMap />
+    </div>
+  </Container>
+</section>
 
 <!-- LOGIN ERKLÄRT -->
 <section class="border-y border-border bg-surface py-20 md:py-28">

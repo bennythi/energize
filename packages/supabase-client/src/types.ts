@@ -18,6 +18,11 @@ export interface Database {
           display_name: string | null;
           handle: string | null;
           role: 'user' | 'admin';
+          phone: string | null;
+          birthdate: string | null;
+          postal_code: string | null;
+          country: string;
+          festivals_attended: number;
           locale: 'de' | 'en' | null;
           push_token: string | null;
           created_at: string;
@@ -27,6 +32,11 @@ export interface Database {
           display_name?: string | null;
           handle?: string | null;
           role?: 'user' | 'admin';
+          phone?: string | null;
+          birthdate?: string | null;
+          postal_code?: string | null;
+          country?: string;
+          festivals_attended?: number;
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
           created_at?: string;
@@ -36,6 +46,11 @@ export interface Database {
           display_name?: string | null;
           handle?: string | null;
           role?: 'user' | 'admin';
+          phone?: string | null;
+          birthdate?: string | null;
+          postal_code?: string | null;
+          country?: string;
+          festivals_attended?: number;
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
           created_at?: string;
@@ -188,7 +203,42 @@ export interface Database {
       };
     };
     Views: Record<string, never>;
-    Functions: Record<string, never>;
+    Functions: {
+      is_admin: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      admin_list_users: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          id: string;
+          email: string;
+          display_name: string | null;
+          handle: string | null;
+          role: 'user' | 'admin';
+          phone: string | null;
+          birthdate: string | null;
+          postal_code: string | null;
+          country: string;
+          festivals_attended: number;
+          created_at: string;
+          email_confirmed_at: string | null;
+          last_sign_in_at: string | null;
+        }>;
+      };
+      admin_set_role: {
+        Args: { target_user_id: string; new_role: 'user' | 'admin' };
+        Returns: void;
+      };
+      community_locations: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          country: string;
+          region: string;
+          count: number;
+        }>;
+      };
+    };
     Enums: Record<string, never>;
     CompositeTypes: Record<string, never>;
   };

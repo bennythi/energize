@@ -30,6 +30,8 @@
     { href: '/admin/moderation', label: 'Moderation' },
     { href: '/admin/reports', label: 'Reports' },
     { href: '/admin/feedback', label: 'Feedback' },
+    { href: '/admin/users', label: 'User' },
+    { href: '/admin/tools', label: 'Tools' },
   ];
 </script>
 

@@ -37,11 +37,35 @@
   // Handle wird automatisch aus dem Namen abgeleitet.
   let displayName = $state('');
   let handle = $state('');
+  let phone = $state('');
+  let birthdate = $state('');
+  let postalCode = $state('');
+  let country = $state('DE');
+  let festivalsAttended = $state(0);
   let displayNameLoaded = $state(false);
   let savingProfile = $state(false);
   let profileSaved = $state(false);
   let profileError = $state<string | null>(null);
   let handleColumnAvailable = $state(true);
+  let extendedColumnsAvailable = $state(true);
+
+  const countries: { code: string; label: string }[] = [
+    { code: 'DE', label: '🇩🇪 Deutschland' },
+    { code: 'AT', label: '🇦🇹 Österreich' },
+    { code: 'CH', label: '🇨🇭 Schweiz' },
+    { code: 'NL', label: '🇳🇱 Niederlande' },
+    { code: 'BE', label: '🇧🇪 Belgien' },
+    { code: 'LU', label: '🇱🇺 Luxemburg' },
+    { code: 'DK', label: '🇩🇰 Dänemark' },
+    { code: 'PL', label: '🇵🇱 Polen' },
+    { code: 'CZ', label: '🇨🇿 Tschechien' },
+    { code: 'FR', label: '🇫🇷 Frankreich' },
+    { code: 'IT', label: '🇮🇹 Italien' },
+    { code: 'GB', label: '🇬🇧 UK' },
+    { code: 'SE', label: '🇸🇪 Schweden' },
+    { code: 'NO', label: '🇳🇴 Norwegen' },
+    { code: 'XX', label: '🌍 Anderes Land' },
+  ];
 
   async function loadProfile() {
     const client = auth.client;
@@ -50,26 +74,45 @@
     try {
       const { data, error } = await client
         .from('profiles')
-        .select('display_name, handle')
+        .select('display_name, handle, phone, birthdate, postal_code, country, festivals_attended')
         .eq('id', user.id)
         .maybeSingle();
       if (error) {
         if (error.code === '42703') {
-          // handle-Spalte gibt's noch nicht (Migration 0004 fehlt)
-          handleColumnAvailable = false;
-          const fallback = await client
+          // Eine der Spalten fehlt. Mit weniger select probieren.
+          extendedColumnsAvailable = false;
+          const retry = await client
             .from('profiles')
-            .select('display_name')
+            .select('display_name, handle')
             .eq('id', user.id)
             .maybeSingle();
-          if (fallback.error) throw fallback.error;
-          displayName = fallback.data?.display_name ?? '';
+          if (retry.error && retry.error.code === '42703') {
+            // handle fehlt auch (Migration 0004)
+            handleColumnAvailable = false;
+            const fallback = await client
+              .from('profiles')
+              .select('display_name')
+              .eq('id', user.id)
+              .maybeSingle();
+            if (fallback.error) throw fallback.error;
+            displayName = fallback.data?.display_name ?? '';
+          } else if (retry.error) {
+            throw retry.error;
+          } else {
+            displayName = retry.data?.display_name ?? '';
+            handle = retry.data?.handle ?? '';
+          }
         } else {
           throw error;
         }
       } else {
         displayName = data?.display_name ?? '';
         handle = data?.handle ?? '';
+        phone = data?.phone ?? '';
+        birthdate = data?.birthdate ?? '';
+        postalCode = data?.postal_code ?? '';
+        country = data?.country ?? 'DE';
+        festivalsAttended = data?.festivals_attended ?? 0;
       }
     } catch (err) {
       console.error('[account] profile load failed', err);
@@ -121,6 +164,22 @@
     return `${root.slice(0, 17)}_${userId.slice(0, 6)}`;
   }
 
+  function validateOptional(): string | null {
+    if (phone && (phone.length < 5 || phone.length > 25)) {
+      return m.account_phone_invalid();
+    }
+    if (postalCode && (postalCode.length < 3 || postalCode.length > 12)) {
+      return m.account_postal_code_invalid();
+    }
+    if (birthdate) {
+      const d = new Date(birthdate);
+      if (Number.isNaN(d.getTime()) || d.getTime() >= Date.now()) {
+        return m.account_birthdate_invalid();
+      }
+    }
+    return null;
+  }
+
   async function handleProfileSave(event: SubmitEvent) {
     event.preventDefault();
     const client = auth.client;
@@ -130,6 +189,12 @@
     profileSaved = false;
     savingProfile = true;
     try {
+      const optErr = validateOptional();
+      if (optErr) {
+        profileError = optErr;
+        return;
+      }
+
       const trimmedName = displayName.trim();
       let nextHandle: string | null = handle || null;
 
@@ -140,21 +205,52 @@
         }
       }
 
-      const payload: { display_name: string | null; handle?: string | null } = {
+      const payload: {
+        display_name: string | null;
+        handle?: string | null;
+        phone?: string | null;
+        birthdate?: string | null;
+        postal_code?: string | null;
+        country?: string;
+        festivals_attended?: number;
+      } = {
         display_name: trimmedName || null,
       };
       if (handleColumnAvailable) payload.handle = nextHandle;
+      if (extendedColumnsAvailable) {
+        payload.phone = phone.trim() || null;
+        payload.birthdate = birthdate || null;
+        payload.postal_code = postalCode.trim() || null;
+        payload.country = country || 'DE';
+        payload.festivals_attended = Math.max(0, Math.min(6, festivalsAttended));
+      }
 
       const { error } = await client.from('profiles').update(payload).eq('id', user.id);
 
       if (error) {
         if (error.code === '42703') {
-          handleColumnAvailable = false;
+          // Eine der neuen Spalten fehlt — minimal payload retry
+          extendedColumnsAvailable = false;
+          const minimal: { display_name: string | null; handle?: string | null } = {
+            display_name: trimmedName || null,
+          };
+          if (handleColumnAvailable) minimal.handle = nextHandle;
           const { error: retryErr } = await client
             .from('profiles')
-            .update({ display_name: trimmedName || null })
+            .update(minimal)
             .eq('id', user.id);
-          if (retryErr) throw retryErr;
+          if (retryErr) {
+            if (retryErr.code === '42703') {
+              handleColumnAvailable = false;
+              const { error: r2 } = await client
+                .from('profiles')
+                .update({ display_name: trimmedName || null })
+                .eq('id', user.id);
+              if (r2) throw r2;
+            } else {
+              throw retryErr;
+            }
+          }
         } else if (error.code === '23505' && handleColumnAvailable) {
           nextHandle = await generateUniqueHandle(
             slugifyName(trimmedName) + '_' + user.id.slice(0, 4),
@@ -162,7 +258,7 @@
           );
           const { error: retryErr } = await client
             .from('profiles')
-            .update({ display_name: trimmedName || null, handle: nextHandle })
+            .update({ ...payload, handle: nextHandle })
             .eq('id', user.id);
           if (retryErr) throw retryErr;
         } else {
@@ -246,6 +342,120 @@
             />
             <p class="mt-2 text-xs text-fg-muted">{m.account_display_name_hint()}</p>
           </label>
+
+          {#if extendedColumnsAvailable}
+            <fieldset class="mt-2 border-l-4 border-accent bg-bg pl-4 py-3 space-y-4">
+              <legend class="float-left -mt-1 mr-3 px-2 bg-bg">
+                <span
+                  class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-accent"
+                >
+                  {m.account_optional_section()}
+                </span>
+              </legend>
+              <p class="clear-both text-xs text-fg-muted">
+                {m.account_optional_hint()}
+              </p>
+
+              <label class="block">
+                <span
+                  class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+                >
+                  {m.account_phone_label()}
+                </span>
+                <input
+                  type="tel"
+                  bind:value={phone}
+                  placeholder={m.account_phone_placeholder()}
+                  disabled={!displayNameLoaded || savingProfile}
+                  maxlength="25"
+                  autocomplete="tel"
+                  class="mt-2 w-full border-2 border-border bg-surface px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+                />
+              </label>
+
+              <div class="grid gap-4 sm:grid-cols-2">
+                <label class="block">
+                  <span
+                    class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+                  >
+                    {m.account_birthdate_label()}
+                  </span>
+                  <input
+                    type="date"
+                    bind:value={birthdate}
+                    disabled={!displayNameLoaded || savingProfile}
+                    autocomplete="bday"
+                    class="mt-2 w-full border-2 border-border bg-surface px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+                  />
+                </label>
+
+                <label class="block">
+                  <span
+                    class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+                  >
+                    {m.account_country_label()}
+                  </span>
+                  <select
+                    bind:value={country}
+                    disabled={!displayNameLoaded || savingProfile}
+                    class="mt-2 w-full border-2 border-border bg-surface px-4 py-3 font-mono text-base text-fg focus:border-accent focus:outline-none disabled:opacity-50"
+                  >
+                    {#each countries as c (c.code)}
+                      <option value={c.code}>{c.label}</option>
+                    {/each}
+                  </select>
+                </label>
+
+                <label class="block">
+                  <span
+                    class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+                  >
+                    {m.account_postal_code_label()}
+                  </span>
+                  <input
+                    type="text"
+                    bind:value={postalCode}
+                    placeholder={m.account_postal_code_placeholder()}
+                    disabled={!displayNameLoaded || savingProfile}
+                    maxlength="12"
+                    inputmode="numeric"
+                    autocomplete="postal-code"
+                    class="mt-2 w-full border-2 border-border bg-surface px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+                  />
+                </label>
+              </div>
+
+              <!-- Festivals besucht -->
+              <div>
+                <span
+                  class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+                >
+                  {m.account_festivals_label()}
+                </span>
+                <div class="mt-2 flex flex-wrap gap-2" role="radiogroup">
+                  {#each [0, 1, 2, 3, 4, 5, 6] as n (n)}
+                    <button
+                      type="button"
+                      onclick={() => (festivalsAttended = n)}
+                      role="radio"
+                      aria-checked={festivalsAttended === n}
+                      disabled={!displayNameLoaded || savingProfile}
+                      class="flex h-11 w-11 items-center justify-center border-2 font-display text-lg font-black transition-all active:scale-95 disabled:opacity-50"
+                      class:border-accent={festivalsAttended === n}
+                      class:bg-accent={festivalsAttended === n}
+                      class:text-fg-inverse={festivalsAttended === n}
+                      class:border-border={festivalsAttended !== n}
+                      class:bg-surface={festivalsAttended !== n}
+                      class:text-fg-muted={festivalsAttended !== n}
+                    >
+                      {n === 6 ? '6+' : n}
+                    </button>
+                  {/each}
+                </div>
+                <p class="mt-2 text-xs text-fg-muted">{m.account_festivals_hint()}</p>
+              </div>
+            </fieldset>
+          {/if}
 
           {#if profileError}
             <p class="text-sm text-danger" role="alert">{profileError}</p>
