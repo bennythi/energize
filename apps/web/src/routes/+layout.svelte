@@ -97,12 +97,15 @@
 
 <nav class="nav-bar sticky top-0 z-30 border-b" class:nav-scrolled={scrolled}>
   <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-    <a
-      href="/"
-      class="flex items-center gap-2 font-display text-xl font-black uppercase tracking-[var(--tracking-claim)] text-fg"
-    >
-      <span class="inline-block h-2 w-2 bg-accent"></span>
-      {m.hero_headline()}
+    <a href="/" class="flex items-center gap-2 text-fg" aria-label="ENERGIZE — zur Startseite">
+      <img
+        src="/brand/logo_energize.avif"
+        alt=""
+        width="36"
+        height="36"
+        class="block h-8 w-8 md:h-9 md:w-9"
+      />
+      <img src="/brand/schriftzug.avif" alt="" class="block h-5 w-auto md:h-6" aria-hidden="true" />
     </a>
 
     <!-- Desktop Nav -->
