@@ -73,36 +73,22 @@ supabase db push
   - `capacitor://localhost/auth/callback` (iOS-App)
   - `https://localhost/auth/callback` (Android-App)
 
-## 5. E-Mail-Template (Deutsch)
+## 5. E-Mail-Templates
 
-**Authentication → Email Templates → Magic Link:**
+Komplette Templates (vollständiges HTML, Energize-Branding, DE) liegen
+unter [`supabase-email-templates/`](./supabase-email-templates/) inkl.
+Setup-Anleitung.
 
-```html
-<h2>Energize Festival — Anmeldelink</h2>
+Alle vier Templates ersetzen — der Supabase-Default hat keinen
+`<html>`-Tag und triggert Spam-Score-Hinweise:
 
-<p>Hi!</p>
+- `magic-link.html` — Subject: `Dein Login-Link für Energize ⚡`
+- `confirm-signup.html` — Subject: `Willkommen bei Energize — bitte E-Mail bestätigen`
+- `email-change.html` — Subject: `Energize — E-Mail-Adresse ändern bestätigen`
 
-<p>Klicke auf den Button, um dich bei deinem Energize-Account anzumelden:</p>
-
-<p>
-  <a
-    href="{{ .ConfirmationURL }}"
-    style="display:inline-block;background:#ffec00;color:#0a0a0a;padding:14px 28px;text-decoration:none;font-family:sans-serif;font-weight:900;letter-spacing:0.1em;text-transform:uppercase;"
-  >
-    Einloggen
-  </a>
-</p>
-
-<p style="color:#666;font-size:12px;">
-  Der Link ist 1 Stunde gültig. Falls du diese Anmeldung nicht ausgelöst hast, ignoriere die Mail.
-</p>
-
-<p style="color:#666;font-size:12px;">— Brainchildz Event Agentur</p>
-```
-
-> **Tipp:** Falls die App auch englisch sein soll: im Code schicken wir
-> `options.data.locale` mit. Sobald Supabase Multi-Language-Templates unterstützt
-> (z. Z. Beta), umstellen.
+Mit Standard-Supabase-SMTP bleiben zwei kleine Spam-Hinweise
+(`MIME_HTML_ONLY`, `MISSING_MID`) — die verschwinden erst mit eigenem
+SMTP-Provider (Postmark/Mailjet/Resend, siehe Template-README).
 
 ## 6. Smoke-Test
 
