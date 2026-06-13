@@ -104,7 +104,49 @@
     </div>
   </Container>
 {:else}
-  <!-- LOGIN-HINT -->
+  <!-- WARUM KEIN TIMETABLE -->
+  <Container>
+    <section class="mt-12 border-2 border-fg bg-surface p-6 md:mt-16 md:p-10">
+      <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
+        ⚡ {m.lineup_no_timetable_eyebrow()}
+      </p>
+      <h2
+        class="mt-3 font-display font-black uppercase leading-[0.95] tracking-[-0.01em] text-fg"
+        style="font-size: clamp(1.5rem, 4.5vw, 2.75rem);"
+      >
+        {m.lineup_no_timetable_title()}
+      </h2>
+
+      <div
+        class="mt-6 grid gap-6 text-base leading-relaxed text-fg-muted md:grid-cols-2 md:gap-10 md:text-lg"
+      >
+        <div class="space-y-4">
+          <p>{m.lineup_no_timetable_p1()}</p>
+          <p>{m.lineup_no_timetable_p2()}</p>
+          <p>{m.lineup_no_timetable_p3()}</p>
+        </div>
+
+        <aside class="border-l-4 border-accent bg-bg p-5">
+          <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
+            🔔 {m.lineup_no_timetable_app_title()}
+          </p>
+          <p class="mt-3 text-sm text-fg md:text-base">
+            {m.lineup_no_timetable_app_body()}
+          </p>
+          {#if !auth.user}
+            <a
+              href="/login"
+              class="mt-4 inline-block font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent transition-colors hover:underline"
+            >
+              → {m.nav_login()}
+            </a>
+          {/if}
+        </aside>
+      </div>
+    </section>
+  </Container>
+
+  <!-- LOGIN-HINT (kompakt) -->
   {#if !auth.user}
     <Container>
       <div class="mt-10 flex items-center justify-between border-l-4 border-accent pl-4">
