@@ -1,14 +1,7 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { browser } from '$app/environment';
   import '../app.css';
-  import {
-    m,
-    setLanguageTag,
-    languageTag,
-    isAvailableLanguageTag,
-    type AvailableLanguageTag,
-  } from '@energize/i18n';
+  import { m, languageTag, type AvailableLanguageTag } from '@energize/i18n';
   import { auth } from '$lib/auth.svelte';
   import { favorites } from '$lib/favorites.svelte';
 
@@ -20,19 +13,10 @@
 
   const LANG_STORAGE_KEY = 'energize.lang';
 
+  // languageTag() ist hier schon korrekt, weil +layout.ts beim Client-
+  // Init aus localStorage gelesen und setLanguageTag() aufgerufen hat.
   let currentLang = $state<AvailableLanguageTag>(languageTag() as AvailableLanguageTag);
   let mobileOpen = $state(false);
-
-  onMount(() => {
-    // Persistierte Sprache aus localStorage anwenden; reload nötig weil
-    // Paraglide-Messages statisch eingebacken sind und beim Mount nur einmal
-    // evaluiert werden.
-    const stored = localStorage.getItem(LANG_STORAGE_KEY);
-    if (stored && isAvailableLanguageTag(stored) && stored !== languageTag()) {
-      setLanguageTag(stored);
-      location.reload();
-    }
-  });
 
   $effect(() => {
     auth.init();
@@ -48,11 +32,11 @@
   });
 
   function toggleLang() {
-    const next: AvailableLanguageTag = currentLang === 'de' ? 'en' : 'de';
     if (!browser) return;
+    const next: AvailableLanguageTag = currentLang === 'de' ? 'en' : 'de';
     localStorage.setItem(LANG_STORAGE_KEY, next);
-    setLanguageTag(next);
-    currentLang = next;
+    // Reload reicht — +layout.ts liest beim naechsten Start localStorage
+    // und ruft setLanguageTag() VOR jedem m.xxx()-Aufruf auf.
     location.reload();
   }
 
