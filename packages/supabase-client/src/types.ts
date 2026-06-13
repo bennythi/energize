@@ -60,6 +60,69 @@ export interface Database {
         };
         Relationships: [];
       };
+      support_tickets: {
+        Row: {
+          id: string;
+          user_id: string;
+          subject: string;
+          category: 'account' | 'ticket' | 'cashless' | 'wall' | 'tech' | 'other' | null;
+          status: 'open' | 'in_progress' | 'answered' | 'closed';
+          created_at: string;
+          updated_at: string;
+          last_admin_reply_at: string | null;
+          closed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          subject: string;
+          category?: 'account' | 'ticket' | 'cashless' | 'wall' | 'tech' | 'other' | null;
+          status?: 'open' | 'in_progress' | 'answered' | 'closed';
+          created_at?: string;
+          updated_at?: string;
+          last_admin_reply_at?: string | null;
+          closed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          subject?: string;
+          category?: 'account' | 'ticket' | 'cashless' | 'wall' | 'tech' | 'other' | null;
+          status?: 'open' | 'in_progress' | 'answered' | 'closed';
+          created_at?: string;
+          updated_at?: string;
+          last_admin_reply_at?: string | null;
+          closed_at?: string | null;
+        };
+        Relationships: [];
+      };
+      support_messages: {
+        Row: {
+          id: string;
+          ticket_id: string;
+          author_id: string;
+          body: string;
+          is_staff: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          ticket_id: string;
+          author_id: string;
+          body: string;
+          is_staff?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          ticket_id?: string;
+          author_id?: string;
+          body?: string;
+          is_staff?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       follows: {
         Row: {
           follower_id: string;
@@ -237,6 +300,31 @@ export interface Database {
       admin_delete_user: {
         Args: { target_user_id: string };
         Returns: void;
+      };
+      admin_close_ticket: {
+        Args: { target_ticket_id: string };
+        Returns: void;
+      };
+      admin_reopen_ticket: {
+        Args: { target_ticket_id: string };
+        Returns: void;
+      };
+      admin_list_open_tickets: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          id: string;
+          subject: string;
+          category: string | null;
+          status: 'open' | 'in_progress' | 'answered' | 'closed';
+          created_at: string;
+          updated_at: string;
+          last_admin_reply_at: string | null;
+          user_id: string;
+          user_email: string;
+          user_display_name: string | null;
+          message_count: number;
+          unanswered_age_hours: number;
+        }>;
       };
       community_locations: {
         Args: Record<string, never>;

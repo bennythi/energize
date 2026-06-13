@@ -6,6 +6,7 @@
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
   import { favorites } from '$lib/favorites.svelte';
   import FavoriteButton from '$lib/FavoriteButton.svelte';
+  import SupportSection from '$lib/SupportSection.svelte';
   import type { PageData } from './$types';
 
   interface Props {
@@ -537,6 +538,8 @@
           <Button href="/feedback" variant="yellow">{m.nav_feedback()} →</Button>
         </div>
       </section>
+
+      <SupportSection />
 
       <section class="mt-12">
         <h2

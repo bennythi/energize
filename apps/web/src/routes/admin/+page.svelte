@@ -9,17 +9,22 @@
   let reportsCount = $state<number | null>(null);
   let feedbackCount = $state<number | null>(null);
   let usersCount = $state<number | null>(null);
+  let openTicketsCount = $state<number | null>(null);
 
   async function loadStats() {
     const client = auth.client;
     if (!client) return;
-    const [pending, approved, rejected, reports, feedback, users] = await Promise.all([
+    const [pending, approved, rejected, reports, feedback, users, tickets] = await Promise.all([
       client.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
       client.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'approved'),
       client.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
       client.from('reports').select('id', { count: 'exact', head: true }),
       client.from('feedback').select('id', { count: 'exact', head: true }),
       client.from('profiles').select('id', { count: 'exact', head: true }),
+      client
+        .from('support_tickets')
+        .select('id', { count: 'exact', head: true })
+        .neq('status', 'closed'),
     ]);
     pendingCount = pending.count ?? 0;
     approvedCount = approved.count ?? 0;
@@ -27,6 +32,7 @@
     reportsCount = reports.count ?? 0;
     feedbackCount = feedback.count ?? 0;
     usersCount = users.count ?? 0;
+    openTicketsCount = tickets.error ? 0 : (tickets.count ?? 0);
   }
 
   onMount(() => {
@@ -41,6 +47,12 @@
   }
 
   const tiles = $derived<Tile[]>([
+    {
+      label: 'Support offen',
+      value: openTicketsCount,
+      href: '/admin/support',
+      accent: (openTicketsCount ?? 0) > 0,
+    },
     {
       label: 'Pending Posts',
       value: pendingCount,

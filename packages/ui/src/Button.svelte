@@ -10,6 +10,7 @@
     variant?: 'yellow' | 'inverse' | 'ghost';
     type?: 'button' | 'submit';
     onclick?: (event: MouseEvent) => void;
+    disabled?: boolean;
     class?: string;
     children?: import('svelte').Snippet;
   }
@@ -19,6 +20,7 @@
     variant = 'yellow',
     type = 'button',
     onclick,
+    disabled = false,
     class: className = '',
     children,
   }: Props = $props();
@@ -29,7 +31,7 @@
     <span class="btn-inner">{@render children?.()}</span>
   </a>
 {:else}
-  <button {type} {onclick} class="btn btn-{variant} {className}">
+  <button {type} {onclick} {disabled} class="btn btn-{variant} {className}">
     <span class="btn-inner">{@render children?.()}</span>
   </button>
 {/if}

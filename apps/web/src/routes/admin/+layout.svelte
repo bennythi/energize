@@ -27,6 +27,7 @@
 
   const adminLinks = [
     { href: '/admin', label: 'Dashboard' },
+    { href: '/admin/support', label: 'Support' },
     { href: '/admin/moderation', label: 'Moderation' },
     { href: '/admin/reports', label: 'Reports' },
     { href: '/admin/feedback', label: 'Feedback' },
