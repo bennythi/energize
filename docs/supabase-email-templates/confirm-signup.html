@@ -5,24 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="x-apple-disable-message-reformatting" />
-    <meta name="color-scheme" content="dark light" />
-    <meta name="supported-color-schemes" content="dark light" />
+    <meta name="color-scheme" content="dark only" />
+    <meta name="supported-color-schemes" content="dark" />
     <title>Willkommen bei Energize</title>
-    <style>
-      @media (prefers-color-scheme: dark) {
-        .bg-page { background-color: #0a0a0a !important; }
-        .bg-card { background-color: #1f1f1f !important; }
-        .text-fg { color: #f5f5f2 !important; }
-        .text-muted { color: #999 !important; }
-        .border-soft { border-color: #333 !important; }
-      }
-    </style>
   </head>
   <body
     style="margin:0;padding:0;background-color:#0a0a0a;color:#f5f5f2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;"
   >
     <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
-      Willkommen bei Energize. Bestätige deine E-Mail-Adresse.
+      Willkommen. Bestätige kurz deine E-Mail, dann gehts los.
     </div>
 
     <table
@@ -34,125 +25,168 @@
       style="background-color:#0a0a0a;"
     >
       <tr>
-        <td align="center" style="padding:32px 16px;">
+        <td align="center" style="padding:24px 16px;">
           <table
             role="presentation"
             width="100%"
             cellpadding="0"
             cellspacing="0"
             border="0"
-            style="max-width:560px;"
+            style="max-width:600px;"
           >
+            <!-- TOP STRIP -->
             <tr>
-              <td style="padding:0;">
-                <table
-                  role="presentation"
-                  width="100%"
-                  cellpadding="0"
-                  cellspacing="0"
-                  border="0"
-                  style="background-color:#ffec00;"
-                >
-                  <tr>
-                    <td
-                      align="center"
-                      style="padding:16px 24px;font-family:'Arial Black','Helvetica',sans-serif;font-weight:900;font-size:24px;letter-spacing:4px;color:#0a0a0a;text-transform:uppercase;"
-                    >
-                      ⚡ ENERGIZE
-                    </td>
-                  </tr>
-                </table>
+              <td
+                align="center"
+                style="background-color:#ffec00;padding:14px 24px;font-family:'Helvetica Neue','Arial Black',sans-serif;font-weight:900;font-size:13px;letter-spacing:3px;color:#0a0a0a;text-transform:uppercase;"
+              >
+                NO_MAINSTREAM_SHIT · NO_MAINSTREAM_SHIT
               </td>
             </tr>
 
+            <!-- HEADER: Plakat-Style -->
             <tr>
               <td
-                style="background-color:#1f1f1f;border:2px solid #333;border-top:none;padding:40px 28px;"
+                align="center"
+                style="background-color:#ffec00;padding:56px 24px;border-bottom:4px solid #0a0a0a;"
               >
                 <p
-                  style="margin:0 0 8px;font-family:'Courier New',monospace;font-size:11px;line-height:1.4;color:#ffec00;letter-spacing:2px;text-transform:uppercase;"
+                  style="margin:0 0 12px;font-family:'JetBrains Mono','Courier New',monospace;font-size:11px;line-height:1.4;color:#0a0a0a;letter-spacing:3px;text-transform:uppercase;font-weight:700;"
                 >
-                  Willkommen
+                  ⚡ Willkommen
                 </p>
                 <h1
-                  style="margin:0 0 16px;font-family:'Arial Black','Helvetica',sans-serif;font-size:32px;font-weight:900;line-height:1.05;letter-spacing:-0.5px;color:#f5f5f2;text-transform:uppercase;"
+                  style="margin:0;font-family:'Helvetica Neue','Arial Black',sans-serif;font-size:52px;font-weight:900;line-height:0.9;letter-spacing:-1.5px;color:#0a0a0a;text-transform:uppercase;"
                 >
-                  Bestätige<br />deine E-Mail.
+                  Du bist<br />jetzt drin.
                 </h1>
+              </td>
+            </tr>
 
+            <!-- BODY CARD -->
+            <tr>
+              <td
+                style="background-color:#1a1a1a;border:2px solid #2a2a2a;border-top:none;padding:32px 24px;"
+              >
                 <p
-                  style="margin:0 0 24px;font-size:16px;line-height:1.5;color:#f5f5f2;"
+                  style="margin:0 0 24px;font-size:16px;line-height:1.55;color:#f5f5f2;"
                 >
-                  Schön dass du dabei bist! Klick auf den Button, um deine
-                  E-Mail-Adresse zu bestätigen und deinen Energize-Account
-                  zu aktivieren.
+                  Schön, dass du dabei bist. Bestätige kurz deine E-Mail, dann ist dein
+                  Energize-Account aktiv.
                 </p>
 
+                <!-- CTA -->
                 <table
                   role="presentation"
                   cellpadding="0"
                   cellspacing="0"
                   border="0"
-                  style="margin:0 0 24px;"
+                  style="margin:0 0 28px;"
                 >
                   <tr>
                     <td
                       align="center"
-                      style="background-color:#ffec00;padding:0;"
+                      style="background-color:#ffec00;border:2px solid #ffec00;"
                     >
                       <a
                         href="{{ .ConfirmationURL }}"
-                        style="display:inline-block;padding:16px 36px;font-family:'Arial Black','Helvetica',sans-serif;font-size:16px;font-weight:900;letter-spacing:2px;color:#0a0a0a;text-decoration:none;text-transform:uppercase;"
+                        style="display:inline-block;padding:18px 42px;font-family:'Helvetica Neue','Arial Black',sans-serif;font-size:16px;font-weight:900;letter-spacing:2px;color:#0a0a0a;text-decoration:none;text-transform:uppercase;"
                       >
-                        E-Mail bestätigen →
+                        E-Mail bestätigen ⚡
                       </a>
                     </td>
                   </tr>
                 </table>
 
                 <p
-                  style="margin:0 0 12px;font-size:13px;line-height:1.5;color:#999;"
+                  style="margin:0 0 8px;font-family:'JetBrains Mono','Courier New',monospace;font-size:10px;line-height:1.5;color:#999;letter-spacing:1.5px;text-transform:uppercase;"
                 >
-                  Falls der Button nicht klickbar ist:
+                  Direktlink
                 </p>
                 <p
-                  style="margin:0 0 24px;font-family:'Courier New',monospace;font-size:12px;line-height:1.4;color:#ffec00;word-break:break-all;"
+                  style="margin:0 0 28px;padding:10px;background-color:#0a0a0a;border-left:2px solid #ffec00;font-family:'JetBrains Mono','Courier New',monospace;font-size:11px;line-height:1.5;color:#ffec00;word-break:break-all;"
                 >
                   {{ .ConfirmationURL }}
                 </p>
 
-                <hr style="border:none;border-top:1px solid #333;margin:24px 0;" />
+                <!-- WAS DU JETZT KANNST -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td
+                      style="border-top:1px solid #2a2a2a;padding-top:24px;"
+                    >
+                      <p
+                        style="margin:0 0 16px;font-family:'JetBrains Mono','Courier New',monospace;font-size:10px;line-height:1.4;color:#ffec00;letter-spacing:2px;text-transform:uppercase;font-weight:700;"
+                      >
+                        Was im Account drin ist
+                      </p>
+                      <table cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                          <td
+                            style="padding:8px 12px;background-color:#0a0a0a;border-left:2px solid #ffec00;color:#f5f5f2;font-size:14px;line-height:1.5;"
+                          >
+                            <strong style="color:#ffec00;">Favoriten</strong>
+                            ·
+                            Acts markieren und 15 Min vorm Set benachrichtigt werden
+                          </td>
+                        </tr>
+                        <tr><td height="8"></td></tr>
+                        <tr>
+                          <td
+                            style="padding:8px 12px;background-color:#0a0a0a;border-left:2px solid #ffec00;color:#f5f5f2;font-size:14px;line-height:1.5;"
+                          >
+                            <strong style="color:#ffec00;">Foto-Wall</strong>
+                            ·
+                            deine besten Shots nach dem Festival posten
+                          </td>
+                        </tr>
+                        <tr><td height="8"></td></tr>
+                        <tr>
+                          <td
+                            style="padding:8px 12px;background-color:#0a0a0a;border-left:2px solid #ffec00;color:#f5f5f2;font-size:14px;line-height:1.5;"
+                          >
+                            <strong style="color:#ffec00;">Support</strong>
+                            ·
+                            Fragen direkt an die Crew, Antwort im Account
+                          </td>
+                        </tr>
+                        <tr><td height="8"></td></tr>
+                        <tr>
+                          <td
+                            style="padding:8px 12px;background-color:#0a0a0a;border-left:2px solid #ffec00;color:#f5f5f2;font-size:14px;line-height:1.5;"
+                          >
+                            <strong style="color:#ffec00;">Feedback</strong>
+                            ·
+                            Goodie-Verlosung pro Edition
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
 
                 <p
-                  style="margin:0 0 8px;font-family:'Courier New',monospace;font-size:11px;line-height:1.4;color:#ffec00;letter-spacing:2px;text-transform:uppercase;"
+                  style="margin:28px 0 0;font-size:12px;line-height:1.6;color:#777;"
                 >
-                  Was du jetzt kannst
-                </p>
-                <ul
-                  style="margin:0 0 16px;padding-left:20px;font-size:14px;line-height:1.6;color:#f5f5f2;"
-                >
-                  <li>Deine Lieblings-Acts auf dem Lineup favorisieren</li>
-                  <li>Auf der Foto-Wall deine besten Momente posten</li>
-                  <li>15-min-Reminder vor jedem Set bekommen (App folgt)</li>
-                  <li>Feedback zu vergangenen Editionen abgeben</li>
-                </ul>
-
-                <p
-                  style="margin:0;font-size:13px;line-height:1.5;color:#999;"
-                >
-                  Du hast keinen Account angelegt? Dann ignorier die Mail —
-                  ohne Bestätigung passiert nichts.
+                  Du hast keinen Account angelegt? Dann ignorier die Mail. Ohne Bestätigung
+                  passiert nichts.
                 </p>
               </td>
             </tr>
 
+            <!-- FOOTER -->
             <tr>
-              <td
-                align="center"
-                style="padding:24px 16px;font-family:'Courier New',monospace;font-size:11px;line-height:1.5;color:#666;letter-spacing:1px;text-transform:uppercase;"
-              >
-                Energize Festival · 29.05.2027 · Stockelsdorf<br />
-                Brainchildz Event Agentur
+              <td style="background-color:#0a0a0a;padding:32px 16px 8px;">
+                <p
+                  style="margin:0 0 6px;font-family:'JetBrains Mono','Courier New',monospace;font-size:10px;line-height:1.5;color:#666;letter-spacing:2px;text-transform:uppercase;text-align:center;"
+                >
+                  29.05.2027 · Stockelsdorf / Dissau
+                </p>
+                <p
+                  style="margin:0;font-family:'JetBrains Mono','Courier New',monospace;font-size:9px;line-height:1.5;color:#555;letter-spacing:1.5px;text-transform:uppercase;text-align:center;"
+                >
+                  Brainchildz Event GmbH · Lübeck
+                </p>
               </td>
             </tr>
           </table>

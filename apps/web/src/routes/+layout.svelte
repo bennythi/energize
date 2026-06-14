@@ -93,6 +93,7 @@
     { href: '/community', label: m.nav_community() },
     { href: '/faq', label: m.nav_faq() },
     { href: '/anfahrt', label: m.nav_anfahrt() },
+    { href: '/support', label: 'Support' },
   ]);
 </script>
 

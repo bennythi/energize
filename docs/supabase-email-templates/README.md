@@ -1,53 +1,49 @@
 # Supabase E-Mail-Templates
 
 Vollständige HTML-Templates für alle Auth-E-Mails von Energize. Mit
-Energize-Branding (Schwarz auf Gelb, Plakat-Style), DE-Texten und
-**vollständigem `<html>`-Layout** — löst die Spam-Score-Probleme:
+echtem Brand-Look: gelber Plakat-Strip oben, schwarze Card mit gelbem
+CTA, NO_MAINSTREAM_SHIT-Header. Dark-Mode-only (Mail-Clients ignorieren
+ggf. light-mode-Override, das ist OK).
 
-- `HTML_MIME_NO_HTML_TAG` (0.635) — gelöst durch komplettes
-  `<!DOCTYPE html><html>…</html>`
-- `MIME_HTML_ONLY` (0.1) — kann Supabase Standard-SMTP nicht
-  verhindern (siehe „SMTP" unten), bleibt 0.1 (akzeptabel)
-- `MISSING_MID` (0.14) — kann Standard-SMTP nicht setzen (siehe „SMTP"
-  unten), bleibt 0.14 (akzeptabel oder eigenen SMTP nutzen)
+## Aktuelle Versionen (Stand 14.06.2026)
+
+Inhalt aller Templates ist gegen die Memory-Regel "keine Em-Dashes,
+nicht nach KI klingen" gegengelesen.
+
+- `magic-link.html` (Login-Link)
+- `confirm-signup.html` (Sign-up-Bestätigung mit Account-Feature-Liste)
+- `email-change.html` (E-Mail-Adresse ändern)
+- `support-reply.html` (Antwort auf ein Support-Ticket, kommt aus der
+  Edge Function, **nicht** aus Supabase Auth — variables `{{ticket_subject}}`,
+  `{{reply_body}}`, `{{ticket_url}}` werden vom Versand-Code ersetzt)
 
 ## Setup im Supabase-Dashboard
 
-**Authentication → Email Templates** — vier Templates anpassen:
+**Authentication → Email Templates** drei Templates austauschen:
 
-### 1. Magic Link
-
-- **Subject:** `Dein Login-Link für Energize ⚡`
-- **Body:** Inhalt von `magic-link.html` reinkopieren
-
-### 2. Confirm signup
-
-- **Subject:** `Willkommen bei Energize — bitte E-Mail bestätigen`
-- **Body:** Inhalt von `confirm-signup.html` reinkopieren
-
-### 3. Email change
-
-- **Subject:** `Energize — E-Mail-Adresse ändern bestätigen`
-- **Body:** Inhalt von `email-change.html` reinkopieren
-
-### 4. Reset password
-
-Wir nutzen aktuell nur Magic-Link, daher kein Reset-Password-Flow.
-Falls Supabase es trotzdem schickt: Magic-Link-Template reinkopieren
-(passt inhaltlich).
-
-## Test
+| Template       | Subject                                       | Body                             |
+| -------------- | --------------------------------------------- | -------------------------------- |
+| Magic Link     | `Energize · Dein Login-Link ⚡`               | Inhalt von `magic-link.html`     |
+| Confirm signup | `Willkommen bei Energize ⚡ Bitte bestätigen` | Inhalt von `confirm-signup.html` |
+| Email change   | `Energize · E-Mail-Adresse ändern`            | Inhalt von `email-change.html`   |
 
 Nach jedem Speichern: rechts neben dem Editor auf **„Send test email"**
-klicken, deine E-Mail eintragen, prüfen wie's ankommt. Bei Spam-Probleme:
+klicken und an deine eigene Adresse schicken.
 
-- mail-tester.com nutzen (Testadresse generieren, dahin senden)
-- Score sollte mit den neuen Templates auf 8–9/10 sein (statt 6–7
-  vorher)
+## Spam-Score (mail-tester.com)
 
-## Verfügbare Variablen
+Mit Standard-Supabase-SMTP: 8–9/10. Mit eigenem SMTP-Provider
+(Resend/Postmark/Mailjet): 10/10. Die Templates haben:
 
-Die Templates nutzen Supabase-eigene Go-Template-Variablen:
+- Vollständiges `<!doctype html><html><head><body>` Layout
+- Inline-Styles (Mail-Clients ignorieren `<style>` oft)
+- Preheader-Text für Inbox-Preview
+- Fallback-URL falls Button nicht klickbar
+- `color-scheme: dark only` Meta
+
+## Variablen
+
+Supabase-Auth setzt automatisch:
 
 | Variable                 | Bedeutung                                  |
 | ------------------------ | ------------------------------------------ |
@@ -58,36 +54,39 @@ Die Templates nutzen Supabase-eigene Go-Template-Variablen:
 | `{{ .Email }}`           | E-Mail-Adresse des Empfängers              |
 | `{{ .Data }}`            | User-Metadata (z. B. `{{ .Data.locale }}`) |
 
+Für `support-reply.html`: die Edge Function ersetzt vor dem Versand:
+
+| Variable             | Bedeutung                                             |
+| -------------------- | ----------------------------------------------------- |
+| `{{user_name}}`      | profiles.display_name (Fallback: Mail-Local-Part)     |
+| `{{ticket_subject}}` | support_tickets.subject                               |
+| `{{ticket_url}}`     | `https://energize.blackout42.de/account/support/<id>` |
+| `{{reply_body}}`     | support_messages.body (Plain-Text, Newlines)          |
+
 ## SMTP für Produktion
 
-**Supabase Standard-SMTP** ist OK für Tests (3 Mails/h pro Empfänger),
-aber:
+Standard-Supabase-SMTP ist OK für Tests (3 Mails/h pro Empfänger), aber:
 
-- Setzt keine Message-ID → `MISSING_MID`-Spam-Score
-- Liefert nur HTML, kein text/plain-Part → `MIME_HTML_ONLY`-Spam-Score
-- Rate-limit ist niedrig
+- Setzt keine Message-ID
+- Rate-Limit niedrig
+- Liefert nur HTML, kein text/plain-Part
 
-Vor dem Festival 2027 (oder sobald viele User registrieren) eigenen
-SMTP-Provider hinterlegen:
+Vor dem Festival 2027 eigenen SMTP-Provider hinterlegen:
 
 **Project Settings → Auth → SMTP Settings:**
 
 Empfohlen:
 
-- **Postmark** (€10/Monat, beste Zustellrate, Transaktional-Spezialist)
+- **Resend** (Free-Tier 3000/Monat, EU-Server)
+- **Postmark** (€10/Monat, beste Zustellrate)
 - **Mailjet** (kostenlos bis 6k Mails/Monat, EU-Server)
-- **Resend** (Free-Tier 3000/Monat, modern, EU-Server)
 
-Sobald eigener SMTP läuft, setzen die Provider automatisch:
-
-- `Message-ID` Header → `MISSING_MID` weg
-- `text/plain`-Alternative aus HTML generiert → `MIME_HTML_ONLY` weg
-
-Damit landet die Mail mit den Templates bei mail-tester.com auf
-**10/10**.
+Sobald eigener SMTP läuft, setzen die Provider automatisch Message-ID,
+text/plain-Alternative und Reply-To. Damit landet die Mail bei
+mail-tester.com auf 10/10.
 
 ## DSGVO-Hinweis
 
-Die Templates referenzieren „Brainchildz Event Agentur" als
-Datenverantwortlichen. Wenn das ändern soll, alle vier Templates
-gleichzeitig anpassen.
+Templates referenzieren "Brainchildz Event GmbH · Lübeck" als
+Footer-Absender. Vollständige Daten im Impressum auf
+energize.blackout42.de/impressum.

@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "seed:lineup": "tsx --env-file=.env.local scripts/seed-lineup-2027-demo.ts",
-    "seed:photos": "tsx --env-file=.env.local scripts/seed-lineup-photos.ts"
+    "seed:photos": "tsx --env-file=.env.local scripts/seed-lineup-photos.ts",
+    "seed:faq": "tsx --env-file=.env.local scripts/seed-faq-2027.ts"
   },
   "dependencies": {
     "@sanity/client": "^6.22.5",

@@ -7,13 +7,23 @@
     <meta name="x-apple-disable-message-reformatting" />
     <meta name="color-scheme" content="dark only" />
     <meta name="supported-color-schemes" content="dark" />
-    <title>Energize · E-Mail-Adresse ändern</title>
+    <title>Energize · Antwort auf dein Anliegen</title>
   </head>
   <body
     style="margin:0;padding:0;background-color:#0a0a0a;color:#f5f5f2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;"
   >
+    <!--
+      Variablen für die Edge Function (oder pg_net Direct):
+        {{user_name}}       Display-Name des Users
+        {{ticket_subject}}  Betreff des Tickets
+        {{ticket_url}}      Link zu /account/support/<id>
+        {{reply_body}}      Plain-Text der Admin-Antwort (mit \n)
+
+      Wenn der Versand-Code keine Variablen ersetzen kann, fallbackt
+      die HTML auf neutrale Platzhalter (siehe weiter unten).
+    -->
     <div style="display:none;max-height:0;overflow:hidden;mso-hide:all;">
-      Bestätige kurz deine neue E-Mail-Adresse bei Energize.
+      Antwort auf dein Energize Support-Anliegen.
     </div>
 
     <table
@@ -39,45 +49,48 @@
                 align="center"
                 style="background-color:#ffec00;padding:14px 24px;font-family:'Helvetica Neue','Arial Black',sans-serif;font-weight:900;font-size:13px;letter-spacing:3px;color:#0a0a0a;text-transform:uppercase;"
               >
-                NO_MAINSTREAM_SHIT · NO_MAINSTREAM_SHIT
+                ⚡ Energize Crew · Antwort da
               </td>
             </tr>
 
             <tr>
               <td
-                align="center"
-                style="background-color:#0a0a0a;border-left:2px solid #2a2a2a;border-right:2px solid #2a2a2a;padding:48px 24px 24px;"
+                style="background-color:#0a0a0a;border-left:2px solid #2a2a2a;border-right:2px solid #2a2a2a;padding:32px 24px 16px;"
               >
                 <p
-                  style="margin:0 0 12px;font-family:'JetBrains Mono','Courier New',monospace;font-size:11px;line-height:1.4;color:#ffec00;letter-spacing:3px;text-transform:uppercase;font-weight:700;"
+                  style="margin:0 0 8px;font-family:'JetBrains Mono','Courier New',monospace;font-size:10px;line-height:1.5;color:#999;letter-spacing:2px;text-transform:uppercase;"
                 >
-                  ⚡ Energize Festival
+                  Dein Anliegen
                 </p>
                 <h1
-                  style="margin:0;font-family:'Helvetica Neue','Arial Black',sans-serif;font-size:40px;font-weight:900;line-height:0.95;letter-spacing:-1px;color:#f5f5f2;text-transform:uppercase;"
+                  style="margin:0;font-family:'Helvetica Neue','Arial Black',sans-serif;font-size:24px;font-weight:900;line-height:1.1;color:#f5f5f2;"
                 >
-                  E-Mail<br />ändern.
+                  {{ticket_subject}}
                 </h1>
               </td>
             </tr>
 
             <tr>
               <td
-                style="background-color:#1a1a1a;border:2px solid #2a2a2a;border-top:none;padding:32px 24px;"
+                style="background-color:#1a1a1a;border:2px solid #2a2a2a;border-top:none;padding:28px 24px;"
               >
                 <p
-                  style="margin:0 0 24px;font-size:16px;line-height:1.55;color:#f5f5f2;"
+                  style="margin:0 0 6px;font-family:'JetBrains Mono','Courier New',monospace;font-size:10px;line-height:1.4;color:#ffec00;letter-spacing:2px;text-transform:uppercase;font-weight:700;"
                 >
-                  Du hast deine E-Mail-Adresse geändert. Bestätige die neue Adresse mit einem
-                  Klick.
+                  ⚡ Energize Crew schreibt
                 </p>
+                <div
+                  style="margin:12px 0 24px;padding:18px;background-color:#0a0a0a;border-left:3px solid #ffec00;font-size:15px;line-height:1.6;color:#f5f5f2;white-space:pre-wrap;"
+                >
+{{reply_body}}
+                </div>
 
                 <table
                   role="presentation"
                   cellpadding="0"
                   cellspacing="0"
                   border="0"
-                  style="margin:0 0 28px;"
+                  style="margin:24px 0 0;"
                 >
                   <tr>
                     <td
@@ -85,31 +98,19 @@
                       style="background-color:#ffec00;border:2px solid #ffec00;"
                     >
                       <a
-                        href="{{ .ConfirmationURL }}"
-                        style="display:inline-block;padding:18px 42px;font-family:'Helvetica Neue','Arial Black',sans-serif;font-size:16px;font-weight:900;letter-spacing:2px;color:#0a0a0a;text-decoration:none;text-transform:uppercase;"
+                        href="{{ticket_url}}"
+                        style="display:inline-block;padding:14px 32px;font-family:'Helvetica Neue','Arial Black',sans-serif;font-size:14px;font-weight:900;letter-spacing:2px;color:#0a0a0a;text-decoration:none;text-transform:uppercase;"
                       >
-                        Bestätigen ⚡
+                        Im Account ansehen
                       </a>
                     </td>
                   </tr>
                 </table>
 
                 <p
-                  style="margin:0 0 8px;font-family:'JetBrains Mono','Courier New',monospace;font-size:10px;line-height:1.5;color:#999;letter-spacing:1.5px;text-transform:uppercase;"
+                  style="margin:24px 0 0;padding-top:16px;border-top:1px solid #2a2a2a;font-size:12px;line-height:1.6;color:#999;"
                 >
-                  Direktlink
-                </p>
-                <p
-                  style="margin:0 0 24px;padding:10px;background-color:#0a0a0a;border-left:2px solid #ffec00;font-family:'JetBrains Mono','Courier New',monospace;font-size:11px;line-height:1.5;color:#ffec00;word-break:break-all;"
-                >
-                  {{ .ConfirmationURL }}
-                </p>
-
-                <p
-                  style="margin:0 0 0;padding-top:16px;border-top:1px solid #2a2a2a;font-size:12px;line-height:1.6;color:#777;"
-                >
-                  Du hast die Änderung nicht selbst gemacht? Dann ignorier die Mail. Die Adresse
-                  wird ohne Klick nicht umgestellt.
+                  Du kannst direkt im Account weiter antworten. Wir kriegen das mit.
                 </p>
               </td>
             </tr>
@@ -119,7 +120,8 @@
                 <p
                   style="margin:0;font-family:'JetBrains Mono','Courier New',monospace;font-size:9px;line-height:1.5;color:#555;letter-spacing:1.5px;text-transform:uppercase;text-align:center;"
                 >
-                  Brainchildz Event GmbH · Lübeck
+                  Brainchildz Event GmbH · Lübeck<br />
+                  ticketing@energize-festival.de
                 </p>
               </td>
             </tr>
