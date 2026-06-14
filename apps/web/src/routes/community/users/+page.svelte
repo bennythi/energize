@@ -20,7 +20,7 @@
     if (!client) return;
     try {
       const { data, error } = await client
-        .from('profiles')
+        .from('profiles_public')
         .select('id, display_name, handle')
         .not('display_name', 'is', null)
         .order('created_at', { ascending: false })
@@ -57,7 +57,7 @@
     try {
       const pattern = `%${safe}%`;
       const { data, error } = await client
-        .from('profiles')
+        .from('profiles_public')
         .select('id, display_name, handle')
         .or(`display_name.ilike.${pattern},handle.ilike.${pattern}`)
         .limit(30);

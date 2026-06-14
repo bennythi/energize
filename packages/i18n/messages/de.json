@@ -1,8 +1,8 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "hero_eyebrow": "29. MAI 2027 — STOCKELSDORF/DISSAU",
+  "hero_eyebrow": "29. MAI 2027 · STOCKELSDORF / DISSAU",
   "hero_headline": "ENERGIZE",
-  "hero_subline": "A NEW FESTIVAL EXPERIENCE — NEAR LÜBECK",
+  "hero_subline": "A NEW FESTIVAL EXPERIENCE · NEAR LÜBECK",
   "hero_claim": "NO_MAINSTREAM_SHIT",
   "cta_tickets": "TICKETS 2027",
   "cta_lineup": "LINE-UP 2027",
@@ -25,7 +25,7 @@
   "nav_logout": "Logout",
 
   "login_title": "Anmelden",
-  "login_lead": "Erhalte einen Magic-Link per E-Mail — kein Passwort.",
+  "login_lead": "Du bekommst einen Magic-Link per E-Mail. Kein Passwort nötig.",
   "login_email_label": "E-Mail-Adresse",
   "login_email_placeholder": "du@example.com",
   "login_submit": "Magic-Link senden",
@@ -38,7 +38,7 @@
   "login_not_configured_body": "Der Account-Bereich wird vorbereitet. Bald kannst du dich hier mit Magic-Link anmelden.",
 
   "callback_title": "Anmeldung läuft",
-  "callback_body": "Einen Moment — wir verifizieren deinen Link.",
+  "callback_body": "Einen Moment. Wir verifizieren deinen Link.",
   "callback_error_title": "Link ungültig oder abgelaufen",
   "callback_error_body": "Bitte fordere einen neuen Magic-Link an.",
   "callback_retry": "Erneut anmelden",
@@ -64,10 +64,10 @@
   "lineup_no_timetable_eyebrow": "Kein Timetable",
   "lineup_no_timetable_title": "Warum wir keine Timetables veröffentlichen.",
   "lineup_no_timetable_p1": "Wie auch in den vergangenen Jahren: Wir sind KEINE Headlinershow und kein Konzert eines großen Künstlers.",
-  "lineup_no_timetable_p2": "Bei uns zählt ENERGIZE — das Gesamterlebnis, die Gemeinschaft und die Leidenschaft zur Musik insgesamt.",
-  "lineup_no_timetable_p3": "Jedes Set auf unserem Line-up und Ihr — die gesamte Crowd — seid Teil des großen Ganzen. ⚡",
+  "lineup_no_timetable_p2": "Bei uns zählt ENERGIZE: das Gesamterlebnis, die Gemeinschaft und die Leidenschaft zur Musik insgesamt.",
+  "lineup_no_timetable_p3": "Jedes Set auf unserem Line-up und Ihr, die gesamte Crowd, seid Teil des großen Ganzen. ⚡",
   "lineup_no_timetable_app_title": "Trotzdem nichts verpassen",
-  "lineup_no_timetable_app_body": "Mit Community-Account und Energize-App wirst du 15 Minuten vor jedem Set deiner favorisierten Acts benachrichtigt — auch ohne dass du den Timetable kennst.",
+  "lineup_no_timetable_app_body": "Mit Community-Account und Energize-App wirst du 15 Minuten vor jedem Set deiner favorisierten Acts benachrichtigt. Auch ohne Timetable.",
 
   "nav_feedback": "Feedback",
 
@@ -90,7 +90,7 @@
   "feedback_thanks_title": "Danke!",
   "feedback_thanks_body": "Dein Feedback ist eingegangen. Wir lesen jede Antwort.",
   "feedback_update": "Aktualisieren",
-  "feedback_existing_note": "Du hast bereits Feedback abgegeben — du kannst es jederzeit anpassen.",
+  "feedback_existing_note": "Du hast bereits Feedback abgegeben. Du kannst es jederzeit anpassen.",
   "feedback_error": "Speichern fehlgeschlagen. Versuch es bitte noch mal.",
 
   "account_feedback_cta": "Feedback zur Edition 2026 geben",
@@ -135,11 +135,11 @@
 
   "community_eyebrow": "Neu für 2027",
   "community_title": "Die Energize Community.",
-  "community_lead": "Mehr als ein Festival-Wochenende. Dein Account macht aus passivem Dabeisein aktives Mitgestalten — Favoriten, Foto-Wall, Cashless, Feedback. Alles an einem Ort, alles deins.",
+  "community_lead": "Mehr als ein Festival-Wochenende. Dein Account macht aus passivem Dabeisein aktives Mitgestalten. Favoriten, Foto-Wall, Cashless, Feedback. Alles an einem Ort, alles deins.",
 
   "community_what_title": "Was du als Mitglied bekommst",
   "community_what_1_title": "Dein persönlicher Timetable",
-  "community_what_1_body": "Markier deine Acts mit einem Klick. Wir erinnern dich 15 Minuten vor dem Set per Push — kein Sound mehr verpasst.",
+  "community_what_1_body": "Markier deine Acts mit einem Klick. Wir erinnern dich 15 Minuten vor dem Set per Push. Kein Sound mehr verpasst.",
   "community_what_2_title": "Foto-Wall",
   "community_what_2_body": "Lad deine besten Momente direkt aus der App hoch. Moderiert, bevor sie für alle sichtbar wird — keine Bots, kein Trash.",
   "community_what_3_title": "Cashless im Blick",

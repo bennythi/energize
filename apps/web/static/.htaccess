@@ -42,4 +42,15 @@ AddDefaultCharset UTF-8
   Header set X-Content-Type-Options "nosniff"
   Header set Referrer-Policy "strict-origin-when-cross-origin"
   Header set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+
+  # Clickjacking-Schutz: niemand darf uns iframen
+  Header always set X-Frame-Options "DENY"
+
+  # HSTS: ein Jahr, alle Subdomains
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+
+  # CSP: erlaubte Quellen sind self + Supabase (Projekt-Host) + Sanity-CDN
+  # + Google Fonts. Inline-Styles wegen Tailwind und Svelte-Component-Inline,
+  # Inline-Scripts NICHT erlaubt.
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: blob: https://zmazyriysvintuwlyzfm.supabase.co https://cdn.sanity.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self'; connect-src 'self' https://zmazyriysvintuwlyzfm.supabase.co https://oxliq7rf.api.sanity.io https://oxliq7rf.apicdn.sanity.io wss://zmazyriysvintuwlyzfm.supabase.co; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src https://shop.tickee.de"
 </IfModule>

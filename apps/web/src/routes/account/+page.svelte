@@ -170,7 +170,7 @@
       const candidate =
         attempt === 0 ? root : `${root.slice(0, 24 - String(attempt).length - 1)}_${attempt}`;
       const { data, error } = await client
-        .from('profiles')
+        .from('profiles_public')
         .select('id')
         .ilike('handle', candidate)
         .neq('id', userId)

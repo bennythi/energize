@@ -268,7 +268,20 @@ export interface Database {
         Relationships: [];
       };
     };
-    Views: Record<string, never>;
+    Views: {
+      profiles_public: {
+        Row: {
+          id: string;
+          display_name: string | null;
+          handle: string | null;
+          country: string;
+          role: 'user' | 'admin';
+          festivals_attended: number;
+          created_at: string;
+        };
+        Relationships: [];
+      };
+    };
     Functions: {
       is_admin: {
         Args: Record<string, never>;

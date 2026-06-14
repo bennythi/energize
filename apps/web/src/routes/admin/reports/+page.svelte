@@ -42,7 +42,7 @@
 
       const [postsRes, profilesRes] = await Promise.all([
         client.from('posts').select('id, image_path, caption, status').in('id', postIds),
-        client.from('profiles').select('id, display_name').in('id', userIds),
+        client.from('profiles_public').select('id, display_name').in('id', userIds),
       ]);
 
       const byPost = new Map(postsRes.data?.map((p) => [p.id, p]) ?? []);

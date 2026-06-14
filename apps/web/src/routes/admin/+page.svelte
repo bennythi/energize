@@ -20,7 +20,7 @@
       client.from('posts').select('id', { count: 'exact', head: true }).eq('status', 'rejected'),
       client.from('reports').select('id', { count: 'exact', head: true }),
       client.from('feedback').select('id', { count: 'exact', head: true }),
-      client.from('profiles').select('id', { count: 'exact', head: true }),
+      client.from('profiles_public').select('id', { count: 'exact', head: true }),
       client
         .from('support_tickets')
         .select('id', { count: 'exact', head: true })

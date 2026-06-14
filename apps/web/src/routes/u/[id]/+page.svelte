@@ -43,7 +43,7 @@
     try {
       const [profileRes, postsRes, followersRes, followingRes] = await Promise.all([
         client
-          .from('profiles')
+          .from('profiles_public')
           .select('id, display_name, handle, created_at')
           .eq('id', userId)
           .maybeSingle(),

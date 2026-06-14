@@ -206,8 +206,8 @@
             Markier deine<br />Highlights.
           </h2>
           <p class="mt-4 max-w-xl text-sm text-fg-muted">
-            Favoriten speichern, Set-Reminder bekommen, Foto-Wall posten, Cashless-Guthaben checken
-            — alles mit einem Magic-Link-Login. Kein Passwort, kein Stress.
+            Favoriten speichern, Set-Reminder bekommen, Foto-Wall posten, Cashless-Guthaben checken.
+            Alles mit einem Magic-Link-Login. Kein Passwort, kein Stress.
           </p>
           <div class="mt-6 flex flex-wrap gap-3">
             <Button href="/login" variant="yellow">{m.nav_login()}</Button>
@@ -226,6 +226,7 @@
     { label: 'Facebook', href: fbUrl },
   ]}
   links={[
+    { label: 'Support', href: '/support' },
     { label: m.footer_imprint(), href: '/impressum' },
     { label: m.footer_privacy(), href: '/datenschutz' },
     { label: m.footer_terms(), href: '/agb' },

@@ -58,7 +58,7 @@ class PostsStore {
 
       // Authors
       const { data: authors } = await client
-        .from('profiles')
+        .from('profiles_public')
         .select('id, display_name, handle')
         .in('id', userIds);
       const byUser = new Map(authors?.map((a) => [a.id, a]) ?? []);

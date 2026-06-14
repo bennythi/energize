@@ -37,7 +37,7 @@
 
       const userIds = [...new Set((rows ?? []).map((r) => r.user_id))];
       const { data: authors } = userIds.length
-        ? await client.from('profiles').select('id, display_name').in('id', userIds)
+        ? await client.from('profiles_public').select('id, display_name').in('id', userIds)
         : { data: [] };
       const byUser = new Map(authors?.map((a) => [a.id, a]) ?? []);
 

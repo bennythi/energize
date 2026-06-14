@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Container, Heading } from '@energize/ui';
+  import { Container, Button } from '@energize/ui';
   import { pickLocale, type FaqCategory } from '@energize/sanity-client';
   import { languageTag, type AvailableLanguageTag } from '@energize/i18n';
   import type { PageData } from './$types';
@@ -20,23 +20,42 @@
     general: 'Allgemein',
   };
 
-  const groups = $derived(
-    Object.entries(
-      data.faq.reduce<Record<string, typeof data.faq>>((acc, entry) => {
-        (acc[entry.category] ??= []).push(entry);
-        return acc;
-      }, {}),
-    ),
-  );
+  // Stabile Reihenfolge: Allgemein zuerst, dann Tickets, Cashless, etc.
+  const categoryOrder: FaqCategory[] = [
+    'general',
+    'tickets',
+    'anreise',
+    'cashless',
+    'hausordnung',
+    'awareness',
+  ];
+
+  const groups = $derived.by(() => {
+    const buckets = data.faq.reduce<Record<string, typeof data.faq>>((acc, entry) => {
+      (acc[entry.category] ??= []).push(entry);
+      return acc;
+    }, {});
+    return categoryOrder
+      .filter((cat) => buckets[cat]?.length)
+      .map((cat) => [cat, buckets[cat]] as const);
+  });
 </script>
 
 <svelte:head>
-  <title>FAQ — ENERGIZE</title>
+  <title>FAQ · ENERGIZE</title>
 </svelte:head>
 
 <Container>
   <section class="py-16 md:py-24">
-    <Heading level={1} display>FAQ</Heading>
+    <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
+      ⚡ Häufige Fragen
+    </p>
+    <h1
+      class="mt-3 font-display font-black uppercase leading-[0.9] tracking-[-0.02em] text-fg"
+      style="font-size: clamp(2.5rem, 8vw, 6rem);"
+    >
+      FAQ
+    </h1>
 
     {#if data.faq.length === 0}
       <p class="mt-8 text-fg-muted">FAQ wird befüllt.</p>
@@ -54,9 +73,15 @@
             <li>
               <details class="group p-4 transition-colors hover:bg-surface">
                 <summary
-                  class="cursor-pointer list-none font-display text-lg font-black uppercase tracking-[var(--tracking-claim)] text-fg"
+                  class="flex cursor-pointer list-none items-baseline justify-between gap-4 font-display text-lg font-black uppercase tracking-[var(--tracking-claim)] text-fg"
                 >
-                  {pickLocale(entry.question, locale)}
+                  <span class="flex-1">{pickLocale(entry.question, locale)}</span>
+                  <span
+                    aria-hidden="true"
+                    class="shrink-0 font-mono text-2xl text-accent transition-transform group-open:rotate-45"
+                  >
+                    +
+                  </span>
                 </summary>
                 <p class="mt-3 whitespace-pre-line text-sm leading-relaxed text-fg-muted">
                   {pickLocale(entry.answer, locale)}
@@ -67,5 +92,28 @@
         </ul>
       </section>
     {/each}
+
+    <!-- Support-CTA -->
+    <section class="mt-16 border-2 border-accent bg-surface p-6 md:p-8">
+      <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
+        Frage nicht dabei?
+      </p>
+      <h2
+        class="mt-3 font-display font-black uppercase leading-[0.95] tracking-[-0.01em] text-fg"
+        style="font-size: clamp(1.5rem, 4vw, 2.25rem);"
+      >
+        Schreib uns direkt.
+      </h2>
+      <p class="mt-3 max-w-xl text-sm text-fg-muted">
+        Über den Support-Bereich landet dein Anliegen direkt im Energize-Postfach. Antwort kommt per
+        Mail und ist jederzeit im Account einsehbar.
+      </p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <Button href="/support" variant="yellow">Zum Support →</Button>
+        <Button href="https://www.instagram.com/energize_offical/" variant="ghost">
+          Instagram-DM
+        </Button>
+      </div>
+    </section>
   </section>
 </Container>

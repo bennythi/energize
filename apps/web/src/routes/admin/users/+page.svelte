@@ -50,7 +50,7 @@
     const client = auth.client;
     if (!client) return;
     const isMe = user.id === auth.user?.id;
-    const isFounder = user.email === FOUNDER_EMAIL;
+    const isFounder = user.email.toLowerCase() === FOUNDER_EMAIL;
     if (isFounder) {
       alert('Founder-Account kann nicht gelöscht werden.');
       return;
@@ -86,7 +86,7 @@
     const client = auth.client;
     if (!client) return;
     const isMe = user.id === auth.user?.id;
-    const isFounder = user.email === FOUNDER_EMAIL;
+    const isFounder = user.email.toLowerCase() === FOUNDER_EMAIL;
 
     if (isFounder && newRole !== 'admin') {
       alert('Founder-Account kann nicht entzogen werden.');
@@ -197,7 +197,7 @@
     {:else}
       <ul class="mt-8 space-y-3">
         {#each filtered as user (user.id)}
-          {@const isFounder = user.email === FOUNDER_EMAIL}
+          {@const isFounder = user.email.toLowerCase() === FOUNDER_EMAIL}
           {@const isMe = user.id === auth.user?.id}
           <li class="border-2 border-border bg-surface p-4 md:p-5">
             <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
