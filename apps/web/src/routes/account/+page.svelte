@@ -7,6 +7,7 @@
   import { favorites } from '$lib/favorites.svelte';
   import FavoriteButton from '$lib/FavoriteButton.svelte';
   import SupportSection from '$lib/SupportSection.svelte';
+  import AvatarUpload from '$lib/AvatarUpload.svelte';
   import type { PageData } from './$types';
 
   interface Props {
@@ -43,6 +44,7 @@
   let postalCode = $state('');
   let country = $state('DE');
   let editions = $state<string[]>([]);
+  let avatarPath = $state<string | null>(null);
   let displayNameLoaded = $state(false);
 
   const allEditions: { year: string; slogan: string }[] = [
@@ -94,7 +96,7 @@
       const { data, error } = await client
         .from('profiles')
         .select(
-          'display_name, handle, phone, birthdate, postal_code, country, festivals_attended_editions',
+          'display_name, handle, phone, birthdate, postal_code, country, festivals_attended_editions, avatar_path',
         )
         .eq('id', user.id)
         .maybeSingle();
@@ -134,6 +136,7 @@
         postalCode = data?.postal_code ?? '';
         country = data?.country ?? 'DE';
         editions = data?.festivals_attended_editions ?? [];
+        avatarPath = data?.avatar_path ?? null;
       }
     } catch (err) {
       console.error('[account] profile load failed', err);
@@ -348,7 +351,11 @@
           {m.account_profile_title()}
         </h2>
 
-        <form onsubmit={handleProfileSave} class="mt-4 space-y-4">
+        <div class="mt-4 border-2 border-border bg-bg p-4">
+          <AvatarUpload currentPath={avatarPath} onUpdated={(p) => (avatarPath = p)} />
+        </div>
+
+        <form onsubmit={handleProfileSave} class="mt-6 space-y-4">
           <label class="block">
             <span
               class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"

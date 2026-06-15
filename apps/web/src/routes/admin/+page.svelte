@@ -67,6 +67,7 @@
     },
     { label: 'Feedback', value: feedbackCount, href: '/admin/feedback' },
     { label: 'User-Profile', value: usersCount, href: '/admin/users' },
+    { label: 'Crew verwalten', value: null, href: '/admin/crew' },
     { label: 'Approved Posts', value: approvedCount, href: '/wall' },
     { label: 'Rejected Posts', value: rejectedCount, href: '/admin/moderation' },
     { label: 'Externe Tools', value: 6, href: '/admin/tools' },

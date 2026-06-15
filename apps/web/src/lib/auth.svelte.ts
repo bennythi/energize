@@ -19,6 +19,7 @@ class AuthStore {
   initialized = false;
   client: EnergizeSupabaseClient | null = null;
   isAdmin = $state(false);
+  isCrew = $state(false);
   adminChecked = $state(false);
 
   init() {
@@ -50,6 +51,7 @@ class AuthStore {
   async checkAdmin(): Promise<void> {
     if (!this.client || !this.user) {
       this.isAdmin = false;
+      this.isCrew = false;
       this.adminChecked = true;
       return;
     }
@@ -61,9 +63,11 @@ class AuthStore {
         .maybeSingle();
       if (error && error.code !== '42703') throw error;
       this.isAdmin = data?.role === 'admin';
+      this.isCrew = data?.role === 'crew' || data?.role === 'admin';
     } catch (err) {
       console.warn('[auth] checkAdmin failed (Migration 0005 nicht da?)', err);
       this.isAdmin = false;
+      this.isCrew = false;
     } finally {
       this.adminChecked = true;
     }

@@ -3,11 +3,13 @@
   import { Container, Button } from '@energize/ui';
   import { auth } from '$lib/auth.svelte';
   import { posts as postsStore } from '$lib/posts.svelte';
+  import { avatarUrl } from '$lib/avatarUrl';
 
   interface ProfileRow {
     id: string;
     display_name: string | null;
     handle: string | null;
+    avatar_path: string | null;
     created_at: string;
   }
 
@@ -44,7 +46,7 @@
       const [profileRes, postsRes, followersRes, followingRes] = await Promise.all([
         client
           .from('profiles_public')
-          .select('id, display_name, handle, created_at')
+          .select('id, display_name, handle, avatar_path, created_at')
           .eq('id', userId)
           .maybeSingle(),
         client
@@ -147,11 +149,19 @@
         <p class="text-fg-muted">User nicht gefunden.</p>
       {:else}
         <div class="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
-          <div
-            class="flex h-24 w-24 shrink-0 items-center justify-center rounded-full bg-accent font-display text-4xl font-black text-fg-inverse"
-          >
-            {initial}
-          </div>
+          {#if avatarUrl(profile.avatar_path)}
+            <img
+              src={avatarUrl(profile.avatar_path)}
+              alt=""
+              class="h-24 w-24 shrink-0 border-2 border-fg object-cover"
+            />
+          {:else}
+            <div
+              class="flex h-24 w-24 shrink-0 items-center justify-center bg-accent font-display text-4xl font-black text-fg-inverse"
+            >
+              {initial}
+            </div>
+          {/if}
 
           <div class="flex-1">
             <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">

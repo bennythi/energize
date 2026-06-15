@@ -132,6 +132,17 @@
             {m.nav_feedback()}
           </a>
         </li>
+        {#if auth.isCrew}
+          <li>
+            <a
+              href="/crew"
+              class="border-2 border-accent px-3 py-1 text-accent transition-all hover:bg-accent hover:text-fg-inverse"
+              title="Crew-Bereich"
+            >
+              ⚡ Crew
+            </a>
+          </li>
+        {/if}
         {#if auth.isAdmin}
           <li>
             <a
@@ -224,6 +235,17 @@
               {m.nav_feedback()}
             </a>
           </li>
+          {#if auth.isCrew}
+            <li>
+              <a
+                href="/crew"
+                onclick={closeMobile}
+                class="drawer-link block border-l-4 border-accent px-6 py-4 text-accent hover:bg-surface"
+              >
+                ⚡ Crew
+              </a>
+            </li>
+          {/if}
           {#if auth.isAdmin}
             <li>
               <a
