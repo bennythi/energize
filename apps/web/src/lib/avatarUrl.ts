@@ -1,8 +1,8 @@
-import { PUBLIC_SUPABASE_URL } from '$env/static/public';
+import { env } from '$env/dynamic/public';
 
 export function avatarUrl(path: string | null | undefined): string | null {
   if (!path) return null;
-  if (!PUBLIC_SUPABASE_URL) return null;
-  const base = PUBLIC_SUPABASE_URL.replace(/\/+$/, '');
-  return `${base}/storage/v1/object/public/avatars/${path}`;
+  const base = env.PUBLIC_SUPABASE_URL;
+  if (!base) return null;
+  return `${base.replace(/\/+$/, '')}/storage/v1/object/public/avatars/${path}`;
 }

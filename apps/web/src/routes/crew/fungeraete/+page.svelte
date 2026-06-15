@@ -28,6 +28,8 @@
     inear: 'InEar',
   };
 
+  const EQUIPMENT_VALUES: Equipment[] = ['razor', 'headphones', 'inear'];
+
   let requests = $state<Request[]>([]);
   let members = $state<Map<string, Member>>(new Map());
   let loading = $state(true);
@@ -323,7 +325,7 @@
 
       <form onsubmit={handleSubmit} class="mt-6 space-y-4">
         <fieldset class="grid grid-cols-3 gap-2">
-          {#each ['razor', 'headphones', 'inear'] as Equipment[] as eq (eq)}
+          {#each EQUIPMENT_VALUES as eq (eq)}
             <label>
               <input type="radio" bind:group={formEquipment} value={eq} class="peer sr-only" />
               <span
