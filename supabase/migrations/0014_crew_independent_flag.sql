@@ -14,10 +14,13 @@
 -- Setzt voraus, dass 0013_crew.sql gelaufen ist.
 
 ----------------------------------------------------------------------
--- 1. Neue Spalte is_crew
+-- 1. Neue Spalte is_crew + crew_roles (idempotent, falls 0013 nicht lief)
 ----------------------------------------------------------------------
 alter table public.profiles
   add column if not exists is_crew boolean not null default false;
+
+alter table public.profiles
+  add column if not exists crew_roles text[] not null default '{}';
 
 ----------------------------------------------------------------------
 -- 2. Migrate alte role='crew'-Datensaetze auf is_crew=true + role='user'
