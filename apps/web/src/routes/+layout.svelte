@@ -5,6 +5,7 @@
   import { m, languageTag, type AvailableLanguageTag } from '@energize/i18n';
   import { auth } from '$lib/auth.svelte';
   import { favorites } from '$lib/favorites.svelte';
+  import { initAnalytics } from '$lib/analytics.svelte';
 
   interface Props {
     children?: import('svelte').Snippet;
@@ -49,6 +50,11 @@
     } else if (auth.initialized) {
       favorites.clear();
     }
+  });
+
+  // Plausible erst nach Hydration laden, nur auf Produktionsdomain.
+  $effect(() => {
+    if (browser) initAnalytics();
   });
 
   // Drawer-A11y: Escape schliesst, scroll-lock auf body, Focus zurueck

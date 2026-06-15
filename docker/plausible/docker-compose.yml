@@ -1,0 +1,76 @@
+# Plausible Analytics Community Edition
+# Subdomain: plausible.blackout24.de
+# Hosting: portainer.anpa-networks.de (Docker)
+#
+# Setup-Reihenfolge (siehe README.md):
+#   1. DNS A-Record plausible.blackout24.de -> Server-IP
+#   2. .env aus .env.example anlegen, SECRET_KEY_BASE + TOTP_VAULT_KEY generieren
+#   3. docker compose up -d
+#   4. Caddy holt TLS-Zertifikat automatisch
+#   5. https://plausible.blackout24.de aufrufen, ersten Admin registrieren
+#   6. DISABLE_REGISTRATION von false auf invite_only setzen + restart
+
+services:
+  plausible_db:
+    image: postgres:16-alpine
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  plausible_events_db:
+    image: clickhouse/clickhouse-server:24.12-alpine
+    restart: always
+    volumes:
+      - event-data:/var/lib/clickhouse
+      - event-logs:/var/log/clickhouse-server
+      - ./clickhouse/clickhouse-config.xml:/etc/clickhouse-server/config.d/logging.xml:ro
+      - ./clickhouse/clickhouse-user-config.xml:/etc/clickhouse-server/users.d/logging.xml:ro
+    ulimits:
+      nofile:
+        soft: 262144
+        hard: 262144
+
+  plausible:
+    image: ghcr.io/plausible/community-edition:v3.0.1
+    restart: always
+    command: sh -c "/entrypoint.sh db createdb && /entrypoint.sh db migrate && /entrypoint.sh run"
+    depends_on:
+      plausible_db:
+        condition: service_healthy
+      plausible_events_db:
+        condition: service_started
+    environment:
+      BASE_URL: https://plausible.blackout24.de
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+      TOTP_VAULT_KEY: ${TOTP_VAULT_KEY}
+      DATABASE_URL: postgres://postgres:${POSTGRES_PASSWORD}@plausible_db:5432/plausible_db
+      CLICKHOUSE_DATABASE_URL: http://plausible_events_db:8123/plausible_events_db
+      DISABLE_REGISTRATION: ${DISABLE_REGISTRATION:-false}
+      MAILER_EMAIL: ${MAILER_EMAIL:-noreply@blackout24.de}
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - plausible
+
+volumes:
+  db-data:
+  event-data:
+  event-logs:
+  caddy-data:
+  caddy-config:

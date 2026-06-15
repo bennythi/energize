@@ -15,7 +15,8 @@
     "@energize/i18n": "workspace:*",
     "@energize/sanity-client": "workspace:*",
     "@energize/supabase-client": "workspace:*",
-    "@energize/ui": "workspace:*"
+    "@energize/ui": "workspace:*",
+    "@sentry/sveltekit": "^10.58.0"
   },
   "devDependencies": {
     "@energize/tsconfig": "workspace:*",

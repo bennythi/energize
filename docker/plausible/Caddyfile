@@ -1,0 +1,16 @@
+plausible.blackout24.de {
+  reverse_proxy plausible:8000
+
+  # Sicherheits-Header
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "strict-origin-when-cross-origin"
+  }
+
+  # Logs nach stdout, Portainer/journalctl liest mit
+  log {
+    output stdout
+    format console
+  }
+}
