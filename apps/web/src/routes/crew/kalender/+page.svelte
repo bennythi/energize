@@ -3,7 +3,8 @@
   import { goto } from '$app/navigation';
   import { Container, Button } from '@energize/ui';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
-  import { CREW_WINDOW_START, CREW_WINDOW_END, FESTIVAL_DAY, isoDay } from '$lib/festival';
+  import { CREW_WINDOW_START, CREW_WINDOW_END, CREW_CALENDAR_MONTHS, isoDay } from '$lib/festival';
+  import MonthGrid from '$lib/MonthGrid.svelte';
 
   interface Entry {
     id: string;
@@ -26,6 +27,7 @@
   let loading = $state(true);
   let errorMsg = $state<string | null>(null);
 
+  let selectedDay = $state<string>('');
   let formDay = $state<string>('');
   let formKind = $state<'all_day' | 'window'>('all_day');
   let formStart = $state('09:00');
@@ -45,22 +47,6 @@
     }
   });
 
-  const days = $derived.by(() => {
-    const result: { iso: string; date: Date; isFestival: boolean }[] = [];
-    const cursor = new Date(CREW_WINDOW_START);
-    cursor.setHours(0, 0, 0, 0);
-    while (cursor <= CREW_WINDOW_END) {
-      const iso = isoDay(cursor);
-      result.push({
-        iso,
-        date: new Date(cursor),
-        isFestival: iso === FESTIVAL_DAY,
-      });
-      cursor.setDate(cursor.getDate() + 1);
-    }
-    return result;
-  });
-
   const entriesByDay = $derived.by(() => {
     const buckets = new Map<string, Entry[]>();
     for (const e of entries) {
@@ -71,6 +57,20 @@
     }
     return buckets;
   });
+
+  const countsByDay = $derived.by(() => {
+    const m = new Map<string, number>();
+    for (const [iso, list] of entriesByDay.entries()) {
+      m.set(iso, list.length);
+    }
+    return m;
+  });
+
+  const myDays = $derived(
+    new Set(
+      entries.filter((e) => e.user_id === auth.user?.id).map((e) => isoDay(new Date(e.start_at))),
+    ),
+  );
 
   async function load() {
     const client = auth.client;
@@ -118,8 +118,17 @@
     return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   }
 
-  function fmtDate(d: Date): string {
-    return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+  function fmtFullDate(iso: string): string {
+    return new Date(iso).toLocaleDateString('de-DE', {
+      weekday: 'long',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    });
+  }
+
+  function selectDay(iso: string) {
+    selectedDay = selectedDay === iso ? '' : iso;
   }
 
   function openForm(iso: string) {
@@ -165,8 +174,10 @@
         note: formNote.trim() || null,
       });
       if (error) throw error;
+      const inserted = formDay;
       closeForm();
       await load();
+      selectedDay = inserted;
     } catch (err) {
       console.error('[crew/kalender] insert failed', err);
       errorMsg = 'Konnte den Eintrag nicht speichern.';
@@ -187,6 +198,8 @@
       console.error('[crew/kalender] delete failed', err);
     }
   }
+
+  const selectedEntries = $derived(selectedDay ? (entriesByDay.get(selectedDay) ?? []) : []);
 
   onMount(() => {
     void load();
@@ -210,8 +223,8 @@
         Wann bist du da.
       </h1>
       <p class="mt-3 max-w-2xl text-sm text-fg-muted">
-        14 Tage vor und nach dem Festival. Trag ganze Tage oder Zeitfenster ein. Andere
-        Crew-Mitglieder sehen, wann du verfuegbar bist.
+        14 Tage vor und nach dem Festival. Klick auf einen Tag, um einen Eintrag zu sehen oder
+        anzulegen. Festivaltag ist gelb hervorgehoben.
       </p>
     </div>
   </Container>
@@ -228,82 +241,74 @@
     {#if loading}
       <p class="text-fg-muted">Lade Kalender ...</p>
     {:else}
-      <ul class="divide-y divide-border border-y border-border">
-        {#each days as day (day.iso)}
-          {@const dayEntries = entriesByDay.get(day.iso) ?? []}
-          <li
-            class="grid grid-cols-[120px_1fr_auto] gap-4 p-4 transition-colors hover:bg-surface md:grid-cols-[160px_1fr_auto]"
-            class:bg-surface={day.isFestival}
-            class:border-l-4={day.isFestival}
-            class:border-accent={day.isFestival}
-          >
-            <div>
-              <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-                {day.isFestival
-                  ? '⚡ Festival'
-                  : day.date.toLocaleDateString('de-DE', { weekday: 'short' })}
-              </p>
-              <p
-                class="mt-1 font-display text-lg font-black uppercase tracking-[var(--tracking-claim)] text-fg"
-              >
-                {fmtDate(day.date)}
-              </p>
-            </div>
-            <div>
-              {#if dayEntries.length === 0}
-                <p class="text-sm text-fg-muted">Niemand eingetragen.</p>
-              {:else}
-                <ul class="space-y-2">
-                  {#each dayEntries as e (e.id)}
-                    {@const mine = e.user_id === auth.user?.id}
-                    <li
-                      class="flex items-start justify-between gap-3 border-l-2 pl-3"
-                      class:border-accent={mine}
-                      class:border-fg-muted={!mine}
-                    >
-                      <div class="text-sm">
-                        <span
-                          class="font-mono uppercase tracking-[var(--tracking-claim)]"
-                          class:text-accent={mine}
-                        >
-                          {memberLabel(e.user_id)}{mine ? ' · du' : ''}
-                        </span>
-                        <span class="text-fg-muted">·</span>
-                        <span class="text-fg">
-                          {#if e.kind === 'all_day'}
-                            ganzer Tag
-                          {:else}
-                            {fmtTime(e.start_at)}–{fmtTime(e.end_at)}
-                          {/if}
-                        </span>
-                        {#if e.note}
-                          <p class="mt-1 text-xs text-fg-muted">{e.note}</p>
-                        {/if}
-                      </div>
-                      {#if mine}
-                        <button
-                          onclick={() => deleteEntry(e.id)}
-                          class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)]"
-                        >
-                          loeschen
-                        </button>
-                      {/if}
-                    </li>
-                  {/each}
-                </ul>
-              {/if}
-            </div>
-            <div class="self-center">
-              <button
-                onclick={() => openForm(day.iso)}
-                class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent hover:underline"
-              >
-                + eintragen
-              </button>
-            </div>
-          </li>
+      <div class="grid gap-6 md:grid-cols-2">
+        {#each CREW_CALENDAR_MONTHS as m (m.year + '-' + m.month)}
+          <MonthGrid year={m.year} month={m.month} {countsByDay} {myDays} onDayClick={selectDay} />
         {/each}
-      </ul>
+      </div>
+
+      <!-- Detail-Block fuer ausgewaehlten Tag -->
+      {#if selectedDay}
+        <div class="mt-8 border-l-4 border-accent bg-surface p-5">
+          <div class="flex items-baseline justify-between gap-3">
+            <h2
+              class="font-display text-xl font-black uppercase tracking-[var(--tracking-claim)] text-fg"
+            >
+              {fmtFullDate(selectedDay)}
+            </h2>
+            <Button variant="ghost" onclick={() => openForm(selectedDay)}>+ eintragen</Button>
+          </div>
+
+          {#if selectedEntries.length === 0}
+            <p class="mt-4 text-sm text-fg-muted">Noch niemand eingetragen.</p>
+          {:else}
+            <ul class="mt-4 space-y-2">
+              {#each selectedEntries as e (e.id)}
+                {@const mine = e.user_id === auth.user?.id}
+                <li
+                  class="flex items-start justify-between gap-3 border-l-2 pl-3 text-sm"
+                  class:border-accent={mine}
+                  class:border-fg-muted={!mine}
+                >
+                  <div>
+                    <span
+                      class="font-mono uppercase tracking-[var(--tracking-claim)]"
+                      class:text-accent={mine}
+                    >
+                      {memberLabel(e.user_id)}{mine ? ' · du' : ''}
+                    </span>
+                    <span class="text-fg-muted">·</span>
+                    <span class="text-fg">
+                      {#if e.kind === 'all_day'}
+                        ganzer Tag
+                      {:else}
+                        {fmtTime(e.start_at)}–{fmtTime(e.end_at)}
+                      {/if}
+                    </span>
+                    {#if e.note}
+                      <p class="mt-1 text-xs text-fg-muted">{e.note}</p>
+                    {/if}
+                  </div>
+                  {#if mine}
+                    <button
+                      onclick={() => deleteEntry(e.id)}
+                      class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)]"
+                    >
+                      loeschen
+                    </button>
+                  {/if}
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </div>
+      {:else}
+        <p
+          class="mt-8 text-center font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+        >
+          Tag im Kalender anklicken, um Eintraege zu sehen.
+        </p>
+      {/if}
     {/if}
   </section>
 </Container>
@@ -319,12 +324,7 @@
         Verfuegbarkeit eintragen
       </p>
       <h2 class="mt-2 font-display text-2xl font-black uppercase text-fg">
-        {new Date(formDay).toLocaleDateString('de-DE', {
-          weekday: 'long',
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        })}
+        {fmtFullDate(formDay)}
       </h2>
 
       <form onsubmit={handleSubmit} class="mt-6 space-y-4">

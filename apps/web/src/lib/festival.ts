@@ -21,3 +21,62 @@ export function isoDay(d: Date): string {
   const day = String(d.getDate()).padStart(2, '0');
   return `${y}-${m}-${day}`;
 }
+
+// Monate, die der Crew-Kalender standardmaessig zeigt. Decken das
+// gesamte Crew-Window ab.
+export const CREW_CALENDAR_MONTHS: { year: number; month: number }[] = [
+  { year: 2027, month: 4 }, // Mai (0-indexiert)
+  { year: 2027, month: 5 }, // Juni
+];
+
+// Erzeugt ein 7xN-Raster (Montag-Sonntag) fuer einen Monat.
+// Padding-Tage vor und nach dem Monat sind als isPadding markiert.
+export interface CalendarCell {
+  iso: string;
+  date: Date;
+  day: number;
+  isPadding: boolean;
+  isFestival: boolean;
+  isInWindow: boolean;
+}
+
+export function monthGrid(year: number, month: number): CalendarCell[] {
+  const first = new Date(year, month, 1);
+  // JS: 0=Sonntag, 1=Montag, ..., 6=Samstag. Wir wollen Montag-Start.
+  const firstDow = (first.getDay() + 6) % 7;
+  const last = new Date(year, month + 1, 0);
+  const daysInMonth = last.getDate();
+  const totalCells = Math.ceil((firstDow + daysInMonth) / 7) * 7;
+
+  const cells: CalendarCell[] = [];
+  for (let i = 0; i < totalCells; i++) {
+    const dayOffset = i - firstDow;
+    const d = new Date(year, month, 1 + dayOffset);
+    const iso = isoDay(d);
+    cells.push({
+      iso,
+      date: d,
+      day: d.getDate(),
+      isPadding: d.getMonth() !== month,
+      isFestival: iso === FESTIVAL_DAY,
+      isInWindow: isInCrewWindow(d),
+    });
+  }
+  return cells;
+}
+
+export const WEEKDAY_LABELS_DE = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+export const MONTH_LABELS_DE = [
+  'Januar',
+  'Februar',
+  'Maerz',
+  'April',
+  'Mai',
+  'Juni',
+  'Juli',
+  'August',
+  'September',
+  'Oktober',
+  'November',
+  'Dezember',
+];

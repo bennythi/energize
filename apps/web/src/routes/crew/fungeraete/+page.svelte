@@ -78,6 +78,36 @@
     new Set(requests.filter((r) => r.user_id === auth.user?.id).map((r) => r.event_day)),
   );
 
+  // Bestellempfehlung: Peak-Bedarf pro Equipment ueber das gesamte
+  // Crew-Window. Wir bestellen nicht pro Tag, sondern fuer die ganze
+  // Zeit. Maximaler Tagesbedarf bestimmt die Stueckzahl, weil parallel
+  // genutzt wird (keine Tagesweiterreichung).
+  let reserveBuffer = $state(20); // Prozent zusaetzlicher Buffer
+
+  const peakDemand = $derived.by(() => {
+    const peak: Record<Equipment, number> = { razor: 0, headphones: 0, inear: 0 };
+    for (const [, dayReqs] of requestsByDay.entries()) {
+      for (const eq of EQUIPMENT_VALUES) {
+        const count = dayReqs.filter((r) => r.equipment === eq).length;
+        if (count > peak[eq]) peak[eq] = count;
+      }
+    }
+    return peak;
+  });
+
+  const orderRecommendation = $derived.by(() => {
+    const factor = 1 + reserveBuffer / 100;
+    return {
+      razor: Math.ceil(peakDemand.razor * factor),
+      headphones: Math.ceil(peakDemand.headphones * factor),
+      inear: Math.ceil(peakDemand.inear * factor),
+    };
+  });
+
+  const totalOrder = $derived(
+    orderRecommendation.razor + orderRecommendation.headphones + orderRecommendation.inear,
+  );
+
   async function load() {
     const client = auth.client;
     if (!client) return;
@@ -214,6 +244,102 @@
     {#if loading}
       <p class="text-fg-muted">Lade ...</p>
     {:else}
+      <!-- Bestellempfehlung -->
+      <div class="mb-10 border-2 border-accent bg-surface p-5 md:p-6">
+        <div class="flex items-baseline justify-between gap-3">
+          <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
+            Bestellempfehlung
+          </p>
+          <p class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted">
+            Peak-Tag × {1 + reserveBuffer / 100}
+          </p>
+        </div>
+        <h2
+          class="mt-2 font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-fg md:text-3xl"
+        >
+          {totalOrder} Geraete fuers ganze Window
+        </h2>
+        <p class="mt-1 text-xs text-fg-muted">
+          Wir mieten fuer die gesamte Crew-Zeit. Maximalbedarf eines einzelnen Tages = Bestellmenge,
+          weil Geraete nicht von Tag zu Tag weitergereicht werden koennen.
+        </p>
+
+        <div class="mt-5 grid gap-3 sm:grid-cols-3">
+          <div class="border-l-4 border-accent bg-bg p-3">
+            <p
+              class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+            >
+              Rasierer
+            </p>
+            <p class="mt-1 font-display text-3xl font-black tabular-nums leading-none text-fg">
+              {orderRecommendation.razor}
+            </p>
+            <p class="mt-1 font-mono text-[10px] text-fg-muted">
+              Peak {peakDemand.razor} · +{reserveBuffer}% Reserve
+            </p>
+          </div>
+          <div class="border-l-4 border-accent bg-bg p-3">
+            <p
+              class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+            >
+              Kopfhoerer
+            </p>
+            <p class="mt-1 font-display text-3xl font-black tabular-nums leading-none text-fg">
+              {orderRecommendation.headphones}
+            </p>
+            <p class="mt-1 font-mono text-[10px] text-fg-muted">
+              Peak {peakDemand.headphones} · +{reserveBuffer}% Reserve
+            </p>
+          </div>
+          <div class="border-l-4 border-accent bg-bg p-3">
+            <p
+              class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+            >
+              InEar
+            </p>
+            <p class="mt-1 font-display text-3xl font-black tabular-nums leading-none text-fg">
+              {orderRecommendation.inear}
+            </p>
+            <p class="mt-1 font-mono text-[10px] text-fg-muted">
+              Peak {peakDemand.inear} · +{reserveBuffer}% Reserve
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-5 flex items-center gap-3">
+          <label
+            for="reserve"
+            class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+          >
+            Reserve-Buffer
+          </label>
+          <input
+            id="reserve"
+            type="range"
+            min="0"
+            max="50"
+            step="5"
+            bind:value={reserveBuffer}
+            class="flex-1 accent-[var(--color-accent)]"
+          />
+          <span class="font-mono text-xs tabular-nums text-accent">+{reserveBuffer}%</span>
+        </div>
+
+        {#if totalOrder === 0}
+          <p
+            class="mt-4 border-l-2 border-fg-muted bg-bg p-3 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+          >
+            Noch keine Anforderungen. Sobald die Crew sich eintraegt, fuellt sich der Bedarf hier.
+          </p>
+        {/if}
+      </div>
+
+      <h2
+        class="mb-4 font-display text-xl font-black uppercase tracking-[var(--tracking-claim)] text-accent"
+      >
+        Tagesuebersicht
+      </h2>
+
       <ul class="divide-y divide-border border-y border-border">
         {#each days as day (day.iso)}
           {@const dayReqs = requestsByDay.get(day.iso) ?? []}
