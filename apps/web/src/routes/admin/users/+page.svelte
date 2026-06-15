@@ -10,7 +10,7 @@
     email: string;
     display_name: string | null;
     handle: string | null;
-    role: 'user' | 'admin' | 'crew';
+    role: 'user' | 'admin';
     phone: string | null;
     birthdate: string | null;
     postal_code: string | null;

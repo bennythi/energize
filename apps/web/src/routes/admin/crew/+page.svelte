@@ -9,7 +9,8 @@
     email: string;
     display_name: string | null;
     handle: string | null;
-    role: 'user' | 'admin' | 'crew';
+    role: 'user' | 'admin';
+    is_crew: boolean;
     crew_roles: string[];
     avatar_path: string | null;
     created_at: string;
@@ -20,7 +21,7 @@
     email: string;
     display_name: string | null;
     handle: string | null;
-    role: 'user' | 'admin' | 'crew';
+    role: 'user' | 'admin';
   }
 
   let crew = $state<CrewRow[]>([]);
@@ -57,7 +58,7 @@
       }));
     } catch (err) {
       console.error('[admin/crew] load failed', err);
-      errorMsg = 'Konnte Crew-Daten nicht laden. Migration 0013 gelaufen?';
+      errorMsg = 'Konnte Crew-Daten nicht laden. Sind die Migrationen 0013 + 0014 gelaufen?';
     } finally {
       loading = false;
     }
@@ -67,6 +68,7 @@
     const client = auth.client;
     if (!client) return;
     actingOn = userId;
+    errorMsg = null;
     try {
       const { error } = await client.rpc('admin_set_crew_role', {
         target_user_id: userId,
@@ -83,10 +85,12 @@
     }
   }
 
+  const crewIds = $derived(new Set(crew.filter((c) => c.is_crew).map((c) => c.id)));
+
   const candidates = $derived.by(() => {
     const term = search.trim().toLowerCase();
     return allUsers
-      .filter((u) => u.role === 'user')
+      .filter((u) => !crewIds.has(u.id))
       .filter((u) => {
         if (!term) return true;
         return (
@@ -119,8 +123,8 @@
       Crew verwalten
     </h1>
     <p class="mt-3 max-w-2xl text-sm text-fg-muted">
-      Crew-Mitglieder bekommen Zugriff auf den Crew-Bereich (Kalender, Funkgeraete). Feinere Rollen
-      (Technik, Kommunikation, Infrastruktur) folgen spaeter.
+      Admin und Crew sind getrennte Rechte. Admins koennen das Crew-Recht unabhaengig vergeben oder
+      sich selbst geben. Feinere Crew-Rollen (Technik, Kommunikation, Infrastruktur) folgen spaeter.
     </p>
 
     {#if errorMsg}
@@ -132,45 +136,71 @@
     {#if loading}
       <p class="mt-8 text-fg-muted">Lade ...</p>
     {:else}
-      <!-- Aktuelle Crew -->
+      <!-- Liste der aktiven Crew + Admins -->
       <section class="mt-10">
         <h2
           class="font-display text-xl font-black uppercase tracking-[var(--tracking-claim)] text-accent"
         >
           Aktive Crew ({crew.length})
         </h2>
+        <p class="mt-1 text-xs text-fg-muted">
+          Admins sind hier auch sichtbar. Sie zaehlen automatisch als Crew, koennen das explizite
+          Crew-Recht aber auch zusaetzlich bekommen.
+        </p>
         {#if crew.length === 0}
-          <p class="mt-3 text-sm text-fg-muted">Noch niemand. Vergib unten die erste Crew-Rolle.</p>
+          <p class="mt-3 text-sm text-fg-muted">
+            Noch niemand. Vergib unten die ersten Crew-Rechte.
+          </p>
         {:else}
           <ul class="mt-3 divide-y divide-border border-y border-border">
             {#each crew as member (member.id)}
+              {@const isMe = member.id === auth.user?.id}
               <li class="flex items-center justify-between gap-4 p-3">
-                <div>
-                  <p class="font-mono text-sm text-fg">
+                <div class="min-w-0 flex-1">
+                  <p class="truncate font-mono text-sm text-fg">
                     {member.display_name ?? member.email}
-                    {#if member.role === 'admin'}
-                      <span
-                        class="ml-2 border border-accent px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-accent"
-                        >Admin</span
-                      >
-                    {:else}
-                      <span
-                        class="ml-2 border border-fg-muted px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
-                        >Crew</span
-                      >
+                    {#if isMe}
+                      <span class="ml-1 font-mono text-[10px] text-fg-muted">(du)</span>
                     {/if}
                   </p>
                   <p class="font-mono text-xs text-fg-muted">{member.email}</p>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    {#if member.role === 'admin'}
+                      <span
+                        class="border border-[var(--color-red,#E24B4A)] px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-[var(--color-red,#E24B4A)]"
+                      >
+                        Admin
+                      </span>
+                    {/if}
+                    {#if member.is_crew}
+                      <span
+                        class="border border-accent px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-accent"
+                      >
+                        Crew
+                      </span>
+                    {/if}
+                  </div>
                 </div>
-                {#if member.role === 'crew'}
-                  <button
-                    onclick={() => setCrewFlag(member.id, false)}
-                    disabled={actingOn === member.id}
-                    class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)] disabled:opacity-50"
-                  >
-                    {actingOn === member.id ? '...' : 'entfernen'}
-                  </button>
-                {/if}
+                <div class="flex shrink-0 gap-2">
+                  {#if !member.is_crew}
+                    <!-- Admin ohne explizites Crew-Flag: optional Crew geben -->
+                    <button
+                      onclick={() => setCrewFlag(member.id, true)}
+                      disabled={actingOn === member.id}
+                      class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent hover:underline disabled:opacity-50"
+                    >
+                      {actingOn === member.id ? '...' : '+ Crew'}
+                    </button>
+                  {:else}
+                    <button
+                      onclick={() => setCrewFlag(member.id, false)}
+                      disabled={actingOn === member.id}
+                      class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)] disabled:opacity-50"
+                    >
+                      {actingOn === member.id ? '...' : 'Crew entziehen'}
+                    </button>
+                  {/if}
+                </div>
               </li>
             {/each}
           </ul>
@@ -182,7 +212,7 @@
         <h2
           class="font-display text-xl font-black uppercase tracking-[var(--tracking-claim)] text-accent"
         >
-          User zur Crew machen
+          Crew-Recht vergeben
         </h2>
         <input
           type="search"
@@ -193,8 +223,17 @@
         <ul class="mt-3 divide-y divide-border border-y border-border">
           {#each candidates as u (u.id)}
             <li class="flex items-center justify-between gap-4 p-3">
-              <div>
-                <p class="font-mono text-sm text-fg">{u.display_name ?? u.email}</p>
+              <div class="min-w-0 flex-1">
+                <p class="truncate font-mono text-sm text-fg">
+                  {u.display_name ?? u.email}
+                  {#if u.role === 'admin'}
+                    <span
+                      class="ml-2 border border-[var(--color-red,#E24B4A)] px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-[var(--color-red,#E24B4A)]"
+                    >
+                      Admin
+                    </span>
+                  {/if}
+                </p>
                 <p class="font-mono text-xs text-fg-muted">{u.email}</p>
               </div>
               <Button
@@ -202,12 +241,14 @@
                 onclick={() => setCrewFlag(u.id, true)}
                 disabled={actingOn === u.id}
               >
-                {actingOn === u.id ? '...' : 'Crew'}
+                {actingOn === u.id ? '...' : 'Crew geben'}
               </Button>
             </li>
           {/each}
           {#if candidates.length === 0}
-            <li class="p-3 text-sm text-fg-muted">Niemand gefunden.</li>
+            <li class="p-3 text-sm text-fg-muted">
+              {search ? 'Niemand gefunden.' : 'Alle User haben bereits Crew-Recht.'}
+            </li>
           {/if}
         </ul>
       </section>

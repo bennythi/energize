@@ -58,12 +58,12 @@ class AuthStore {
     try {
       const { data, error } = await this.client
         .from('profiles')
-        .select('role')
+        .select('role, is_crew')
         .eq('id', this.user.id)
         .maybeSingle();
       if (error && error.code !== '42703') throw error;
       this.isAdmin = data?.role === 'admin';
-      this.isCrew = data?.role === 'crew' || data?.role === 'admin';
+      this.isCrew = this.isAdmin || data?.is_crew === true;
     } catch (err) {
       console.warn('[auth] checkAdmin failed (Migration 0005 nicht da?)', err);
       this.isAdmin = false;

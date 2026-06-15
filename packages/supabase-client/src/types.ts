@@ -17,7 +17,7 @@ export interface Database {
           id: string;
           display_name: string | null;
           handle: string | null;
-          role: 'user' | 'admin' | 'crew';
+          role: 'user' | 'admin';
           phone: string | null;
           birthdate: string | null;
           postal_code: string | null;
@@ -27,6 +27,7 @@ export interface Database {
           locale: 'de' | 'en' | null;
           push_token: string | null;
           avatar_path: string | null;
+          is_crew: boolean;
           crew_roles: string[];
           created_at: string;
         };
@@ -34,7 +35,7 @@ export interface Database {
           id: string;
           display_name?: string | null;
           handle?: string | null;
-          role?: 'user' | 'admin' | 'crew';
+          role?: 'user' | 'admin';
           phone?: string | null;
           birthdate?: string | null;
           postal_code?: string | null;
@@ -44,6 +45,7 @@ export interface Database {
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
           avatar_path?: string | null;
+          is_crew?: boolean;
           crew_roles?: string[];
           created_at?: string;
         };
@@ -51,7 +53,7 @@ export interface Database {
           id?: string;
           display_name?: string | null;
           handle?: string | null;
-          role?: 'user' | 'admin' | 'crew';
+          role?: 'user' | 'admin';
           phone?: string | null;
           birthdate?: string | null;
           postal_code?: string | null;
@@ -61,6 +63,7 @@ export interface Database {
           locale?: 'de' | 'en' | null;
           push_token?: string | null;
           avatar_path?: string | null;
+          is_crew?: boolean;
           crew_roles?: string[];
           created_at?: string;
         };
@@ -338,7 +341,8 @@ export interface Database {
           display_name: string | null;
           handle: string | null;
           country: string;
-          role: 'user' | 'admin' | 'crew';
+          role: 'user' | 'admin';
+          is_crew: boolean;
           festivals_attended: number;
           avatar_path: string | null;
           created_at: string;
@@ -362,7 +366,7 @@ export interface Database {
           email: string;
           display_name: string | null;
           handle: string | null;
-          role: 'user' | 'admin' | 'crew';
+          role: 'user' | 'admin';
           phone: string | null;
           birthdate: string | null;
           postal_code: string | null;
@@ -375,7 +379,7 @@ export interface Database {
         }>;
       };
       admin_set_role: {
-        Args: { target_user_id: string; new_role: 'user' | 'admin' | 'crew' };
+        Args: { target_user_id: string; new_role: 'user' | 'admin' };
         Returns: void;
       };
       admin_set_crew_role: {
@@ -389,7 +393,8 @@ export interface Database {
           email: string;
           display_name: string | null;
           handle: string | null;
-          role: 'user' | 'admin' | 'crew';
+          role: 'user' | 'admin';
+          is_crew: boolean;
           crew_roles: string[];
           avatar_path: string | null;
           created_at: string;
@@ -401,7 +406,8 @@ export interface Database {
           id: string;
           display_name: string | null;
           handle: string | null;
-          role: 'user' | 'admin' | 'crew';
+          role: 'user' | 'admin';
+          is_crew: boolean;
           crew_roles: string[];
           avatar_path: string | null;
         }>;
