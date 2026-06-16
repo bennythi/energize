@@ -102,7 +102,7 @@
         Kassen.
       </h1>
       <p class="mt-3 max-w-2xl text-sm text-fg-muted">
-        Eine Schicht pro Kasse offen. Schicht eroeffnen und schliessen jeweils im Vier-Augen-Prinzip
+        Eine Schicht pro Kasse offen. Schicht eröffnen und schließen jeweils im Vier-Augen-Prinzip
         mit zwei Kassierern. Stammdaten verwaltet der Admin.
       </p>
     </div>
@@ -133,7 +133,7 @@
           </p>
         {:else}
           <p class="mt-2 text-fg-muted">
-            Sag einem Admin Bescheid, dass die Kassen-Stammdaten angelegt werden muessen.
+            Sag einem Admin Bescheid, dass die Kassen-Stammdaten angelegt werden müssen.
           </p>
         {/if}
       </div>
@@ -172,7 +172,7 @@
                 <p
                   class="mt-4 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
                 >
-                  Keine offene Schicht. Klick zum Eroeffnen.
+                  Keine offene Schicht. Klick zum Eröffnen.
                 </p>
               {/if}
             </a>

@@ -105,7 +105,7 @@
   }
 
   async function remove(b: Briefing) {
-    if (!confirm(`Briefing "${b.title}" wirklich loeschen?`)) return;
+    if (!confirm(`Briefing "${b.title}" wirklich löschen?`)) return;
     const client = auth.client;
     if (!client) return;
     try {
@@ -200,7 +200,7 @@
                     onclick={() => remove(b)}
                     class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)]"
                   >
-                    loeschen
+                    löschen
                   </button>
                 </div>
               </li>

@@ -69,7 +69,7 @@
       href="/crew/briefings"
       class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-accent"
     >
-      ← zurueck zu Briefings
+      ← zurück zu Briefings
     </a>
 
     {#if errorMsg}

@@ -183,7 +183,7 @@
     </h1>
     <p class="mt-3 max-w-2xl text-sm text-fg-muted">
       Pro Funktion (Resource) kannst du Rollen und Einzelpersonen Berechtigungen geben: lesen, lesen
-      + bearbeiten oder lesen + bearbeiten + loeschen. Admins haben automatisch alle Rechte und
+      + bearbeiten oder lesen + bearbeiten + löschen. Admins haben automatisch alle Rechte und
       brauchen keinen Eintrag.
     </p>
 
@@ -244,7 +244,7 @@
                         <option value="">kein Zugriff</option>
                         <option value="read">lesen</option>
                         <option value="write">+ bearbeiten</option>
-                        <option value="delete">+ loeschen</option>
+                        <option value="delete">+ löschen</option>
                       </select>
                     </td>
                   {/each}
@@ -273,14 +273,14 @@
           Einzelpersonen
         </h2>
         <p class="mt-1 text-xs text-fg-muted">
-          Direkte Berechtigungen fuer einzelne User, unabhaengig von ihren Rollen. Hat Vorrang
-          gegenueber Rollen, wenn das Level hoeher ist.
+          Direkte Berechtigungen für einzelne User, unabhaengig von ihren Rollen. Hat Vorrang
+          gegenüber Rollen, wenn das Level höher ist.
         </p>
 
         <input
           type="search"
           bind:value={userSearch}
-          placeholder="User suchen oder leer fuer Liste der bereits berechtigten"
+          placeholder="User suchen oder leer für Liste der bereits berechtigten"
           class="mt-3 w-full border-2 border-border bg-bg px-4 py-2 font-mono text-sm text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none"
         />
 
@@ -324,7 +324,7 @@
                         <option value="">kein Zugriff</option>
                         <option value="read">lesen</option>
                         <option value="write">+ bearbeiten</option>
-                        <option value="delete">+ loeschen</option>
+                        <option value="delete">+ löschen</option>
                       </select>
                     </td>
                   {/each}

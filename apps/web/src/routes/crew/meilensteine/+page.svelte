@@ -197,7 +197,7 @@
                   <p
                     class="mt-1 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
                   >
-                    {overdue ? `${-days} Tg zu spaet` : `in ${days} Tg`}
+                    {overdue ? `${-days} Tg zu spät` : `in ${days} Tg`}
                   </p>
                 </div>
                 <div>

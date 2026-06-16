@@ -123,8 +123,8 @@
       Crew verwalten
     </h1>
     <p class="mt-3 max-w-2xl text-sm text-fg-muted">
-      Admin und Crew sind getrennte Rechte. Admins koennen das Crew-Recht unabhaengig vergeben oder
-      sich selbst geben. Feinere Crew-Rollen (Technik, Kommunikation, Infrastruktur) folgen spaeter.
+      Admin und Crew sind getrennte Rechte. Admins können das Crew-Recht unabhaengig vergeben oder
+      sich selbst geben. Feinere Crew-Rollen (Technik, Kommunikation, Infrastruktur) folgen später.
     </p>
 
     {#if errorMsg}
@@ -144,7 +144,7 @@
           Aktive Crew ({crew.length})
         </h2>
         <p class="mt-1 text-xs text-fg-muted">
-          Admins sind hier auch sichtbar. Sie zaehlen automatisch als Crew, koennen das explizite
+          Admins sind hier auch sichtbar. Sie zählen automatisch als Crew, können das explizite
           Crew-Recht aber auch zusaetzlich bekommen.
         </p>
         {#if crew.length === 0}

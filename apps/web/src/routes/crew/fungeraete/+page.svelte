@@ -25,7 +25,7 @@
 
   const EQUIPMENT_LABEL: Record<Equipment, string> = {
     razor: 'Rasierer',
-    headphones: 'Kopfhoerer',
+    headphones: 'Kopfhörer',
     inear: 'InEar',
   };
 
@@ -79,9 +79,9 @@
     new Set(requests.filter((r) => r.user_id === auth.user?.id).map((r) => r.event_day)),
   );
 
-  // Bestellempfehlung: Peak-Bedarf pro Equipment ueber das gesamte
-  // Crew-Window. Wir bestellen nicht pro Tag, sondern fuer die ganze
-  // Zeit. Maximaler Tagesbedarf bestimmt die Stueckzahl, weil parallel
+  // Bestellempfehlung: Peak-Bedarf pro Equipment über das gesamte
+  // Crew-Window. Wir bestellen nicht pro Tag, sondern für die ganze
+  // Zeit. Maximaler Tagesbedarf bestimmt die Stückzahl, weil parallel
   // genutzt wird (keine Tagesweiterreichung).
   let reserveBuffer = $state(20); // Prozent zusaetzlicher Buffer
 
@@ -196,7 +196,7 @@
   async function deleteRequest(id: string) {
     const client = auth.client;
     if (!client) return;
-    if (!confirm('Anforderung wirklich loeschen?')) return;
+    if (!confirm('Anforderung wirklich löschen?')) return;
     try {
       const { error } = await client.from('crew_equipment_requests').delete().eq('id', id);
       if (error) throw error;
@@ -212,14 +212,14 @@
 </script>
 
 <svelte:head>
-  <title>Crew · Funkgeraete · ENERGIZE</title>
+  <title>Crew · Funkgeräte · ENERGIZE</title>
 </svelte:head>
 
 <section class="border-b border-border bg-bg">
   <Container>
     <div class="py-12 md:py-16">
       <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
-        ⚡ Crew / Funkgeraete
+        ⚡ Crew / Funkgeräte
       </p>
       <h1
         class="mt-3 font-display font-black uppercase leading-[0.9] tracking-[-0.02em] text-fg"
@@ -228,7 +228,7 @@
         Welches Headset brauchst du.
       </h1>
       <p class="mt-3 max-w-2xl text-sm text-fg-muted">
-        Pro Tag eine Wahl: Rasierer, Kopfhoerer oder InEar. Ein Eintrag pro Tag.
+        Pro Tag eine Wahl: Rasierer, Kopfhörer oder InEar. Ein Eintrag pro Tag.
       </p>
     </div>
   </Container>
@@ -282,7 +282,7 @@
                       ><span class="font-black tabular-nums text-fg">{counts.razor}</span> Rasierer</span
                     >{/if}
                   {#if counts.headphones > 0}<span
-                      ><span class="font-black tabular-nums text-fg">{counts.headphones}</span> Kopfhoerer</span
+                      ><span class="font-black tabular-nums text-fg">{counts.headphones}</span> Kopfhörer</span
                     >{/if}
                   {#if counts.inear > 0}<span
                       ><span class="font-black tabular-nums text-fg">{counts.inear}</span> InEar</span
@@ -312,7 +312,7 @@
                           onclick={() => deleteRequest(r.id)}
                           class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)]"
                         >
-                          loeschen
+                          löschen
                         </button>
                       {/if}
                     </li>
@@ -325,7 +325,7 @@
                 onclick={() => openForm(day.iso)}
                 class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent hover:underline"
               >
-                {myDays.has(day.iso) ? 'aendern' : '+ anfordern'}
+                {myDays.has(day.iso) ? 'ändern' : '+ anfordern'}
               </button>
             </div>
           </li>
@@ -345,11 +345,11 @@
         <h2
           class="mt-2 font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-fg md:text-3xl"
         >
-          {totalOrder} Geraete fuers ganze Window
+          {totalOrder} Geräte für die gesamte Festival-Zeit
         </h2>
         <p class="mt-1 text-xs text-fg-muted">
-          Wir mieten fuer die gesamte Crew-Zeit. Maximalbedarf eines einzelnen Tages = Bestellmenge,
-          weil Geraete nicht von Tag zu Tag weitergereicht werden koennen.
+          Wir mieten für die gesamte Crew-Zeit. Maximalbedarf eines einzelnen Tages = Bestellmenge,
+          weil Geräte nicht von Tag zu Tag weitergereicht werden können.
         </p>
 
         <div class="mt-5 grid gap-3 sm:grid-cols-3">
@@ -370,7 +370,7 @@
             <p
               class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
             >
-              Kopfhoerer
+              Kopfhörer
             </p>
             <p class="mt-1 font-display text-3xl font-black tabular-nums leading-none text-fg">
               {orderRecommendation.headphones}
@@ -433,7 +433,7 @@
   >
     <div class="w-full max-w-md border-2 border-accent bg-bg p-6">
       <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
-        Funkgeraet anfordern
+        Funkgerät anfordern
       </p>
       <h2 class="mt-2 font-display text-2xl font-black uppercase text-fg">
         {new Date(formDay).toLocaleDateString('de-DE', {

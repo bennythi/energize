@@ -190,7 +190,7 @@
   async function deleteEntry(id: string) {
     const client = auth.client;
     if (!client) return;
-    if (!confirm('Eintrag wirklich loeschen?')) return;
+    if (!confirm('Eintrag wirklich löschen?')) return;
     try {
       const { error } = await client.from('crew_availability').delete().eq('id', id);
       if (error) throw error;
@@ -248,7 +248,7 @@
         {/each}
       </div>
 
-      <!-- Detail-Block fuer ausgewaehlten Tag -->
+      <!-- Detail-Block für ausgewählten Tag -->
       {#if selectedDay}
         <div class="mt-8 border-l-4 border-accent bg-surface p-5">
           <div class="flex items-baseline justify-between gap-3">
@@ -295,7 +295,7 @@
                       onclick={() => deleteEntry(e.id)}
                       class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)]"
                     >
-                      loeschen
+                      löschen
                     </button>
                   {/if}
                 </li>
@@ -322,7 +322,7 @@
   >
     <div class="w-full max-w-md border-2 border-accent bg-bg p-6">
       <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
-        Verfuegbarkeit eintragen
+        Verfügbarkeit eintragen
       </p>
       <h2 class="mt-2 font-display text-2xl font-black uppercase text-fg">
         {fmtFullDate(formDay)}

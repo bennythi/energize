@@ -196,7 +196,7 @@
       return;
     }
     if (startingTotal <= 0) {
-      errorMsg = 'Startbestand ist null. Bitte Stueckelungen eingeben.';
+      errorMsg = 'Startbestand ist null. Bitte Stückelungen eingeben.';
       return;
     }
     acting = true;
@@ -215,7 +215,7 @@
         .single();
       if (insertErr) throw insertErr;
 
-      // Stueckelungen einfuegen (nur Werte > 0)
+      // Stückelungen einfuegen (nur Werte > 0)
       const denomRows = DENOMINATIONS.filter((d) => (openCounts[d.cents] ?? 0) > 0).map((d) => ({
         shift_id: newShift.id,
         kind: 'start' as const,
@@ -251,7 +251,7 @@
     }
     const amountCents = Math.round(parseFloat(mvAmount.replace(',', '.')) * 100);
     if (!amountCents || amountCents <= 0) {
-      errorMsg = 'Betrag ungueltig.';
+      errorMsg = 'Betrag ungültig.';
       return;
     }
     acting = true;
@@ -293,7 +293,7 @@
     errorMsg = null;
     const currentShift = shift;
     try {
-      // End-Stueckelungen schreiben
+      // End-Stückelungen schreiben
       const denomRows = DENOMINATIONS.filter((d) => (closeCounts[d.cents] ?? 0) > 0).map((d) => ({
         shift_id: currentShift.id,
         kind: 'end' as const,
@@ -307,7 +307,7 @@
         if (denomErr) throw denomErr;
       }
 
-      // Schicht schliessen
+      // Schicht schließen
       const { error: updErr } = await client
         .from('cashless_shifts')
         .update({
@@ -355,7 +355,7 @@
         href="/crew/kasse"
         class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-accent"
       >
-        ← zurueck zu Kassen
+        ← zurück zu Kassen
       </a>
       <p class="mt-4 font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
         ⚡ Crew / Kasse
@@ -389,14 +389,12 @@
           Keine offene Schicht
         </p>
         <p class="mt-2 text-fg">
-          Mit dem Eroeffnen-Klick fuegst du eine neue Schicht hinzu. Du brauchst einen zweiten
-          Kassierer und ihr zaehlt den Wechselgeld-Startbestand gemeinsam.
+          Mit dem Eröffnen-Klick fuegst du eine neue Schicht hinzu. Du brauchst einen zweiten
+          Kassierer und ihr zählt den Wechselgeld-Startbestand gemeinsam.
         </p>
         {#if auth.canWrite(CREW_RESOURCES.kasse)}
           <div class="mt-4">
-            <Button variant="yellow" onclick={() => (showOpenForm = true)}>
-              Schicht eroeffnen
-            </Button>
+            <Button variant="yellow" onclick={() => (showOpenForm = true)}>Schicht eröffnen</Button>
           </div>
         {:else}
           <p class="mt-3 font-mono text-xs text-fg-muted">
@@ -411,7 +409,7 @@
           Schicht offen seit {fmtDt(shift.opened_at)}
         </p>
         <p class="mt-2 font-mono text-sm text-fg">
-          eroeffnet von {memberLabel(shift.opened_by_a)} + {memberLabel(shift.opened_by_b)}
+          eröffnet von {memberLabel(shift.opened_by_a)} + {memberLabel(shift.opened_by_b)}
         </p>
 
         {#if summary}
@@ -500,11 +498,10 @@
         {/if}
       </section>
 
-      <!-- Schicht schliessen -->
+      <!-- Schicht schließen -->
       {#if auth.canWrite(CREW_RESOURCES.kasse)}
         <div class="mt-8">
-          <Button variant="yellow" onclick={() => (showCloseForm = true)}>Schicht schliessen</Button
-          >
+          <Button variant="yellow" onclick={() => (showCloseForm = true)}>Schicht schließen</Button>
         </div>
       {/if}
     {/if}
@@ -521,7 +518,7 @@
     <div class="flex max-h-[92vh] w-full max-w-3xl flex-col border-2 border-accent bg-bg">
       <header class="border-b border-border p-4">
         <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
-          Schicht eroeffnen
+          Schicht eröffnen
         </p>
       </header>
       <div class="flex-1 space-y-4 overflow-y-auto p-4">
@@ -533,7 +530,7 @@
             bind:value={openPartner}
             class="mt-1 w-full border-2 border-border bg-bg px-3 py-2 font-mono text-sm text-fg focus:border-accent focus:outline-none"
           >
-            <option value="">Bitte waehlen ...</option>
+            <option value="">Bitte wählen ...</option>
             {#each otherCrew as p (p.id)}
               <option value={p.id}>{p.display_name ?? p.handle ?? p.id.slice(0, 8)}</option>
             {/each}
@@ -554,7 +551,7 @@
           onclick={openShift}
           disabled={acting || !openPartner || startingTotal <= 0}
         >
-          {acting ? 'Speichere ...' : 'Schicht eroeffnen'}
+          {acting ? 'Speichere ...' : 'Schicht eröffnen'}
         </Button>
         <Button variant="ghost" onclick={() => (showOpenForm = false)} disabled={acting}>
           Abbrechen
@@ -628,7 +625,7 @@
             bind:value={mvPartner}
             class="mt-1 w-full border-2 border-border bg-bg px-3 py-2 font-mono text-sm text-fg focus:border-accent focus:outline-none"
           >
-            <option value="">Bitte waehlen ...</option>
+            <option value="">Bitte wählen ...</option>
             {#each otherCrew as p (p.id)}
               <option value={p.id}>{p.display_name ?? p.handle ?? p.id.slice(0, 8)}</option>
             {/each}
@@ -670,7 +667,7 @@
     <div class="flex max-h-[92vh] w-full max-w-3xl flex-col border-2 border-accent bg-bg">
       <header class="border-b border-border p-4">
         <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
-          Schicht schliessen
+          Schicht schließen
         </p>
       </header>
       <div class="flex-1 space-y-4 overflow-y-auto p-4">
@@ -682,7 +679,7 @@
             bind:value={closePartner}
             class="mt-1 w-full border-2 border-border bg-bg px-3 py-2 font-mono text-sm text-fg focus:border-accent focus:outline-none"
           >
-            <option value="">Bitte waehlen ...</option>
+            <option value="">Bitte wählen ...</option>
             {#each otherCrew as p (p.id)}
               <option value={p.id}>{p.display_name ?? p.handle ?? p.id.slice(0, 8)}</option>
             {/each}
@@ -737,7 +734,7 @@
       </div>
       <footer class="flex gap-3 border-t border-border p-4">
         <Button variant="yellow" onclick={closeShift} disabled={acting || !closePartner}>
-          {acting ? 'Schliesse ...' : 'Schicht schliessen'}
+          {acting ? 'Schliesse ...' : 'Schicht schließen'}
         </Button>
         <Button variant="ghost" onclick={() => (showCloseForm = false)} disabled={acting}>
           Abbrechen

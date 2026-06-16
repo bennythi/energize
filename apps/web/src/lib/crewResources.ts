@@ -1,5 +1,5 @@
-// Slugs der Crew-Resources. Muessen mit Migration 0018 / seed der
-// crew_resources-Tabelle uebereinstimmen.
+// Slugs der Crew-Resources. Müssen mit Migration 0018 / seed der
+// crew_resources-Tabelle übereinstimmen.
 
 export const CREW_RESOURCES = {
   kalender: 'crew.kalender',
@@ -14,10 +14,10 @@ export type CrewResource = (typeof CREW_RESOURCES)[keyof typeof CREW_RESOURCES];
 export const CREW_RESOURCE_LABELS: Record<CrewResource, { label: string; description: string }> = {
   'crew.kalender': {
     label: 'Crew-Kalender',
-    description: 'Verfuegbarkeiten der Crew pro Tag und Zeitfenster',
+    description: 'Verfügbarkeiten der Crew pro Tag und Zeitfenster',
   },
   'crew.fungeraete': {
-    label: 'Funkgeraete',
+    label: 'Funkgeräte',
     description: 'Tagesbedarf und Bestellempfehlung',
   },
   'crew.kasse': {

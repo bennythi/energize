@@ -29,7 +29,7 @@ export const CREW_CALENDAR_MONTHS: { year: number; month: number }[] = [
   { year: 2027, month: 5 }, // Juni
 ];
 
-// Erzeugt ein 7xN-Raster (Montag-Sonntag) fuer einen Monat.
+// Erzeugt ein 7xN-Raster (Montag-Sonntag) für einen Monat.
 // Padding-Tage vor und nach dem Monat sind als isPadding markiert.
 export interface CalendarCell {
   iso: string;

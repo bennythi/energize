@@ -57,8 +57,8 @@
     if (browser) initAnalytics();
   });
 
-  // Drawer-A11y: Escape schliesst, scroll-lock auf body, Focus zurueck
-  // auf den Burger nach Schliessen.
+  // Drawer-A11y: Escape schließt, scroll-lock auf body, Focus zurück
+  // auf den Burger nach Schließen.
   $effect(() => {
     if (!browser) return;
     if (mobileOpen) {
@@ -72,7 +72,7 @@
       return () => {
         window.removeEventListener('keydown', onKeydown);
         document.body.style.overflow = '';
-        // Focus zurueck auf Burger, nachdem der Drawer zu ist
+        // Focus zurück auf Burger, nachdem der Drawer zu ist
         queueMicrotask(() => burgerButton?.focus());
       };
     }
@@ -86,7 +86,7 @@
     if (!browser) return;
     const next: AvailableLanguageTag = currentLang === 'de' ? 'en' : 'de';
     localStorage.setItem(LANG_STORAGE_KEY, next);
-    // Reload reicht — +layout.ts liest beim naechsten Start localStorage
+    // Reload reicht — +layout.ts liest beim nächsten Start localStorage
     // und ruft setLanguageTag() VOR jedem m.xxx()-Aufruf auf.
     location.reload();
   }

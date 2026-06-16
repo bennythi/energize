@@ -16,7 +16,7 @@
 
   const SUGGESTED_CATEGORIES = [
     'Bestellung Feuerwerk',
-    'Bestellung Funkgeraete',
+    'Bestellung Funkgeräte',
     'Bestellung Baufahrzeuge',
     'Bestellung Toiletten',
     'Bestellung Buehne',
@@ -109,7 +109,7 @@
   }
 
   async function remove(m: Milestone) {
-    if (!confirm(`Meilenstein "${m.title}" wirklich loeschen?`)) return;
+    if (!confirm(`Meilenstein "${m.title}" wirklich löschen?`)) return;
     const client = auth.client;
     if (!client) return;
     try {
@@ -150,7 +150,7 @@
       Meilensteine
     </h1>
     <p class="mt-3 max-w-2xl text-sm text-fg-muted">
-      Termin-Vorgaben fuer Bestellungen, Genehmigungen, Vertraege. Crew mit Lese-Recht auf
+      Termin-Vorgaben für Bestellungen, Genehmigungen, Vertraege. Crew mit Lese-Recht auf
       <span class="font-mono text-fg">crew.meilensteine</span> sieht den Jahreskalender und kann erledigte
       Punkte abhaken.
     </p>
@@ -202,7 +202,7 @@
                 onclick={() => remove(m)}
                 class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)]"
               >
-                loeschen
+                löschen
               </button>
             </div>
           </li>
@@ -259,7 +259,7 @@
             <span
               class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
             >
-              Faelligkeitsdatum
+              Fälligkeitsdatum
             </span>
             <input
               type="date"

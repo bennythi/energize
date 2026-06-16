@@ -59,7 +59,7 @@
           Hallo, Crew.
         </h1>
         <p class="mt-4 max-w-2xl text-fg-muted">
-          Hier landet alles, was wir intern fuer die Organisation brauchen. Festival-Tag {FESTIVAL_DAY}.
+          Hier landet alles, was wir intern für die Organisation brauchen. Festival-Tag {FESTIVAL_DAY}.
           Aktuelles Crew-Fenster: {windowLabel}.
         </p>
       </div>
