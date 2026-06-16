@@ -103,6 +103,20 @@
   ]);
 </script>
 
+{#if auth.viewAs}
+  <div
+    class="sticky top-0 z-40 border-b-2 border-fg-inverse bg-accent px-4 py-2 text-center font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-inverse"
+  >
+    Du siehst gerade als <strong>{auth.viewAs.displayName}</strong> ({auth.viewAs.email}).
+    <button
+      onclick={() => auth.exitViewAs()}
+      class="ml-3 border border-fg-inverse px-2 py-0.5 hover:bg-fg-inverse hover:text-accent"
+    >
+      Aussteigen
+    </button>
+  </div>
+{/if}
+
 <nav class="nav-bar sticky top-0 z-30 border-b" class:nav-scrolled={scrolled}>
   <div class="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
     <a href="/" class="flex items-center gap-2 text-fg" aria-label="ENERGIZE — zur Startseite">

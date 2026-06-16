@@ -1,16 +1,9 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { Container, Button } from '@energize/ui';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
   import { FESTIVAL_DAY, CREW_WINDOW_START, CREW_WINDOW_END } from '$lib/festival';
-
-  let stats = $state({
-    availability: 0,
-    equipment: 0,
-    members: 0,
-  });
-  let loadingStats = $state(true);
+  import { CREW_RESOURCES, CREW_RESOURCE_LABELS, type CrewResource } from '$lib/crewResources';
 
   $effect(() => {
     if (!isAuthConfigured) return;
@@ -24,60 +17,28 @@
     }
   });
 
-  async function loadStats() {
-    const client = auth.client;
-    if (!client || !auth.user) return;
-    const [a, e, m] = await Promise.all([
-      client.from('crew_availability').select('id', { count: 'exact', head: true }),
-      client.from('crew_equipment_requests').select('id', { count: 'exact', head: true }),
-      client.rpc('crew_list_members'),
-    ]);
-    stats = {
-      availability: a.count ?? 0,
-      equipment: e.count ?? 0,
-      members: m.data?.length ?? 0,
-    };
-    loadingStats = false;
-  }
-
-  onMount(() => {
-    void loadStats();
-  });
-
   const fmt = (d: Date) =>
     d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
   const windowLabel = $derived(`${fmt(CREW_WINDOW_START)} bis ${fmt(CREW_WINDOW_END)}`);
 
   interface Tile {
-    label: string;
-    value: number | string | null;
-    desc: string;
+    resource: CrewResource;
     href: string;
     accent?: boolean;
   }
 
-  const tiles = $derived<Tile[]>([
-    {
-      label: 'Kalender',
-      value: loadingStats ? '...' : stats.availability,
-      desc: 'Wann bist du da. Eintraege quer durch die Crew.',
-      href: '/crew/kalender',
-      accent: true,
-    },
-    {
-      label: 'Funkgeraete',
-      value: loadingStats ? '...' : stats.equipment,
-      desc: 'Welches Headset brauchst du an welchem Tag.',
-      href: '/crew/fungeraete',
-    },
-    {
-      label: 'Crew',
-      value: loadingStats ? '...' : stats.members,
-      desc: 'Aktive Mitglieder im Crew-Bereich.',
-      href: '/crew',
-    },
-  ]);
+  const allTiles: Tile[] = [
+    { resource: CREW_RESOURCES.kalender, href: '/crew/kalender', accent: true },
+    { resource: CREW_RESOURCES.fungeraete, href: '/crew/fungeraete' },
+    { resource: CREW_RESOURCES.kasse, href: '/crew/kasse' },
+    { resource: CREW_RESOURCES.briefings, href: '/crew/briefings' },
+    { resource: CREW_RESOURCES.meilensteine, href: '/crew/meilensteine' },
+  ];
+
+  const visibleTiles = $derived(allTiles.filter((t) => auth.canRead(t.resource)));
+
+  const hasAnyAccess = $derived(visibleTiles.length > 0);
 </script>
 
 <svelte:head>
@@ -107,36 +68,51 @@
 
   <Container>
     <section class="py-12 md:py-16">
-      <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {#each tiles as tile (tile.label)}
-          <li>
-            <a
-              href={tile.href}
-              class="card-press block h-full border-2 p-6 transition-colors hover:bg-surface {tile.accent
-                ? 'border-accent'
-                : 'border-fg'}"
-            >
-              <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-                {tile.label}
-              </p>
-              <p
-                class="mt-3 font-display text-4xl font-black tabular-nums leading-none text-fg md:text-5xl"
+      {#if hasAnyAccess}
+        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {#each visibleTiles as tile (tile.resource)}
+            {@const meta = CREW_RESOURCE_LABELS[tile.resource]}
+            <li>
+              <a
+                href={tile.href}
+                class="card-press block h-full border-2 p-6 transition-colors hover:bg-surface {tile.accent
+                  ? 'border-accent'
+                  : 'border-fg'}"
               >
-                {tile.value}
-              </p>
-              <p class="mt-3 text-sm text-fg-muted">{tile.desc}</p>
-            </a>
-          </li>
-        {/each}
-      </ul>
+                <p
+                  class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+                >
+                  {meta.label}
+                </p>
+                <p
+                  class="mt-3 font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-fg md:text-3xl"
+                >
+                  Offen
+                </p>
+                <p class="mt-3 text-sm text-fg-muted">{meta.description}</p>
+              </a>
+            </li>
+          {/each}
+        </ul>
+      {:else}
+        <div class="border-2 border-fg-muted bg-surface p-6">
+          <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
+            Noch keine Berechtigungen
+          </p>
+          <p class="mt-2 text-fg">
+            Du bist als Crew markiert, aber dir wurde noch keine Rolle mit Zugriff auf die einzelnen
+            Funktionen zugewiesen. Sag einem Admin Bescheid, der kann dich unter
+            <span class="font-mono">/admin/berechtigungen</span> freischalten.
+          </p>
+        </div>
+      {/if}
 
-      <div class="mt-8 flex flex-wrap gap-3">
-        <Button href="/crew/kalender" variant="yellow">Zum Kalender</Button>
-        <Button href="/crew/fungeraete" variant="ghost">Funkgeraete</Button>
-        {#if auth.isAdmin}
+      {#if auth.isAdmin}
+        <div class="mt-8 flex flex-wrap gap-3">
           <Button href="/admin/crew" variant="ghost">Crew verwalten</Button>
-        {/if}
-      </div>
+          <Button href="/admin/berechtigungen" variant="ghost">Berechtigungen</Button>
+        </div>
+      {/if}
     </section>
   </Container>
 {:else}

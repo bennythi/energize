@@ -314,6 +314,17 @@
                     {isFounder ? '🔒 Geschützt' : 'Admin entziehen'}
                   </button>
                 {/if}
+                <button
+                  type="button"
+                  onclick={() => auth.enterViewAs(user.id)}
+                  disabled={actingOn === user.id || user.id === auth.user?.id}
+                  class="border-2 border-border bg-bg px-3 py-2 text-center font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+                  title={user.id === auth.user?.id
+                    ? 'Das bist du selbst'
+                    : 'App aus Sicht des Users anschauen'}
+                >
+                  👁 Als User sehen
+                </button>
                 <a
                   href={`/u/${user.id}`}
                   class="border-2 border-border bg-bg px-3 py-2 text-center font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted transition-colors hover:border-accent hover:text-accent"

@@ -4,6 +4,7 @@
   import { Container, Button } from '@energize/ui';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
   import { CREW_WINDOW_START, CREW_WINDOW_END, CREW_CALENDAR_MONTHS, isoDay } from '$lib/festival';
+  import { CREW_RESOURCES } from '$lib/crewResources';
   import MonthGrid from '$lib/MonthGrid.svelte';
 
   interface Entry {
@@ -42,8 +43,8 @@
       void goto('/login', { replaceState: true });
       return;
     }
-    if (!auth.isCrew && auth.adminChecked) {
-      void goto('/account', { replaceState: true });
+    if (!auth.canRead(CREW_RESOURCES.kalender) && auth.adminChecked) {
+      void goto('/crew', { replaceState: true });
     }
   });
 

@@ -333,6 +333,168 @@ export interface Database {
         };
         Relationships: [];
       };
+      cashless_registers: {
+        Row: {
+          id: string;
+          name: string;
+          location: string | null;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      cashless_shifts: {
+        Row: {
+          id: string;
+          register_id: string;
+          opened_at: string;
+          opened_by_a: string;
+          opened_by_b: string;
+          closed_at: string | null;
+          closed_by_a: string | null;
+          closed_by_b: string | null;
+          starting_cents: number;
+          ending_cents: number | null;
+          note: string | null;
+        };
+        Insert: {
+          id?: string;
+          register_id: string;
+          opened_at?: string;
+          opened_by_a: string;
+          opened_by_b: string;
+          closed_at?: string | null;
+          closed_by_a?: string | null;
+          closed_by_b?: string | null;
+          starting_cents: number;
+          ending_cents?: number | null;
+          note?: string | null;
+        };
+        Update: {
+          closed_at?: string | null;
+          closed_by_a?: string | null;
+          closed_by_b?: string | null;
+          ending_cents?: number | null;
+          note?: string | null;
+        };
+        Relationships: [];
+      };
+      cashless_shift_denominations: {
+        Row: {
+          id: string;
+          shift_id: string;
+          kind: 'start' | 'end';
+          denomination_cents: number;
+          count: number;
+        };
+        Insert: {
+          id?: string;
+          shift_id: string;
+          kind: 'start' | 'end';
+          denomination_cents: number;
+          count: number;
+        };
+        Update: {
+          count?: number;
+        };
+        Relationships: [];
+      };
+      cashless_movements: {
+        Row: {
+          id: string;
+          shift_id: string;
+          kind: 'withdrawal' | 'exchange_in' | 'exchange_out';
+          amount_cents: number;
+          counterpart_register_id: string | null;
+          performed_at: string;
+          performed_by_a: string;
+          performed_by_b: string;
+          note: string | null;
+        };
+        Insert: {
+          id?: string;
+          shift_id: string;
+          kind: 'withdrawal' | 'exchange_in' | 'exchange_out';
+          amount_cents: number;
+          counterpart_register_id?: string | null;
+          performed_at?: string;
+          performed_by_a: string;
+          performed_by_b: string;
+          note?: string | null;
+        };
+        Update: never;
+        Relationships: [];
+      };
+      crew_briefings: {
+        Row: {
+          id: string;
+          department: string;
+          title: string;
+          body: string;
+          pinned: boolean;
+          updated_at: string;
+          updated_by: string | null;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      crew_milestones: {
+        Row: {
+          id: string;
+          title: string;
+          description: string | null;
+          category: string;
+          due_date: string;
+          completed_at: string | null;
+          completed_by: string | null;
+          created_at: string;
+          created_by: string | null;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      crew_resources: {
+        Row: {
+          slug: string;
+          label: string;
+          description: string | null;
+          sort_order: number;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      crew_role_permissions: {
+        Row: {
+          id: string;
+          role: string;
+          resource_slug: string;
+          level: 'read' | 'write' | 'delete';
+          created_at: string;
+          created_by: string | null;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      crew_user_permissions: {
+        Row: {
+          id: string;
+          user_id: string;
+          resource_slug: string;
+          level: 'read' | 'write' | 'delete';
+          created_at: string;
+          created_by: string | null;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: {
       profiles_public: {
@@ -448,6 +610,108 @@ export interface Database {
           region: string;
           count: number;
         }>;
+      };
+      is_topup_kassierer: {
+        Args: Record<string, never>;
+        Returns: boolean;
+      };
+      admin_cashless_register_upsert: {
+        Args: {
+          target_id: string | null;
+          new_name: string;
+          new_location: string | null;
+          new_active: boolean;
+        };
+        Returns: string;
+      };
+      cashless_shift_summary: {
+        Args: { target_shift_id: string };
+        Returns: Array<{
+          shift_id: string;
+          starting_cents: number;
+          movement_in_cents: number;
+          movement_out_cents: number;
+          expected_cents: number;
+          ending_cents: number | null;
+          difference_cents: number | null;
+        }>;
+      };
+      admin_crew_briefing_upsert: {
+        Args: {
+          target_id: string | null;
+          new_department: string;
+          new_title: string;
+          new_body: string;
+          new_pinned: boolean;
+        };
+        Returns: string;
+      };
+      admin_crew_briefing_delete: {
+        Args: { target_id: string };
+        Returns: void;
+      };
+      admin_crew_milestone_upsert: {
+        Args: {
+          target_id: string | null;
+          new_title: string;
+          new_description: string | null;
+          new_category: string;
+          new_due_date: string;
+        };
+        Returns: string;
+      };
+      admin_crew_milestone_delete: {
+        Args: { target_id: string };
+        Returns: void;
+      };
+      crew_milestone_set_completed: {
+        Args: { target_id: string; completed: boolean };
+        Returns: void;
+      };
+      admin_view_user_profile: {
+        Args: { target_user_id: string };
+        Returns: Array<{
+          user_id: string;
+          email: string;
+          display_name: string | null;
+          role: 'user' | 'admin';
+          is_crew: boolean;
+          crew_roles: string[];
+        }>;
+      };
+      admin_view_user_permissions: {
+        Args: { target_user_id: string };
+        Returns: Array<{
+          resource_slug: string;
+          level: 'read' | 'write' | 'delete';
+        }>;
+      };
+      crew_can: {
+        Args: { resource: string; required_level: string };
+        Returns: boolean;
+      };
+      crew_my_permissions: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          resource_slug: string;
+          level: 'read' | 'write' | 'delete';
+        }>;
+      };
+      admin_set_role_permission: {
+        Args: {
+          role: string;
+          resource_slug: string;
+          new_level: string | null;
+        };
+        Returns: void;
+      };
+      admin_set_user_permission: {
+        Args: {
+          target_user_id: string;
+          resource_slug: string;
+          new_level: string | null;
+        };
+        Returns: void;
       };
     };
     Enums: Record<string, never>;

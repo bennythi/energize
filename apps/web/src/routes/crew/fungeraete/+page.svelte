@@ -4,6 +4,7 @@
   import { Container, Button } from '@energize/ui';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
   import { CREW_WINDOW_START, CREW_WINDOW_END, FESTIVAL_DAY, isoDay } from '$lib/festival';
+  import { CREW_RESOURCES } from '$lib/crewResources';
 
   type Equipment = 'razor' | 'headphones' | 'inear';
 
@@ -47,8 +48,8 @@
       void goto('/login', { replaceState: true });
       return;
     }
-    if (!auth.isCrew && auth.adminChecked) {
-      void goto('/account', { replaceState: true });
+    if (!auth.canRead(CREW_RESOURCES.fungeraete) && auth.adminChecked) {
+      void goto('/crew', { replaceState: true });
     }
   });
 
@@ -244,8 +245,95 @@
     {#if loading}
       <p class="text-fg-muted">Lade ...</p>
     {:else}
-      <!-- Bestellempfehlung -->
-      <div class="mb-10 border-2 border-accent bg-surface p-5 md:p-6">
+      <ul class="divide-y divide-border border-y border-border">
+        {#each days as day (day.iso)}
+          {@const dayReqs = requestsByDay.get(day.iso) ?? []}
+          {@const counts = {
+            razor: dayReqs.filter((r) => r.equipment === 'razor').length,
+            headphones: dayReqs.filter((r) => r.equipment === 'headphones').length,
+            inear: dayReqs.filter((r) => r.equipment === 'inear').length,
+          }}
+          <li
+            class="grid grid-cols-[120px_1fr_auto] gap-4 p-4 transition-colors hover:bg-surface md:grid-cols-[160px_1fr_auto]"
+            class:bg-surface={day.isFestival}
+            class:border-l-4={day.isFestival}
+            class:border-accent={day.isFestival}
+          >
+            <div>
+              <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
+                {day.isFestival
+                  ? '⚡ Festival'
+                  : day.date.toLocaleDateString('de-DE', { weekday: 'short' })}
+              </p>
+              <p
+                class="mt-1 font-display text-lg font-black uppercase tracking-[var(--tracking-claim)] text-fg"
+              >
+                {fmtDate(day.date)}
+              </p>
+            </div>
+            <div>
+              {#if dayReqs.length === 0}
+                <p class="text-sm text-fg-muted">Niemand braucht hier was.</p>
+              {:else}
+                <div
+                  class="mb-2 flex flex-wrap gap-3 font-mono text-[11px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+                >
+                  {#if counts.razor > 0}<span
+                      ><span class="font-black tabular-nums text-fg">{counts.razor}</span> Rasierer</span
+                    >{/if}
+                  {#if counts.headphones > 0}<span
+                      ><span class="font-black tabular-nums text-fg">{counts.headphones}</span> Kopfhoerer</span
+                    >{/if}
+                  {#if counts.inear > 0}<span
+                      ><span class="font-black tabular-nums text-fg">{counts.inear}</span> InEar</span
+                    >{/if}
+                </div>
+                <ul class="space-y-2">
+                  {#each dayReqs as r (r.id)}
+                    {@const mine = r.user_id === auth.user?.id}
+                    <li
+                      class="flex items-start justify-between gap-3 border-l-2 pl-3 text-sm"
+                      class:border-accent={mine}
+                      class:border-fg-muted={!mine}
+                    >
+                      <div>
+                        <span
+                          class="font-mono uppercase tracking-[var(--tracking-claim)]"
+                          class:text-accent={mine}
+                        >
+                          {memberLabel(r.user_id)}{mine ? ' · du' : ''}
+                        </span>
+                        <span class="text-fg-muted">·</span>
+                        <span class="text-fg">{EQUIPMENT_LABEL[r.equipment]}</span>
+                        {#if r.note}<p class="mt-1 text-xs text-fg-muted">{r.note}</p>{/if}
+                      </div>
+                      {#if mine}
+                        <button
+                          onclick={() => deleteRequest(r.id)}
+                          class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)]"
+                        >
+                          loeschen
+                        </button>
+                      {/if}
+                    </li>
+                  {/each}
+                </ul>
+              {/if}
+            </div>
+            <div class="self-center">
+              <button
+                onclick={() => openForm(day.iso)}
+                class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent hover:underline"
+              >
+                {myDays.has(day.iso) ? 'aendern' : '+ anfordern'}
+              </button>
+            </div>
+          </li>
+        {/each}
+      </ul>
+
+      <!-- Bestellempfehlung jetzt unter der Tagesliste -->
+      <div class="mt-10 border-2 border-accent bg-surface p-5 md:p-6">
         <div class="flex items-baseline justify-between gap-3">
           <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
             Bestellempfehlung
@@ -333,99 +421,6 @@
           </p>
         {/if}
       </div>
-
-      <h2
-        class="mb-4 font-display text-xl font-black uppercase tracking-[var(--tracking-claim)] text-accent"
-      >
-        Tagesuebersicht
-      </h2>
-
-      <ul class="divide-y divide-border border-y border-border">
-        {#each days as day (day.iso)}
-          {@const dayReqs = requestsByDay.get(day.iso) ?? []}
-          {@const counts = {
-            razor: dayReqs.filter((r) => r.equipment === 'razor').length,
-            headphones: dayReqs.filter((r) => r.equipment === 'headphones').length,
-            inear: dayReqs.filter((r) => r.equipment === 'inear').length,
-          }}
-          <li
-            class="grid grid-cols-[120px_1fr_auto] gap-4 p-4 transition-colors hover:bg-surface md:grid-cols-[160px_1fr_auto]"
-            class:bg-surface={day.isFestival}
-            class:border-l-4={day.isFestival}
-            class:border-accent={day.isFestival}
-          >
-            <div>
-              <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-                {day.isFestival
-                  ? '⚡ Festival'
-                  : day.date.toLocaleDateString('de-DE', { weekday: 'short' })}
-              </p>
-              <p
-                class="mt-1 font-display text-lg font-black uppercase tracking-[var(--tracking-claim)] text-fg"
-              >
-                {fmtDate(day.date)}
-              </p>
-            </div>
-            <div>
-              {#if dayReqs.length === 0}
-                <p class="text-sm text-fg-muted">Niemand braucht hier was.</p>
-              {:else}
-                <div
-                  class="mb-2 flex flex-wrap gap-3 font-mono text-[11px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
-                >
-                  {#if counts.razor > 0}<span
-                      ><span class="font-black tabular-nums text-fg">{counts.razor}</span> Rasierer</span
-                    >{/if}
-                  {#if counts.headphones > 0}<span
-                      ><span class="font-black tabular-nums text-fg">{counts.headphones}</span> Kopfhoerer</span
-                    >{/if}
-                  {#if counts.inear > 0}<span
-                      ><span class="font-black tabular-nums text-fg">{counts.inear}</span> InEar</span
-                    >{/if}
-                </div>
-                <ul class="space-y-2">
-                  {#each dayReqs as r (r.id)}
-                    {@const mine = r.user_id === auth.user?.id}
-                    <li
-                      class="flex items-start justify-between gap-3 border-l-2 pl-3 text-sm"
-                      class:border-accent={mine}
-                      class:border-fg-muted={!mine}
-                    >
-                      <div>
-                        <span
-                          class="font-mono uppercase tracking-[var(--tracking-claim)]"
-                          class:text-accent={mine}
-                        >
-                          {memberLabel(r.user_id)}{mine ? ' · du' : ''}
-                        </span>
-                        <span class="text-fg-muted">·</span>
-                        <span class="text-fg">{EQUIPMENT_LABEL[r.equipment]}</span>
-                        {#if r.note}<p class="mt-1 text-xs text-fg-muted">{r.note}</p>{/if}
-                      </div>
-                      {#if mine}
-                        <button
-                          onclick={() => deleteRequest(r.id)}
-                          class="font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted hover:text-[var(--color-red,#E24B4A)]"
-                        >
-                          loeschen
-                        </button>
-                      {/if}
-                    </li>
-                  {/each}
-                </ul>
-              {/if}
-            </div>
-            <div class="self-center">
-              <button
-                onclick={() => openForm(day.iso)}
-                class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent hover:underline"
-              >
-                {myDays.has(day.iso) ? 'aendern' : '+ anfordern'}
-              </button>
-            </div>
-          </li>
-        {/each}
-      </ul>
     {/if}
   </section>
 </Container>
