@@ -80,10 +80,10 @@
   );
 
   // Bestellempfehlung: Peak-Bedarf pro Equipment über das gesamte
-  // Crew-Window. Wir bestellen nicht pro Tag, sondern für die ganze
+  // Crew-Fenster. Wir bestellen nicht pro Tag, sondern für die ganze
   // Zeit. Maximaler Tagesbedarf bestimmt die Stückzahl, weil parallel
   // genutzt wird (keine Tagesweiterreichung).
-  let reserveBuffer = $state(20); // Prozent zusaetzlicher Buffer
+  let reserveBuffer = $state(20); // Prozent zusätzlicher Buffer
 
   const peakDemand = $derived.by(() => {
     const peak: Record<Equipment, number> = { razor: 0, headphones: 0, inear: 0 };
@@ -345,11 +345,12 @@
         <h2
           class="mt-2 font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-fg md:text-3xl"
         >
-          {totalOrder} Geräte für die gesamte Festival-Zeit
+          {totalOrder} Geräte insgesamt bestellen
         </h2>
         <p class="mt-1 text-xs text-fg-muted">
-          Wir mieten für die gesamte Crew-Zeit. Maximalbedarf eines einzelnen Tages = Bestellmenge,
-          weil Geräte nicht von Tag zu Tag weitergereicht werden können.
+          Wir mieten die Geräte für das ganze Crew-Fenster auf einmal. Bestellmenge richtet sich
+          nach dem Tag mit dem höchsten Bedarf, weil die Geräte nicht von Tag zu Tag weitergegeben
+          werden können.
         </p>
 
         <div class="mt-5 grid gap-3 sm:grid-cols-3">

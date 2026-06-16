@@ -273,7 +273,7 @@
           Einzelpersonen
         </h2>
         <p class="mt-1 text-xs text-fg-muted">
-          Direkte Berechtigungen für einzelne User, unabhaengig von ihren Rollen. Hat Vorrang
+          Direkte Berechtigungen für einzelne User, unabhängig von ihren Rollen. Hat Vorrang
           gegenüber Rollen, wenn das Level höher ist.
         </p>
 

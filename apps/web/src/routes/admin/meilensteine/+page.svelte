@@ -150,7 +150,7 @@
       Meilensteine
     </h1>
     <p class="mt-3 max-w-2xl text-sm text-fg-muted">
-      Termin-Vorgaben für Bestellungen, Genehmigungen, Vertraege. Crew mit Lese-Recht auf
+      Termin-Vorgaben für Bestellungen, Genehmigungen, Verträge. Crew mit Lese-Recht auf
       <span class="font-mono text-fg">crew.meilensteine</span> sieht den Jahreskalender und kann erledigte
       Punkte abhaken.
     </p>

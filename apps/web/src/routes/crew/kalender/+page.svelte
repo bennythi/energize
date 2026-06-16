@@ -257,7 +257,7 @@
             >
               {fmtFullDate(selectedDay)}
             </h2>
-            <Button variant="ghost" onclick={() => openForm(selectedDay)}>+ eintragen</Button>
+            <Button variant="ghost" onclick={() => openForm(selectedDay)}>+ einträgen</Button>
           </div>
 
           {#if selectedEntries.length === 0}
@@ -322,7 +322,7 @@
   >
     <div class="w-full max-w-md border-2 border-accent bg-bg p-6">
       <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
-        Verfügbarkeit eintragen
+        Verfügbarkeit einträgen
       </p>
       <h2 class="mt-2 font-display text-2xl font-black uppercase text-fg">
         {fmtFullDate(formDay)}

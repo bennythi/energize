@@ -196,7 +196,7 @@
       return;
     }
     if (startingTotal <= 0) {
-      errorMsg = 'Startbestand ist null. Bitte Stückelungen eingeben.';
+      errorMsg = 'Startbestand ist 0. Trag die Stückzahl pro Geldwert ein.';
       return;
     }
     acting = true;
@@ -215,7 +215,7 @@
         .single();
       if (insertErr) throw insertErr;
 
-      // Stückelungen einfuegen (nur Werte > 0)
+      // Stückelungen einfügen (nur Werte > 0)
       const denomRows = DENOMINATIONS.filter((d) => (openCounts[d.cents] ?? 0) > 0).map((d) => ({
         shift_id: newShift.id,
         kind: 'start' as const,
@@ -389,7 +389,7 @@
           Keine offene Schicht
         </p>
         <p class="mt-2 text-fg">
-          Mit dem Eröffnen-Klick fuegst du eine neue Schicht hinzu. Du brauchst einen zweiten
+          Klick auf "Schicht eröffnen", um eine neue Schicht zu starten. Du brauchst einen zweiten
           Kassierer und ihr zählt den Wechselgeld-Startbestand gemeinsam.
         </p>
         {#if auth.canWrite(CREW_RESOURCES.kasse)}

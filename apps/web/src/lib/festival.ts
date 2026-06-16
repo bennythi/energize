@@ -22,8 +22,8 @@ export function isoDay(d: Date): string {
   return `${y}-${m}-${day}`;
 }
 
-// Monate, die der Crew-Kalender standardmaessig zeigt. Decken das
-// gesamte Crew-Window ab.
+// Monate, die der Crew-Kalender standardmäßig zeigt. Decken das
+// gesamte Crew-Fenster ab.
 export const CREW_CALENDAR_MONTHS: { year: number; month: number }[] = [
   { year: 2027, month: 4 }, // Mai (0-indexiert)
   { year: 2027, month: 5 }, // Juni

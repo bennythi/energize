@@ -128,8 +128,8 @@
         Jahres-Deadlines.
       </h1>
       <p class="mt-3 max-w-2xl text-sm text-fg-muted">
-        Bestellungen, Genehmigungen, Vertraege. Klick auf einen Punkt schaltet ihn auf erledigt,
-        wenn du Bearbeiten-Recht hast.
+        Bestellungen, Genehmigungen, Verträge. Klick auf einen Punkt schaltet ihn auf erledigt, wenn
+        du Bearbeiten-Recht hast.
       </p>
     </div>
   </Container>
@@ -197,7 +197,8 @@
                   <p
                     class="mt-1 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
                   >
-                    {overdue ? `${-days} Tg zu spät` : `in ${days} Tg`}
+                    {#if m.completed_at}erledigt{:else if overdue}{-days} Tage überfällig{:else if days === 0}heute
+                      fällig{:else if days === 1}morgen fällig{:else}in {days} Tagen{/if}
                   </p>
                 </div>
                 <div>

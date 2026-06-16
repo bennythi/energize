@@ -100,7 +100,7 @@
       Kassen-Stammdaten
     </h1>
     <p class="mt-3 max-w-2xl text-sm text-fg-muted">
-      Stammdaten der Top-Up-Kassen. Schichten werden im Crew-Bereich gefuehrt (<a
+      Stammdaten der Top-Up-Kassen. Schichten werden im Crew-Bereich geführt (<a
         href="/crew/kasse"
         class="text-accent hover:underline">/crew/kasse</a
       >). Inaktive Kassen tauchen dort nicht mehr auf.
