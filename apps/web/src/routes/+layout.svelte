@@ -156,10 +156,11 @@
           <li>
             <a
               href="/crew"
-              class="border-2 border-accent px-3 py-1 text-accent transition-all hover:bg-accent hover:text-fg-inverse"
+              class="inline-flex items-center gap-1.5 border-2 border-accent px-3 py-1 text-accent transition-all hover:bg-accent hover:text-fg-inverse"
               title="Crew-Bereich"
             >
-              ⚡ Crew
+              <span aria-hidden="true" class="text-[0.85em] leading-none">⚡</span>
+              <span>Crew</span>
             </a>
           </li>
         {/if}
@@ -167,10 +168,11 @@
           <li>
             <a
               href="/admin"
-              class="border-2 border-danger px-3 py-1 text-danger transition-all hover:bg-danger hover:text-fg"
+              class="inline-flex items-center gap-1.5 border-2 border-danger px-3 py-1 text-danger transition-all hover:bg-danger hover:text-fg"
               title="Admin-Bereich"
             >
-              ★ Admin
+              <span aria-hidden="true" class="text-[0.85em] leading-none">★</span>
+              <span>Admin</span>
             </a>
           </li>
         {/if}
@@ -260,9 +262,10 @@
               <a
                 href="/crew"
                 onclick={closeMobile}
-                class="drawer-link block border-l-4 border-accent px-6 py-4 text-accent hover:bg-surface"
+                class="drawer-link flex items-center gap-2 border-l-4 border-accent px-6 py-4 text-accent hover:bg-surface"
               >
-                ⚡ Crew
+                <span aria-hidden="true" class="text-[0.85em] leading-none">⚡</span>
+                <span>Crew</span>
               </a>
             </li>
           {/if}
@@ -271,9 +274,10 @@
               <a
                 href="/admin"
                 onclick={closeMobile}
-                class="drawer-link block border-l-4 border-danger px-6 py-4 text-danger hover:bg-surface"
+                class="drawer-link flex items-center gap-2 border-l-4 border-danger px-6 py-4 text-danger hover:bg-surface"
               >
-                ★ Admin
+                <span aria-hidden="true" class="text-[0.85em] leading-none">★</span>
+                <span>Admin</span>
               </a>
             </li>
           {/if}
