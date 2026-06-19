@@ -8,6 +8,7 @@
   import FavoriteButton from '$lib/FavoriteButton.svelte';
   import SupportSection from '$lib/SupportSection.svelte';
   import AvatarUpload from '$lib/AvatarUpload.svelte';
+  import FriendsSection from '$lib/FriendsSection.svelte';
   import type { PageData } from './$types';
 
   interface Props {
@@ -543,6 +544,21 @@
         </p>
         <div class="mt-4">
           <Button href="/feedback" variant="yellow">{m.nav_feedback()} →</Button>
+        </div>
+      </section>
+
+      <section class="mt-12">
+        <h2
+          class="font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-accent"
+        >
+          Freunde
+        </h2>
+        <p class="mt-2 text-sm text-fg-muted">
+          Verbinde dich mit anderen Energizern. Anfragen müssen von der Gegenseite bestätigt werden
+          und gehen per Mail raus.
+        </p>
+        <div class="mt-6">
+          <FriendsSection />
         </div>
       </section>
 

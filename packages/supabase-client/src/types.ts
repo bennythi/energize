@@ -207,6 +207,20 @@ export interface Database {
         };
         Relationships: [];
       };
+      friendships: {
+        Row: {
+          id: string;
+          user_low: string;
+          user_high: string;
+          requester_id: string;
+          status: 'pending' | 'accepted' | 'declined';
+          created_at: string;
+          responded_at: string | null;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       favorites: {
         Row: {
           user_id: string;
@@ -684,6 +698,52 @@ export interface Database {
         Returns: Array<{
           resource_slug: string;
           level: 'read' | 'write' | 'delete';
+        }>;
+      };
+      friend_request_send: {
+        Args: { target_user_id: string };
+        Returns: Array<{
+          id: string;
+          status: 'pending' | 'accepted' | 'declined';
+          message: string;
+        }>;
+      };
+      friend_request_respond: {
+        Args: { request_id: string; accept: boolean };
+        Returns: void;
+      };
+      friend_remove: {
+        Args: { other_user_id: string };
+        Returns: void;
+      };
+      friends_my_list: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          friendship_id: string;
+          friend_id: string;
+          display_name: string | null;
+          handle: string | null;
+          avatar_path: string | null;
+          since: string | null;
+        }>;
+      };
+      friends_my_pending: {
+        Args: Record<string, never>;
+        Returns: Array<{
+          friendship_id: string;
+          requester_id: string;
+          display_name: string | null;
+          handle: string | null;
+          avatar_path: string | null;
+          requested_at: string;
+        }>;
+      };
+      friend_status_with: {
+        Args: { other_user_id: string };
+        Returns: Array<{
+          status: 'pending' | 'accepted' | 'declined';
+          is_my_request: boolean;
+          friendship_id: string;
         }>;
       };
       crew_can: {

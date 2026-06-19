@@ -32,6 +32,12 @@
   let errorMsg = $state<string | null>(null);
   let toggling = $state(false);
 
+  let friendStatus = $state<'none' | 'pending_sent' | 'pending_received' | 'accepted' | 'declined'>(
+    'none',
+  );
+  let friendshipId = $state<string | null>(null);
+  let friendActing = $state(false);
+
   const isMe = $derived(auth.user?.id === userId);
 
   async function load() {
@@ -81,6 +87,22 @@
           .eq('followee_id', userId)
           .maybeSingle();
         imFollowing = !!f;
+
+        // Freundschafts-Status
+        const { data: fs } = await client.rpc('friend_status_with', {
+          other_user_id: userId,
+        });
+        const row = fs?.[0];
+        if (!row) {
+          friendStatus = 'none';
+          friendshipId = null;
+        } else {
+          friendshipId = row.friendship_id;
+          if (row.status === 'accepted') friendStatus = 'accepted';
+          else if (row.status === 'declined') friendStatus = 'declined';
+          else if (row.is_my_request) friendStatus = 'pending_sent';
+          else friendStatus = 'pending_received';
+        }
       }
     } catch (err) {
       console.error('[profile] load failed', err);
@@ -123,6 +145,56 @@
       followerCount += wasFollowing ? 1 : -1;
     } finally {
       toggling = false;
+    }
+  }
+
+  async function sendFriendRequest() {
+    const client = auth.client;
+    if (!client || !userId) return;
+    friendActing = true;
+    try {
+      const { error } = await client.rpc('friend_request_send', { target_user_id: userId });
+      if (error) throw error;
+      await load();
+    } catch (err) {
+      console.error('[profile] friend request failed', err);
+      alert(err instanceof Error ? err.message : 'Anfrage fehlgeschlagen');
+    } finally {
+      friendActing = false;
+    }
+  }
+
+  async function respondFriend(accept: boolean) {
+    const client = auth.client;
+    if (!client || !friendshipId) return;
+    friendActing = true;
+    try {
+      const { error } = await client.rpc('friend_request_respond', {
+        request_id: friendshipId,
+        accept,
+      });
+      if (error) throw error;
+      await load();
+    } catch (err) {
+      console.error('[profile] friend respond failed', err);
+    } finally {
+      friendActing = false;
+    }
+  }
+
+  async function unfriend() {
+    const client = auth.client;
+    if (!client || !userId) return;
+    if (!confirm('Freundschaft wirklich beenden?')) return;
+    friendActing = true;
+    try {
+      const { error } = await client.rpc('friend_remove', { other_user_id: userId });
+      if (error) throw error;
+      await load();
+    } catch (err) {
+      console.error('[profile] unfriend failed', err);
+    } finally {
+      friendActing = false;
     }
   }
 
@@ -190,11 +262,37 @@
               {#if isMe}
                 <Button href="/account" variant="ghost">Profil bearbeiten</Button>
               {:else if auth.user}
-                <Button onclick={toggleFollow} variant={imFollowing ? 'ghost' : 'yellow'}>
+                {#if friendStatus === 'accepted'}
+                  <Button variant="ghost" onclick={unfriend} disabled={friendActing}>
+                    {friendActing ? '…' : '✓ Befreundet'}
+                  </Button>
+                {:else if friendStatus === 'pending_sent'}
+                  <Button variant="ghost" disabled>Anfrage gesendet</Button>
+                {:else if friendStatus === 'pending_received'}
+                  <Button
+                    variant="yellow"
+                    onclick={() => respondFriend(true)}
+                    disabled={friendActing}
+                  >
+                    Anfrage annehmen
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onclick={() => respondFriend(false)}
+                    disabled={friendActing}
+                  >
+                    Ablehnen
+                  </Button>
+                {:else}
+                  <Button variant="yellow" onclick={sendFriendRequest} disabled={friendActing}>
+                    {friendActing ? '…' : '+ Freund anfragen'}
+                  </Button>
+                {/if}
+                <Button onclick={toggleFollow} variant="ghost">
                   {toggling ? '…' : imFollowing ? 'Entfolgen' : 'Folgen'}
                 </Button>
               {:else}
-                <Button href="/login" variant="yellow">Login zum Folgen</Button>
+                <Button href="/login" variant="yellow">Login zum Anfragen</Button>
               {/if}
             </div>
           </div>
