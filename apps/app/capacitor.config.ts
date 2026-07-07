@@ -1,10 +1,9 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'de.energize-festival.app',
+  appId: 'de.energize_festival.app',
   appName: 'ENERGIZE',
   webDir: 'build',
-  bundledWebRuntime: false,
   android: {
     backgroundColor: '#0A0A0A',
   },

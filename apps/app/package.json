@@ -16,6 +16,7 @@
     "cap:add:android": "cap add android"
   },
   "dependencies": {
+    "@capacitor/android": "^6.2.0",
     "@capacitor/browser": "^6.0.4",
     "@capacitor/core": "^6.2.0",
     "@energize/design-tokens": "workspace:*",
