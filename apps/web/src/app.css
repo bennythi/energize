@@ -5,9 +5,20 @@
 @layer base {
   html,
   body {
-    background-color: var(--color-bg);
     color: var(--color-fg);
     font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+  }
+  /* Ambient-Hintergrund: dezente Farbverlaeufe, damit Glasflaechen wirken.
+   * Fixiert, damit beim Scrollen ruhig. */
+  body {
+    background-color: var(--color-bg);
+    background-image:
+      radial-gradient(60rem 60rem at 12% -10%, var(--color-accent-glow), transparent 60%),
+      radial-gradient(50rem 50rem at 100% 0%, rgba(255, 255, 255, 0.05), transparent 55%),
+      radial-gradient(70rem 40rem at 50% 120%, var(--color-accent-glow), transparent 60%);
+    background-attachment: fixed;
+    min-height: 100vh;
   }
 
   ::selection {
@@ -83,6 +94,52 @@
 }
 
 @layer utilities {
+  /* Glasflaeche: transluzent + Blur + feiner Rand + oberer Highlight. */
+  .glass {
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass);
+  }
+  .glass-strong {
+    background-color: var(--glass-bg-strong);
+    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass);
+  }
+  /* Standard-Karte: Glas + grosse Rundung. */
+  .card {
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-glass);
+  }
+  /* Eingabefeld: dunkel-transluzent, abgerundet, Akzent-Fokus. */
+  .field {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.25);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 0.7rem 0.9rem;
+    color: var(--color-fg);
+    font-family: var(--font-body);
+    transition:
+      border-color var(--dur-hover) var(--ease-out),
+      box-shadow var(--dur-hover) var(--ease-out);
+  }
+  .field::placeholder {
+    color: var(--color-fg-muted);
+  }
+  .field:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px var(--color-accent-glow);
+  }
+
   .claim {
     font-family: var(--font-display);
     font-weight: 900;

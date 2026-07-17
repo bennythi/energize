@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 
-const INSTANCE = process.env.INSTANCE ?? 'energize';
+const INSTANCE = process.env.INSTANCE ?? 'platform';
 const instanceDir = path.resolve(dirname, `../../instances/${INSTANCE}`);
 
 export default defineConfig({

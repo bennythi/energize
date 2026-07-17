@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
-  import { Container, Heading, Button } from '@platform/ui';
+  import { Button } from '@platform/ui';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
   import QrCode from '$lib/modules/shop/QrCode.svelte';
 
@@ -48,68 +48,48 @@
     return s === 'valid' ? 'Gueltig' : s === 'used' ? 'Verwendet' : 'Ungueltig';
   }
   function statusClass(s: Ticket['status']): string {
-    return s === 'valid'
-      ? 'border-accent text-accent'
-      : s === 'used'
-        ? 'border-fg-muted text-fg-muted'
-        : 'border-danger text-danger';
+    return s === 'valid' ? 'text-success' : s === 'used' ? 'text-fg-muted' : 'text-danger';
   }
 </script>
 
 <svelte:head>
-  <title>Meine Tickets — ENERGIZE</title>
+  <title>Meine Tickets</title>
 </svelte:head>
 
-<Container size="sm">
-  <section class="py-16 md:py-24">
-    <Heading level={1} display>Meine Tickets</Heading>
+<div class="mx-auto w-full max-w-xl px-5 py-10 md:py-16">
+  <h1 class="text-3xl font-semibold tracking-tight text-fg md:text-4xl">Meine Tickets</h1>
 
-    {#if loading}
-      <p class="mt-8 text-fg-muted">…</p>
-    {:else if tickets.length === 0}
-      <p class="mt-8 text-fg-muted">Du hast noch keine Tickets.</p>
-      <div class="mt-6">
-        <Button href="/shop" variant="yellow">Zum Ticketshop</Button>
-      </div>
-    {:else}
-      <ul class="mt-8 space-y-6">
-        {#each tickets as t (t.id)}
-          <li
-            class="flex flex-col items-center gap-4 border-2 border-border bg-surface p-6 sm:flex-row sm:items-center"
-          >
-            <div class="shrink-0">
-              {#if t.status === 'valid'}
-                <QrCode value={t.qr_token} size={180} />
-              {:else}
-                <div
-                  class="flex h-[180px] w-[180px] items-center justify-center bg-bg font-mono text-xs text-fg-muted"
-                >
-                  {statusLabel(t.status)}
-                </div>
-              {/if}
-            </div>
-            <div class="min-w-0 flex-1 text-center sm:text-left">
-              <p
-                class="font-display text-xl font-black uppercase tracking-[var(--tracking-claim)] text-fg"
-              >
-                {typeName(t)}
-              </p>
-              <p
-                class="mt-1 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] text-fg-muted"
-              >
-                {t.code}
-              </p>
-              <span
-                class="mt-3 inline-block border-2 px-2 py-1 font-mono text-[10px] uppercase tracking-[var(--tracking-claim)] {statusClass(
-                  t.status,
-                )}"
+  {#if loading}
+    <div class="card mt-8 h-56 animate-pulse opacity-50"></div>
+  {:else if tickets.length === 0}
+    <div class="card mt-8 p-6">
+      <p class="text-fg-muted">Du hast noch keine Tickets.</p>
+      <div class="mt-5"><Button href="/shop">Zum Ticketshop</Button></div>
+    </div>
+  {:else}
+    <div class="mt-8 flex flex-col gap-5">
+      {#each tickets as t (t.id)}
+        <article class="card flex flex-col items-center gap-5 p-6 sm:flex-row">
+          <div class="shrink-0 rounded-2xl bg-white p-3">
+            {#if t.status === 'valid'}
+              <QrCode value={t.qr_token} size={168} />
+            {:else}
+              <div
+                class="flex h-[168px] w-[168px] items-center justify-center text-xs text-[color:#666]"
               >
                 {statusLabel(t.status)}
-              </span>
-            </div>
-          </li>
-        {/each}
-      </ul>
-    {/if}
-  </section>
-</Container>
+              </div>
+            {/if}
+          </div>
+          <div class="min-w-0 flex-1 text-center sm:text-left">
+            <p class="text-xl font-semibold tracking-tight text-fg">{typeName(t)}</p>
+            <p class="mt-1 font-mono text-[11px] text-fg-muted">{t.code}</p>
+            <p class="mt-3 text-sm font-medium {statusClass(t.status)}">
+              ● {statusLabel(t.status)}
+            </p>
+          </div>
+        </article>
+      {/each}
+    </div>
+  {/if}
+</div>

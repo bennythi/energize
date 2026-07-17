@@ -1,6 +1,6 @@
 <script lang="ts">
   import { goto } from '$app/navigation';
-  import { Container, Heading, Button } from '@platform/ui';
+  import { Button } from '@platform/ui';
   import { m } from '@platform/i18n';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
 
@@ -10,11 +10,8 @@
   let submitting = $state(false);
   let errorMsg = $state<string | null>(null);
 
-  // Nach Auth-Resolution redirecten, falls schon eingeloggt.
   $effect(() => {
-    if (!auth.loading && auth.user) {
-      void goto('/account', { replaceState: true });
-    }
+    if (!auth.loading && auth.user) void goto('/account', { replaceState: true });
   });
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -64,79 +61,59 @@
 </script>
 
 <svelte:head>
-  <title>{m.login_title()} — ENERGIZE</title>
+  <title>{m.login_title()}</title>
 </svelte:head>
 
-<Container size="sm">
-  <section class="py-16 md:py-24">
-    <Heading level={1} display>{m.login_title()}</Heading>
+<div class="mx-auto w-full max-w-md px-5 py-14 md:py-20">
+  <h1 class="text-3xl font-semibold tracking-tight text-fg md:text-4xl">{m.login_title()}</h1>
 
-    {#if !isAuthConfigured}
-      <div class="mt-8 border-2 border-border bg-surface p-6">
-        <h2
-          class="font-display text-lg font-black uppercase tracking-[var(--tracking-claim)] text-fg"
+  {#if !isAuthConfigured}
+    <div class="card mt-8 p-6">
+      <h2 class="font-semibold text-fg">{m.login_not_configured_title()}</h2>
+      <p class="mt-2 text-sm text-fg-muted">{m.login_not_configured_body()}</p>
+    </div>
+  {:else if otpId}
+    <p class="mt-3 text-fg-muted">{m.login_code_lead()}</p>
+    <form onsubmit={submitCode} class="card mt-6 flex flex-col gap-4 p-6">
+      <label class="block">
+        <span class="text-xs font-medium text-fg-muted">{m.login_code_label()}</span>
+        <input
+          type="text"
+          inputmode="numeric"
+          autocomplete="one-time-code"
+          bind:value={code}
+          placeholder={m.login_code_placeholder()}
+          disabled={submitting}
+          class="field mt-2 text-lg tracking-[0.3em]"
+        />
+      </label>
+      {#if errorMsg}<p class="text-sm text-danger" role="alert">{errorMsg}</p>{/if}
+      <div class="flex flex-wrap gap-3">
+        <Button type="submit"
+          >{submitting ? m.login_code_submitting() : m.login_code_submit()}</Button
         >
-          {m.login_not_configured_title()}
-        </h2>
-        <p class="mt-3 text-sm text-fg-muted">{m.login_not_configured_body()}</p>
+        <Button variant="ghost" onclick={reset}>{m.login_back()}</Button>
       </div>
-    {:else if otpId}
-      <p class="mt-6 text-fg-muted">{m.login_code_lead()}</p>
-
-      <form onsubmit={submitCode} class="mt-8 space-y-4">
-        <label class="block">
-          <span class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-            {m.login_code_label()}
-          </span>
-          <input
-            type="text"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-            bind:value={code}
-            placeholder={m.login_code_placeholder()}
-            disabled={submitting}
-            class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-lg tracking-[0.3em] text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
-          />
-        </label>
-
-        {#if errorMsg}
-          <p class="text-sm text-danger" role="alert">{errorMsg}</p>
-        {/if}
-
-        <div class="flex flex-wrap gap-2">
-          <Button type="submit" variant="yellow">
-            {submitting ? m.login_code_submitting() : m.login_code_submit()}
-          </Button>
-          <Button variant="ghost" onclick={reset}>{m.login_back()}</Button>
-        </div>
-      </form>
-    {:else}
-      <p class="mt-6 text-fg-muted">{m.login_lead()}</p>
-
-      <form onsubmit={requestCode} class="mt-8 space-y-4">
-        <label class="block">
-          <span class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-            {m.login_email_label()}
-          </span>
-          <input
-            type="email"
-            required
-            autocomplete="email"
-            bind:value={email}
-            placeholder={m.login_email_placeholder()}
-            disabled={submitting}
-            class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
-          />
-        </label>
-
-        {#if errorMsg}
-          <p class="text-sm text-danger" role="alert">{errorMsg}</p>
-        {/if}
-
-        <Button type="submit" variant="yellow">
-          {submitting ? m.login_submitting() : m.login_submit()}
-        </Button>
-      </form>
-    {/if}
-  </section>
-</Container>
+    </form>
+  {:else}
+    <p class="mt-3 text-fg-muted">{m.login_lead()}</p>
+    <form onsubmit={requestCode} class="card mt-6 flex flex-col gap-4 p-6">
+      <label class="block">
+        <span class="text-xs font-medium text-fg-muted">{m.login_email_label()}</span>
+        <input
+          type="email"
+          required
+          autocomplete="email"
+          bind:value={email}
+          placeholder={m.login_email_placeholder()}
+          disabled={submitting}
+          class="field mt-2"
+        />
+      </label>
+      {#if errorMsg}<p class="text-sm text-danger" role="alert">{errorMsg}</p>{/if}
+      <div>
+        <Button type="submit">{submitting ? m.login_submitting() : m.login_submit()}</Button>
+      </div>
+    </form>
+  {/if}
+</div>

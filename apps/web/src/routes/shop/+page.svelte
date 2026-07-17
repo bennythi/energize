@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { Container, Heading, Button } from '@platform/ui';
+  import { Button } from '@platform/ui';
   import { auth } from '$lib/auth.svelte';
   import { cart } from '$lib/modules/shop/cart.svelte';
   import { formatPrice } from '$lib/modules/shop/api';
@@ -45,69 +45,129 @@
   function available(t: TicketType): number {
     return (t.quota || 0) - (t.sold || 0) - (t.reserved || 0);
   }
+  function inCart(id: string): number {
+    return cart.items.find((i) => i.ticketType === id)?.qty ?? 0;
+  }
 </script>
 
 <svelte:head>
-  <title>Ticketshop — ENERGIZE</title>
+  <title>Ticketshop</title>
 </svelte:head>
 
-<Container>
-  <section class="py-16 md:py-24">
-    <Heading level={1} display>Ticketshop</Heading>
-    <p class="mt-4 max-w-2xl text-fg-muted">Waehle deine Tickets. Bezahlung sicher im Checkout.</p>
+<div class="mx-auto w-full max-w-4xl px-5 py-10 md:py-16">
+  <h1 class="text-3xl font-semibold tracking-tight text-fg md:text-4xl">Ticketshop</h1>
+  <p class="mt-3 max-w-xl text-fg-muted">Waehle deine Tickets. Sichere Bezahlung im Checkout.</p>
 
-    {#if loading}
-      <p class="mt-10 text-fg-muted">…</p>
-    {:else if types.length === 0}
-      <p class="mt-10 text-fg-muted">Aktuell sind keine Tickets im Verkauf.</p>
-    {:else}
-      <ul class="mt-10 grid gap-4 md:grid-cols-2">
-        {#each types as t (t.id)}
-          {@const soldOut = available(t) <= 0}
-          <li class="flex flex-col border-2 border-border bg-surface p-6">
-            <div class="flex items-start justify-between gap-4">
-              <h2
-                class="font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-fg"
-              >
-                {t.name}
-              </h2>
-              <span class="shrink-0 font-mono text-lg text-accent"
-                >{formatPrice(t.price, t.currency)}</span
-              >
-            </div>
-            {#if t.description}
-              <p class="mt-2 text-sm text-fg-muted">{t.description}</p>
-            {/if}
-            <div class="mt-6 flex items-center justify-between gap-3">
-              {#if soldOut}
-                <span
-                  class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-danger"
-                >
-                  Ausverkauft
-                </span>
-              {:else}
-                <Button
-                  variant="yellow"
-                  onclick={() => cart.add({ ticketType: t.id, name: t.name, price: t.price })}
-                >
-                  + In den Warenkorb
-                </Button>
+  {#if loading}
+    <div class="mt-10 grid gap-4 sm:grid-cols-2">
+      {#each Array(2) as _, i (i)}
+        <div class="card h-40 animate-pulse opacity-50"></div>
+      {/each}
+    </div>
+  {:else if types.length === 0}
+    <p class="mt-10 text-fg-muted">Aktuell sind keine Tickets im Verkauf.</p>
+  {:else}
+    <div class="mt-10 grid gap-4 sm:grid-cols-2">
+      {#each types as t (t.id)}
+        {@const soldOut = available(t) <= 0}
+        {@const qty = inCart(t.id)}
+        <article class="card flex flex-col gap-5 p-6">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-semibold tracking-tight text-fg">{t.name}</h2>
+              {#if t.description}
+                <p class="mt-1.5 text-sm text-fg-muted">{t.description}</p>
               {/if}
             </div>
-          </li>
-        {/each}
-      </ul>
+            <span class="shrink-0 text-lg font-semibold text-accent"
+              >{formatPrice(t.price, t.currency)}</span
+            >
+          </div>
 
-      {#if cart.count > 0}
-        <div
-          class="mt-10 flex flex-wrap items-center justify-between gap-4 border-2 border-accent bg-bg p-5"
-        >
-          <p class="font-mono text-sm text-fg">
-            {cart.count} Ticket(s) · <span class="text-accent">{formatPrice(cart.total)}</span>
-          </p>
-          <Button href="/shop/checkout" variant="yellow">Zur Kasse →</Button>
-        </div>
-      {/if}
+          <div class="mt-auto">
+            {#if soldOut}
+              <span class="text-sm font-medium text-danger">Ausverkauft</span>
+            {:else if qty > 0}
+              <div class="flex items-center gap-3">
+                <div class="stepper">
+                  <button
+                    type="button"
+                    aria-label="weniger"
+                    onclick={() => cart.setQty(t.id, qty - 1)}>−</button
+                  >
+                  <span>{qty}</span>
+                  <button
+                    type="button"
+                    aria-label="mehr"
+                    onclick={() => cart.setQty(t.id, Math.min(qty + 1, t.per_order_limit || 10))}
+                    >+</button
+                  >
+                </div>
+                <span class="text-xs text-fg-muted">im Warenkorb</span>
+              </div>
+            {:else}
+              <Button
+                variant="ghost"
+                onclick={() => cart.add({ ticketType: t.id, name: t.name, price: t.price })}
+              >
+                In den Warenkorb
+              </Button>
+            {/if}
+          </div>
+        </article>
+      {/each}
+    </div>
+
+    {#if cart.count > 0}
+      <div class="cart-bar card">
+        <p class="text-sm text-fg">
+          <span class="font-semibold">{cart.count}</span> Ticket(s) ·
+          <span class="font-semibold text-accent">{formatPrice(cart.total)}</span>
+        </p>
+        <Button href="/shop/checkout">Zur Kasse</Button>
+      </div>
     {/if}
-  </section>
-</Container>
+  {/if}
+</div>
+
+<style>
+  .stepper {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--radius-pill);
+    background-color: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+  }
+  .stepper button {
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 9999px;
+    color: var(--color-fg);
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: background-color var(--dur-hover) var(--ease-out);
+  }
+  .stepper button:hover {
+    background-color: var(--glass-bg-strong);
+  }
+  .stepper span {
+    min-width: 1.25rem;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    color: var(--color-fg);
+  }
+
+  .cart-bar {
+    position: sticky;
+    bottom: 1rem;
+    margin-top: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border-radius: var(--radius-pill);
+  }
+</style>

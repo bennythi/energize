@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from 'svelte';
   import { page } from '$app/state';
-  import { Container, Heading, Button } from '@platform/ui';
+  import { Button } from '@platform/ui';
   import { auth } from '$lib/auth.svelte';
   import { cart } from '$lib/modules/shop/cart.svelte';
   import { devComplete } from '$lib/modules/shop/api';
@@ -38,7 +38,6 @@
     }
   }
 
-  // Stub-Modus: Zahlung lokal simulieren (ohne Mollie/Stripe).
   async function simulate() {
     if (!orderId) return;
     simulating = true;
@@ -54,44 +53,71 @@
 </script>
 
 <svelte:head>
-  <title>Bestellung — ENERGIZE</title>
+  <title>Bestellung</title>
 </svelte:head>
 
-<Container size="sm">
-  <section class="py-16 md:py-24">
-    {#if status === 'paid'}
-      <Heading level={1} display>Danke!</Heading>
-      <p class="mt-6 text-fg-muted">
-        Deine Zahlung ist eingegangen. Deine Tickets liegen in deinem Account bereit.
-      </p>
-      <div class="mt-8">
-        <Button href="/account/tickets" variant="yellow">Meine Tickets →</Button>
-      </div>
-    {:else if status === 'cancelled' || status === 'expired'}
-      <Heading level={1} display>Bestellung abgebrochen</Heading>
-      <p class="mt-6 text-fg-muted">Die Bestellung ist {status}. Bitte versuche es erneut.</p>
-      <div class="mt-8">
-        <Button href="/shop" variant="yellow">Zurueck zum Shop</Button>
-      </div>
-    {:else}
-      <Heading level={1} display>Zahlung wird bestaetigt …</Heading>
-      <p class="mt-6 text-fg-muted">Einen Moment, wir pruefen den Zahlungseingang.</p>
+<div class="mx-auto w-full max-w-md px-5 py-14 md:py-20">
+  {#if status === 'paid'}
+    <div class="card p-8 text-center">
+      <div class="check">✓</div>
+      <h1 class="mt-4 text-2xl font-semibold tracking-tight text-fg">Danke!</h1>
+      <p class="mt-2 text-fg-muted">Deine Zahlung ist eingegangen. Deine Tickets liegen bereit.</p>
+      <div class="mt-6"><Button href="/account/tickets">Meine Tickets</Button></div>
+    </div>
+  {:else if status === 'cancelled' || status === 'expired'}
+    <div class="card p-8 text-center">
+      <h1 class="text-2xl font-semibold tracking-tight text-fg">Bestellung abgebrochen</h1>
+      <p class="mt-2 text-fg-muted">Die Bestellung ist {status}. Bitte versuche es erneut.</p>
+      <div class="mt-6"><Button href="/shop">Zurueck zum Shop</Button></div>
+    </div>
+  {:else}
+    <div class="card p-8 text-center">
+      <div class="spinner"></div>
+      <h1 class="mt-5 text-2xl font-semibold tracking-tight text-fg">Zahlung wird bestaetigt …</h1>
+      <p class="mt-2 text-fg-muted">Einen Moment, wir pruefen den Zahlungseingang.</p>
 
       {#if provider === 'stub'}
-        <div class="mt-8 border-2 border-accent bg-surface p-5">
-          <p class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-accent">
-            Testmodus
-          </p>
-          <p class="mt-2 text-sm text-fg-muted">
-            Kein echter Zahlungsanbieter konfiguriert. Zahlung simulieren:
-          </p>
-          <div class="mt-4">
-            <Button variant="yellow" onclick={simulate} disabled={simulating}>
-              {simulating ? '…' : 'Zahlung simulieren'}
-            </Button>
+        <div
+          class="mt-6 rounded-xl border border-[color:var(--glass-border)] bg-[color:var(--glass-bg)] p-4 text-left"
+        >
+          <p class="text-xs font-medium uppercase tracking-wide text-accent">Testmodus</p>
+          <p class="mt-1.5 text-sm text-fg-muted">Kein echter Zahlungsanbieter konfiguriert.</p>
+          <div class="mt-3">
+            <Button onclick={simulate} disabled={simulating}
+              >{simulating ? '…' : 'Zahlung simulieren'}</Button
+            >
           </div>
         </div>
       {/if}
-    {/if}
-  </section>
-</Container>
+    </div>
+  {/if}
+</div>
+
+<style>
+  .check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 9999px;
+    font-size: 1.5rem;
+    color: #05261a;
+    background-color: var(--color-success);
+    box-shadow: 0 8px 24px rgba(52, 211, 153, 0.35);
+  }
+  .spinner {
+    width: 2.25rem;
+    height: 2.25rem;
+    margin: 0 auto;
+    border-radius: 9999px;
+    border: 3px solid var(--glass-border);
+    border-top-color: var(--color-accent);
+    animation: spin 700ms linear infinite;
+  }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

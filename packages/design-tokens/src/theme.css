@@ -1,72 +1,72 @@
 /**
  * Tailwind v4 theme: NEUTRALE Default-Tokens der Plattform.
  *
- * Dies ist die einzige Quelle der Wahrheit fuer alle Design-Tokens.
- * Beide Apps importieren diesen Block, danach ueberschreibt jede Instanz
- * dieselben Variablen-Namen in instances/<name>/tokens.css.
- *
- * Regel: Token-NAMEN sind der Vertrag. Instanzen aendern nur die Werte,
- * nie die Namen. Aenderung hier wirkt auf alle Instanzen, Aenderung in
- * einer Instanz-tokens.css nur auf diese Marke.
+ * Moderne, glas-betonte Default-Optik (dunkel, abgerundet, dezenter Blur).
+ * Einzige Quelle der Wahrheit; Instanzen ueberschreiben dieselben Namen in
+ * instances/<name>/tokens.css. Token-NAMEN sind der Vertrag.
  */
 @theme {
   /* Dunkle Basis / Surfaces (Dark-Mode-Default) */
-  --color-bg: #0b0b0f;
-  --color-surface: #16161c;
-  --color-surface-alt: #0b0b0f;
-  --color-border: #26262e;
+  --color-bg: #0a0b10;
+  --color-surface: #14161d;
+  --color-surface-alt: #0e1016;
+  --color-border: #262a35;
 
   /* Helle Variante */
-  --color-bg-light: #f6f6f7;
-  --color-border-light: #e3e3e6;
+  --color-bg-light: #f6f7f9;
+  --color-border-light: #e4e6ea;
 
   /* Vordergrund / Text */
-  --color-fg: #f4f4f6;
-  --color-fg-inverse: #0b0b0f;
-  /* AA-tauglich (>= 4.5:1) auf der dunklen Basis. */
-  --color-fg-muted: #9b9ba4;
+  --color-fg: #eef0f5;
+  --color-fg-inverse: #0a0b10;
+  --color-fg-muted: #98a0b0;
 
-  /* Akzent (neutral: modernes Indigo, pro Instanz ueberschrieben) */
-  --color-accent: #6d78ff;
-  --color-accent-pure: #5a67ff;
-  --color-accent-glow: rgba(109, 120, 255, 0.18);
+  /* Akzent (neutral: modernes Indigo-Violett) */
+  --color-accent: #7c82ff;
+  --color-accent-pure: #6b73ff;
+  --color-accent-glow: rgba(124, 130, 255, 0.35);
 
   /* Status */
-  --color-success: #22c77b;
-  --color-warn: #f5b301;
-  --color-danger: #e24b4a;
+  --color-success: #34d399;
+  --color-warn: #fbbf24;
+  --color-danger: #f87171;
 
-  /* Typography (neutral: Inter-Stack als Display + Body) */
+  /* Glas-Effekt (Panels, Nav, Karten) */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-bg-strong: rgba(255, 255, 255, 0.08);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-highlight: rgba(255, 255, 255, 0.14);
+  --glass-blur: 18px;
+
+  /* Typography (neutral: Inter-Stack) */
   --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
 
-  --text-hero: clamp(3rem, 10vw, 7.5rem);
+  --text-hero: clamp(2.5rem, 7vw, 5rem);
   --text-hero--line-height: 1.05;
-  --text-hero--letter-spacing: -0.02em;
+  --text-hero--letter-spacing: -0.03em;
 
-  --tracking-claim: 0.1em;
+  --tracking-claim: 0.02em;
   --tracking-wide: 0.05em;
 
-  /* Radius */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
+  /* Radius: modern, abgerundet */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
   --radius-lg: 1rem;
   --radius-xl: 1.5rem;
+  --radius-2xl: 2rem;
   --radius-pill: 9999px;
 
-  /* Shadow / Glow (Glow nutzt die Akzent-Variable, folgt also dem Brand) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
-  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.7);
-  --shadow-glow: 0 0 24px var(--color-accent-glow);
-  --shadow-glow-strong: 0 0 48px var(--color-accent-glow);
+  /* Shadow / Glow / Glass */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 0 1px var(--color-accent-glow), 0 8px 30px var(--color-accent-glow);
+  --shadow-glow-strong: 0 0 0 1px var(--color-accent-glow), 0 12px 44px var(--color-accent-glow);
+  --shadow-glass: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 var(--glass-highlight);
 
-  /* Easing (Emil-Kowalski-Curves, staerker als CSS-Defaults).
-   * - out: enter feels instant, ease-out-power3
-   * - in-out: on-screen movement (drawer, modal swap)
-   * - drawer: iOS-like bottom-sheet curve aus Ionic
-   * - spring: subtle overshoot fuer playful elements */
+  /* Easing (Emil-Kowalski-Curves, staerker als CSS-Defaults) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
@@ -74,7 +74,7 @@
 
   /* Standard-Durations */
   --dur-press: 140ms;
-  --dur-hover: 180ms;
-  --dur-enter: 220ms;
-  --dur-page: 280ms;
+  --dur-hover: 200ms;
+  --dur-enter: 260ms;
+  --dur-page: 320ms;
 }

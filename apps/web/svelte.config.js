@@ -3,7 +3,7 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 // Aktive Instanz (Default 'energize'). Muss zum Vite-Alias passen, damit
 // svelte-check / TS $instance/* genauso aufloesen wie der Vite-Bundler.
-const INSTANCE = process.env.INSTANCE ?? 'energize';
+const INSTANCE = process.env.INSTANCE ?? 'platform';
 
 /** @type {import('@sveltejs/kit').Config} */
 const config = {

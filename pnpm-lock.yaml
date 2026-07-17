@@ -185,6 +185,12 @@ importers:
         specifier: workspace:*
         version: link:../../packages/modules
 
+  instances/platform:
+    devDependencies:
+      '@platform/modules':
+        specifier: workspace:*
+        version: link:../../packages/modules
+
   packages/design-tokens:
     devDependencies:
       '@platform/tsconfig':

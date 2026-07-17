@@ -8,7 +8,7 @@ const dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Aktive Instanz zur Build-/Dev-Zeit. Default 'energize' (erste Instanz).
 // Wird ueber INSTANCE=<slug> gesetzt (siehe Root-Scripts build:<slug>).
-const INSTANCE = process.env.INSTANCE ?? 'energize';
+const INSTANCE = process.env.INSTANCE ?? 'platform';
 const instanceDir = path.resolve(dirname, `../../instances/${INSTANCE}`);
 
 export default defineConfig({

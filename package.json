@@ -12,8 +12,10 @@
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
+    "dev:platform": "cross-env INSTANCE=platform PUBLIC_INSTANCE=platform turbo run dev --filter=@platform/web",
     "dev:energize": "cross-env INSTANCE=energize PUBLIC_INSTANCE=energize turbo run dev --filter=@platform/web",
     "dev:demo": "cross-env INSTANCE=demo PUBLIC_INSTANCE=demo turbo run dev --filter=@platform/web",
+    "build:platform": "cross-env INSTANCE=platform PUBLIC_INSTANCE=platform turbo run build --filter=@platform/web",
     "build:energize": "cross-env INSTANCE=energize PUBLIC_INSTANCE=energize turbo run build --filter=@platform/web",
     "build:demo": "cross-env INSTANCE=demo PUBLIC_INSTANCE=demo turbo run build --filter=@platform/web",
     "lint": "turbo run lint",

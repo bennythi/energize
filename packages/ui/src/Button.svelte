@@ -2,10 +2,10 @@
   interface Props {
     href?: string;
     /**
-     * Style-Guide-Varianten:
-     * - `yellow` → Gelb auf Schwarz (Hero-CTA, Energize-typisch)
-     * - `inverse` → Schwarz auf Gelb (Plakat-/Achtung-Style)
-     * - `ghost` → Transparenter Button mit weißer Outline
+     * Varianten:
+     * - `yellow`  -> Primaer: gefuellter Akzent mit Glow (Haupt-CTA)
+     * - `inverse` -> Primaer-Alternative (identisch, Legacy-Name)
+     * - `ghost`   -> Glas: transluzent mit feinem Rand (sekundaer)
      */
     variant?: 'yellow' | 'inverse' | 'ghost';
     type?: 'button' | 'submit';
@@ -24,16 +24,14 @@
     class: className = '',
     children,
   }: Props = $props();
+
+  const cls = $derived(variant === 'ghost' ? 'btn btn-glass' : 'btn btn-primary');
 </script>
 
 {#if href}
-  <a {href} class="btn btn-{variant} {className}" rel="noopener">
-    <span class="btn-inner">{@render children?.()}</span>
-  </a>
+  <a {href} class="{cls} {className}" rel="noopener">{@render children?.()}</a>
 {:else}
-  <button {type} {onclick} {disabled} class="btn btn-{variant} {className}">
-    <span class="btn-inner">{@render children?.()}</span>
-  </button>
+  <button {type} {onclick} {disabled} class="{cls} {className}">{@render children?.()}</button>
 {/if}
 
 <style>
@@ -41,81 +39,78 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0.75rem 1.5rem;
-    border-width: 2px;
-    border-style: solid;
-    font-family: var(--font-display);
-    font-weight: 900;
-    font-size: 0.875rem;
+    gap: 0.5rem;
+    padding: 0.7rem 1.4rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
     line-height: 1;
-    letter-spacing: var(--tracking-claim);
-    text-transform: uppercase;
+    letter-spacing: -0.01em;
     text-decoration: none;
     cursor: pointer;
     user-select: none;
-    /* Transitionen explizit — kein `transition: all` (Emil) */
+    /* Nur transform/box-shadow/background animieren (GPU-freundlich, Emil). */
     transition:
-      background-color var(--dur-hover) var(--ease-out),
-      border-color var(--dur-hover) var(--ease-out),
-      color var(--dur-hover) var(--ease-out),
+      transform var(--dur-press) var(--ease-spring),
       box-shadow var(--dur-hover) var(--ease-out),
-      transform var(--dur-press) var(--ease-out);
+      background-color var(--dur-hover) var(--ease-out),
+      border-color var(--dur-hover) var(--ease-out);
     will-change: transform;
   }
-  @media (min-width: 768px) {
-    .btn {
-      font-size: 1rem;
-    }
-  }
 
-  /* Press-Feedback: leichtes scale, schnell zurueck */
+  /* Press-Feedback: leichtes scale mit Spring. */
   .btn:active {
     transform: scale(0.97);
   }
 
-  /* Hover-State NUR auf echten Pointer-Devices — sonst stuck-hover
-   * auf Touch-Screens nach Tap */
-  @media (hover: hover) and (pointer: fine) {
-    .btn-yellow:hover {
-      background-color: transparent;
-      color: var(--color-accent);
-      box-shadow: var(--shadow-glow);
-    }
-    .btn-inverse:hover {
-      background-color: var(--color-accent);
-      color: var(--color-fg-inverse);
-    }
-    .btn-ghost:hover {
-      background-color: var(--color-fg);
-      color: var(--color-fg-inverse);
-    }
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
-  /* Varianten */
-  .btn-yellow {
+  /* Primaer: gefuellter Akzent, dezenter oberer Highlight, Glow. */
+  .btn-primary {
     background-color: var(--color-accent);
     color: var(--color-fg-inverse);
-    border-color: var(--color-accent);
-  }
-  .btn-inverse {
-    background-color: var(--color-fg-inverse);
-    color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-  .btn-ghost {
-    background-color: transparent;
-    color: var(--color-fg);
-    border-color: var(--color-fg);
+    box-shadow:
+      inset 0 1px 0 var(--glass-highlight),
+      0 6px 20px var(--color-accent-glow);
   }
 
-  /* Reduced-Motion: transitions auf 0, scale wegnehmen */
+  /* Glas: transluzent mit Blur + feinem Rand. */
+  .btn-glass {
+    background-color: var(--glass-bg);
+    color: var(--color-fg);
+    border-color: var(--glass-border);
+    backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .btn:hover {
+      transform: translateY(-1px);
+    }
+    .btn-primary:hover {
+      box-shadow:
+        inset 0 1px 0 var(--glass-highlight),
+        0 10px 30px var(--color-accent-glow);
+    }
+    .btn-glass:hover {
+      background-color: var(--glass-bg-strong);
+      border-color: var(--color-accent);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .btn {
       transition:
-        background-color 100ms linear,
-        color 100ms linear;
+        background-color 120ms linear,
+        border-color 120ms linear;
     }
-    .btn:active {
+    .btn:active,
+    .btn:hover {
       transform: none;
     }
   }
