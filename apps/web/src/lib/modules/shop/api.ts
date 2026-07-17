@@ -6,7 +6,9 @@ export interface CheckoutResponse {
 }
 
 export interface ScanResponse {
-  result: 'valid' | 'already_used' | 'invalid';
+  // 'error' ist client-synthetisch (Netz-/Serverfehler) und NICHT mit einem
+  // echten Fake-Ticket ('invalid') zu verwechseln.
+  result: 'valid' | 'already_used' | 'invalid' | 'error';
   ticket_type?: string;
   holder_name?: string;
   used_at?: string;
