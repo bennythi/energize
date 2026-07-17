@@ -65,3 +65,6 @@ backend/pocketbase/pocketbase.exe
 backend/pocketbase/pb_data/
 backend/pocketbase/CHANGELOG.md
 backend/pocketbase/LICENSE.md
+
+# Mailpit (lokaler Mail-Catcher)
+backend/mailpit/

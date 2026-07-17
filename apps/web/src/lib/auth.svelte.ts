@@ -164,8 +164,10 @@ class AuthStore {
     if (!this.pb) throw new Error('Auth ist nicht initialisiert');
     const normalized = email.trim().toLowerCase();
     // User anlegen, falls neu. Fehler (existiert bereits) bewusst ignorieren.
+    // Zufallspasswort: eine UUID (36 Zeichen, genug Entropie, unter PB-Limit
+    // von 71). Der User nutzt es nie, Login laeuft ueber OTP/Magic-Link.
     try {
-      const random = crypto.randomUUID() + crypto.randomUUID();
+      const random = crypto.randomUUID();
       await this.pb.collection('users').create({
         email: normalized,
         password: random,
