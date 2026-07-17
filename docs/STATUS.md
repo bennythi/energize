@@ -84,14 +84,14 @@ per Node-Skripten geprueft.
    `SHOP_QR_SECRET` fuer die Ticket-Signatur in Produktion setzen.
 3. **SMTP** (ANPA): fuer OTP-Login-Mails und Bestaetigungs-Mails. In der PB-
    Admin-UI unter Mail-Settings konfigurieren.
-4. **Kamera-QR-Scan**: `/scan` nimmt aktuell manuelle Token-Eingabe. Kamera
-   (`@zxing/browser` bzw. `@capacitor-mlkit/barcode-scanning`) ist der naechste Schritt.
+4. **Native Kamera (App)**: Der Web-Kamera-Scanner auf `/scan` ist da
+   (`@zxing/browser`, gehaertet nach Review). Fuer die Capacitor-App folgt noch
+   `@capacitor-mlkit/barcode-scanning` fuer nativen Scan.
 5. **Legacy-Module zurueckportieren**: `apps/web/legacy/` enthaelt die bisherigen
    Supabase-Seiten (community, crew, admin, wall, friendships, feedback). Sie sind
    aus dem Build genommen und werden modulweise auf Pocketbase portiert.
 
-## Nicht committet
+## Git
 
-Git ist initialisiert, aber es gibt noch keinen Commit dieser Arbeit (Regel:
-committen nur auf deine Anweisung). Wenn du willst, kann der naechste Schritt ein
-sauberer Initial-Commit sein.
+Initialer Commit + Kamera-Scanner-Commit liegen auf `master` (lokal, noch nicht
+gepusht). Ein Remote (ANPA Gitea oder GitHub) kann bei Bedarf angebunden werden.
