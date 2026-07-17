@@ -16,6 +16,13 @@ export const Collections = {
   CrewRolePermissions: 'crew_role_permissions',
   CrewUserPermissions: 'crew_user_permissions',
   Profiles: 'profiles',
+  ShopOrderItems: 'shop_order_items',
+  ShopOrders: 'shop_orders',
+  ShopOutboundEmails: 'shop_outbound_emails',
+  ShopPayments: 'shop_payments',
+  ShopSettings: 'shop_settings',
+  ShopTicketTypes: 'shop_ticket_types',
+  ShopTickets: 'shop_tickets',
   SupportMessages: 'support_messages',
   SupportTickets: 'support_tickets',
   Users: 'users',
@@ -164,6 +171,157 @@ export type ProfilesRecord = {
   user: RecordIdString;
 };
 
+export type ShopOrderItemsRecord = {
+  created: IsoAutoDateString;
+  id: string;
+  line_total: number;
+  order: RecordIdString;
+  qty: number;
+  ticket_type: RecordIdString;
+  unit_price: number;
+  updated: IsoAutoDateString;
+};
+
+export const ShopOrdersStatusOptions = {
+  draft: 'draft',
+  pending: 'pending',
+  paid: 'paid',
+  cancelled: 'cancelled',
+  refunded: 'refunded',
+  expired: 'expired',
+} as const;
+export type ShopOrdersStatusOptions =
+  (typeof ShopOrdersStatusOptions)[keyof typeof ShopOrdersStatusOptions];
+
+export const ShopOrdersProviderOptions = {
+  mollie: 'mollie',
+  stripe: 'stripe',
+  stub: 'stub',
+} as const;
+export type ShopOrdersProviderOptions =
+  (typeof ShopOrdersProviderOptions)[keyof typeof ShopOrdersProviderOptions];
+export type ShopOrdersRecord = {
+  buyer: RecordIdString;
+  created: IsoAutoDateString;
+  currency: string;
+  expires_at?: IsoDateString;
+  id: string;
+  paid_at?: IsoDateString;
+  provider?: ShopOrdersProviderOptions;
+  provider_payment_id?: string;
+  status: ShopOrdersStatusOptions;
+  subtotal?: number;
+  total?: number;
+  updated: IsoAutoDateString;
+};
+
+export const ShopOutboundEmailsStatusOptions = {
+  queued: 'queued',
+  sending: 'sending',
+  sent: 'sent',
+  failed: 'failed',
+} as const;
+export type ShopOutboundEmailsStatusOptions =
+  (typeof ShopOutboundEmailsStatusOptions)[keyof typeof ShopOutboundEmailsStatusOptions];
+export type ShopOutboundEmailsRecord<Tpayload = unknown> = {
+  attempts?: number;
+  id: string;
+  last_error?: string;
+  locale?: string;
+  payload?: null | Tpayload;
+  send_after?: IsoDateString;
+  status: ShopOutboundEmailsStatusOptions;
+  template: string;
+  to: string;
+};
+
+export const ShopPaymentsProviderOptions = {
+  mollie: 'mollie',
+  stripe: 'stripe',
+  stub: 'stub',
+} as const;
+export type ShopPaymentsProviderOptions =
+  (typeof ShopPaymentsProviderOptions)[keyof typeof ShopPaymentsProviderOptions];
+
+export const ShopPaymentsStatusOptions = {
+  open: 'open',
+  paid: 'paid',
+  failed: 'failed',
+  expired: 'expired',
+  refunded: 'refunded',
+} as const;
+export type ShopPaymentsStatusOptions =
+  (typeof ShopPaymentsStatusOptions)[keyof typeof ShopPaymentsStatusOptions];
+export type ShopPaymentsRecord<Traw = unknown> = {
+  amount?: number;
+  created: IsoAutoDateString;
+  currency?: string;
+  id: string;
+  order: RecordIdString;
+  provider?: ShopPaymentsProviderOptions;
+  provider_ref: string;
+  raw?: null | Traw;
+  status?: ShopPaymentsStatusOptions;
+  updated: IsoAutoDateString;
+};
+
+export const ShopSettingsActiveProviderOptions = {
+  mollie: 'mollie',
+  stripe: 'stripe',
+  both: 'both',
+  stub: 'stub',
+} as const;
+export type ShopSettingsActiveProviderOptions =
+  (typeof ShopSettingsActiveProviderOptions)[keyof typeof ShopSettingsActiveProviderOptions];
+export type ShopSettingsRecord = {
+  active_provider: ShopSettingsActiveProviderOptions;
+  default_currency: string;
+  id: string;
+  module_enabled?: boolean;
+  order_ttl_minutes?: number;
+  support_email?: string;
+};
+
+export type ShopTicketTypesRecord = {
+  active?: boolean;
+  currency: string;
+  description?: string;
+  id: string;
+  name: string;
+  per_order_limit?: number;
+  price: number;
+  quota?: number;
+  reserved?: number;
+  sales_end?: IsoDateString;
+  sales_start?: IsoDateString;
+  slug: string;
+  sold?: number;
+  sort?: number;
+};
+
+export const ShopTicketsStatusOptions = {
+  valid: 'valid',
+  used: 'used',
+  void: 'void',
+} as const;
+export type ShopTicketsStatusOptions =
+  (typeof ShopTicketsStatusOptions)[keyof typeof ShopTicketsStatusOptions];
+export type ShopTicketsRecord = {
+  code: string;
+  created: IsoAutoDateString;
+  holder_name?: string;
+  id: string;
+  order: RecordIdString;
+  qr_token?: string;
+  scanned_by?: RecordIdString;
+  scanned_gate?: string;
+  status: ShopTicketsStatusOptions;
+  ticket_type: RecordIdString;
+  token_version?: number;
+  updated: IsoAutoDateString;
+  used_at?: IsoDateString;
+};
+
 export type SupportMessagesRecord = {
   author: RecordIdString;
   body: string;
@@ -236,6 +394,24 @@ export type CrewUserPermissionsResponse<Texpand = unknown> = Required<CrewUserPe
   BaseSystemFields<Texpand>;
 export type ProfilesResponse<Texpand = unknown> = Required<ProfilesRecord> &
   BaseSystemFields<Texpand>;
+export type ShopOrderItemsResponse<Texpand = unknown> = Required<ShopOrderItemsRecord> &
+  BaseSystemFields<Texpand>;
+export type ShopOrdersResponse<Texpand = unknown> = Required<ShopOrdersRecord> &
+  BaseSystemFields<Texpand>;
+export type ShopOutboundEmailsResponse<Tpayload = unknown, Texpand = unknown> = Required<
+  ShopOutboundEmailsRecord<Tpayload>
+> &
+  BaseSystemFields<Texpand>;
+export type ShopPaymentsResponse<Traw = unknown, Texpand = unknown> = Required<
+  ShopPaymentsRecord<Traw>
+> &
+  BaseSystemFields<Texpand>;
+export type ShopSettingsResponse<Texpand = unknown> = Required<ShopSettingsRecord> &
+  BaseSystemFields<Texpand>;
+export type ShopTicketTypesResponse<Texpand = unknown> = Required<ShopTicketTypesRecord> &
+  BaseSystemFields<Texpand>;
+export type ShopTicketsResponse<Texpand = unknown> = Required<ShopTicketsRecord> &
+  BaseSystemFields<Texpand>;
 export type SupportMessagesResponse<Texpand = unknown> = Required<SupportMessagesRecord> &
   BaseSystemFields<Texpand>;
 export type SupportTicketsResponse<Texpand = unknown> = Required<SupportTicketsRecord> &
@@ -255,6 +431,13 @@ export type CollectionRecords = {
   crew_role_permissions: CrewRolePermissionsRecord;
   crew_user_permissions: CrewUserPermissionsRecord;
   profiles: ProfilesRecord;
+  shop_order_items: ShopOrderItemsRecord;
+  shop_orders: ShopOrdersRecord;
+  shop_outbound_emails: ShopOutboundEmailsRecord;
+  shop_payments: ShopPaymentsRecord;
+  shop_settings: ShopSettingsRecord;
+  shop_ticket_types: ShopTicketTypesRecord;
+  shop_tickets: ShopTicketsRecord;
   support_messages: SupportMessagesRecord;
   support_tickets: SupportTicketsRecord;
   users: UsersRecord;
@@ -271,6 +454,13 @@ export type CollectionResponses = {
   crew_role_permissions: CrewRolePermissionsResponse;
   crew_user_permissions: CrewUserPermissionsResponse;
   profiles: ProfilesResponse;
+  shop_order_items: ShopOrderItemsResponse;
+  shop_orders: ShopOrdersResponse;
+  shop_outbound_emails: ShopOutboundEmailsResponse;
+  shop_payments: ShopPaymentsResponse;
+  shop_settings: ShopSettingsResponse;
+  shop_ticket_types: ShopTicketTypesResponse;
+  shop_tickets: ShopTicketsResponse;
   support_messages: SupportMessagesResponse;
   support_tickets: SupportTicketsResponse;
   users: UsersResponse;
