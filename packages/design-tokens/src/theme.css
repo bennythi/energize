@@ -1,0 +1,80 @@
+/**
+ * Tailwind v4 theme: NEUTRALE Default-Tokens der Plattform.
+ *
+ * Dies ist die einzige Quelle der Wahrheit fuer alle Design-Tokens.
+ * Beide Apps importieren diesen Block, danach ueberschreibt jede Instanz
+ * dieselben Variablen-Namen in instances/<name>/tokens.css.
+ *
+ * Regel: Token-NAMEN sind der Vertrag. Instanzen aendern nur die Werte,
+ * nie die Namen. Aenderung hier wirkt auf alle Instanzen, Aenderung in
+ * einer Instanz-tokens.css nur auf diese Marke.
+ */
+@theme {
+  /* Dunkle Basis / Surfaces (Dark-Mode-Default) */
+  --color-bg: #0b0b0f;
+  --color-surface: #16161c;
+  --color-surface-alt: #0b0b0f;
+  --color-border: #26262e;
+
+  /* Helle Variante */
+  --color-bg-light: #f6f6f7;
+  --color-border-light: #e3e3e6;
+
+  /* Vordergrund / Text */
+  --color-fg: #f4f4f6;
+  --color-fg-inverse: #0b0b0f;
+  /* AA-tauglich (>= 4.5:1) auf der dunklen Basis. */
+  --color-fg-muted: #9b9ba4;
+
+  /* Akzent (neutral: modernes Indigo, pro Instanz ueberschrieben) */
+  --color-accent: #6d78ff;
+  --color-accent-pure: #5a67ff;
+  --color-accent-glow: rgba(109, 120, 255, 0.18);
+
+  /* Status */
+  --color-success: #22c77b;
+  --color-warn: #f5b301;
+  --color-danger: #e24b4a;
+
+  /* Typography (neutral: Inter-Stack als Display + Body) */
+  --font-display: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'Cascadia Code', monospace;
+
+  --text-hero: clamp(3rem, 10vw, 7.5rem);
+  --text-hero--line-height: 1.05;
+  --text-hero--letter-spacing: -0.02em;
+
+  --tracking-claim: 0.1em;
+  --tracking-wide: 0.05em;
+
+  /* Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 9999px;
+
+  /* Shadow / Glow (Glow nutzt die Akzent-Variable, folgt also dem Brand) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.7);
+  --shadow-glow: 0 0 24px var(--color-accent-glow);
+  --shadow-glow-strong: 0 0 48px var(--color-accent-glow);
+
+  /* Easing (Emil-Kowalski-Curves, staerker als CSS-Defaults).
+   * - out: enter feels instant, ease-out-power3
+   * - in-out: on-screen movement (drawer, modal swap)
+   * - drawer: iOS-like bottom-sheet curve aus Ionic
+   * - spring: subtle overshoot fuer playful elements */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Standard-Durations */
+  --dur-press: 140ms;
+  --dur-hover: 180ms;
+  --dur-enter: 220ms;
+  --dur-page: 280ms;
+}

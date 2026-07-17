@@ -1,0 +1,37 @@
+@import 'tailwindcss';
+@import '@platform/design-tokens/theme.css'; /* 1. neutrale @theme-Tokens + Utilities */
+@import '$instance/tokens.css'; /* 2. Instanz ueberschreibt gleiche Var-Namen */
+
+@layer base {
+  html,
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-fg);
+    font-family: var(--font-body);
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-fg-inverse);
+  }
+}
+
+@layer utilities {
+  .claim {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-claim);
+  }
+
+  .plakat {
+    background-color: var(--color-accent);
+    color: var(--color-fg-inverse);
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-claim);
+  }
+}

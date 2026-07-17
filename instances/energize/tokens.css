@@ -1,0 +1,25 @@
+/**
+ * Energize-Brand-Overrides (Style-Guide v0.9).
+ * Nur Werte, die vom neutralen Default abweichen. Gleiche Variablen-Namen.
+ * Gelb auf Schwarz, Barlow Condensed als Display-Schrift.
+ */
+:root {
+  --color-bg: #0a0a0a;
+  --color-surface: #1f1f1f;
+  --color-surface-alt: #0a0a0a;
+  --color-border: #1f1f1f;
+
+  --color-bg-light: #f5f5f2;
+  --color-border-light: #dddddd;
+
+  --color-fg: #f5f5f2;
+  --color-fg-inverse: #0a0a0a;
+  --color-fg-muted: #9a9a9a;
+
+  --color-accent: #ffec00;
+  --color-accent-pure: #ffff00;
+  --color-accent-glow: rgba(255, 236, 0, 0.25);
+  --color-warn: #ffec00;
+
+  --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+}

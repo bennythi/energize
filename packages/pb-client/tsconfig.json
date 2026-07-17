@@ -1,0 +1,9 @@
+{
+  "extends": "@platform/tsconfig/svelte.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "checkJs": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

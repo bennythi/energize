@@ -1,0 +1,13 @@
+/**
+ * Demo-Brand-Overrides: bewusst deutlich anders als Energize (Emerald-Akzent,
+ * andere Display-Schrift), um zu zeigen, dass Theming pro Instanz funktioniert.
+ * Nur abweichende Werte, gleiche Variablen-Namen.
+ */
+:root {
+  --color-accent: #10b981;
+  --color-accent-pure: #059669;
+  --color-accent-glow: rgba(16, 185, 129, 0.22);
+  --color-warn: #f5b301;
+
+  --font-display: 'Space Grotesk', system-ui, sans-serif;
+}

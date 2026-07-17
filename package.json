@@ -1,0 +1,47 @@
+{
+  "name": "event-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Modulare Event-Plattform: neutraler Kern, Module pro Instanz, Energize als erste Instanz",
+  "packageManager": "pnpm@9.15.0",
+  "engines": {
+    "node": ">=20.10.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "dev:energize": "cross-env INSTANCE=energize PUBLIC_INSTANCE=energize turbo run dev --filter=@platform/web",
+    "dev:demo": "cross-env INSTANCE=demo PUBLIC_INSTANCE=demo turbo run dev --filter=@platform/web",
+    "build:energize": "cross-env INSTANCE=energize PUBLIC_INSTANCE=energize turbo run build --filter=@platform/web",
+    "build:demo": "cross-env INSTANCE=demo PUBLIC_INSTANCE=demo turbo run build --filter=@platform/web",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "pb:serve": "backend/pocketbase/pocketbase.exe --dir backend/pocketbase/pb_data --migrationsDir backend/pocketbase/pb_migrations --hooksDir backend/pocketbase/pb_hooks serve --http=127.0.0.1:8090",
+    "pb:typegen": "pnpm --filter @platform/pb-client typegen",
+    "format": "prettier --write \"**/*.{ts,svelte,js,json,md,css}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,svelte,js,json,md,css}\" --ignore-path .gitignore",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.17.0",
+    "@types/node": "^22.10.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-svelte": "^2.46.1",
+    "globals": "^17.6.0",
+    "cross-env": "^7.0.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.2.11",
+    "prettier": "^3.4.2",
+    "prettier-plugin-svelte": "^3.3.2",
+    "svelte-eslint-parser": "^0.43.0",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "typescript-eslint": "^8.18.1"
+  },
+  "lint-staged": {
+    "*.{ts,svelte,js,json,md,css}": "prettier --write",
+    "*.{ts,svelte,js}": "eslint --fix"
+  }
+}
