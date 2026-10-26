@@ -7,5 +7,9 @@ import type { TypedPocketBase } from './generated/pb-types.js';
  * @platform/pb-client typegen` aus der laufenden Instanz generiert).
  */
 export function createPbClient(url: string): TypedPocketBase {
-  return new PocketBase(url) as TypedPocketBase;
+  const pb = new PocketBase(url) as TypedPocketBase;
+  // Auto-Cancel bricht parallele Requests auf dieselbe Collection ab (z.B.
+  // Promise.all mit zwei getFullList). Die Seiten laden bewusst parallel.
+  pb.autoCancellation(false);
+  return pb;
 }

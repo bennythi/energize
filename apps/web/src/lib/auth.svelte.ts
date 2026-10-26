@@ -117,8 +117,12 @@ class AuthStore {
     }
     try {
       await this.ensureProfile();
+      // requestKey null: init() und onChange() laden parallel; mit dem
+      // SDK-Auto-Cancel wuerde der erste Request abgebrochen und kurz
+      // "kein Crew" melden (Gates leiten dann faelschlich weg).
       const res = await this.pb.send<MyPermissionsResponse>('/api/crew/my-permissions', {
         method: 'GET',
+        requestKey: null,
       });
       this.isAdmin = res.role === 'admin';
       this.isCrew = this.isAdmin || res.is_crew === true;
@@ -139,15 +143,15 @@ class AuthStore {
     try {
       this.profile = await this.pb
         .collection('profiles')
-        .getFirstListItem<ProfileData>(`user = "${this.user.id}"`);
+        .getFirstListItem<ProfileData>(`user = "${this.user.id}"`, { requestKey: null });
     } catch {
       try {
-        this.profile = await this.pb.collection('profiles').create<ProfileData>({
-          user: this.user.id,
-          display_name: '',
-          handle: '',
-          locale: 'de',
-        });
+        this.profile = await this.pb
+          .collection('profiles')
+          .create<ProfileData>(
+            { user: this.user.id, display_name: '', handle: '', locale: 'de' },
+            { requestKey: null },
+          );
       } catch (err) {
         console.warn('[auth] ensureProfile create failed', err);
         this.profile = null;

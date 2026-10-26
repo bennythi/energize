@@ -23,6 +23,25 @@ function isShiftOpen(app, shiftId) {
   }
 }
 
+/** Hat die Kasse schon eine offene Schicht? */
+function hasOpenShift(app, registerId) {
+  try {
+    app.findFirstRecordByFilter('cashless_shifts', "register = {:r} && closed_at = ''", {
+      r: registerId,
+    });
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+/** Zwei verschiedene Personen, eine davon der eingeloggte User. */
+function isPair(c, fieldA, fieldB) {
+  const a = c.record.getString(fieldA);
+  const b = c.record.getString(fieldB);
+  return !!a && !!b && a !== b && (a === c.authId || b === c.authId);
+}
+
 // Eigene Eintraege (Kalender, Funk): lesen mit read, eigene anlegen/aendern mit
 // write, fremde loeschen nur mit delete.
 function ownRows(resource) {
@@ -51,28 +70,41 @@ const POLICIES = {
     update: (c) => c.admin,
     delete: (c) => c.admin,
   },
+  // Vier-Augen-Prinzip: Oeffnen, Schliessen und Bewegungen immer durch zwei
+  // verschiedene Personen, eine davon der eingeloggte User.
   cashless_shifts: {
     resource: 'crew.kasse',
     create: (c) =>
       c.can('write') &&
-      (c.record.getString('opened_by_a') === c.authId ||
-        c.record.getString('opened_by_b') === c.authId),
+      isPair(c, 'opened_by_a', 'opened_by_b') &&
+      !c.record.getString('closed_at') &&
+      !hasOpenShift(c.app, c.record.getString('register')),
+    // Nur offene Schichten aendern; Kasse/Eroeffner bleiben fix. Wer schliesst,
+    // muss einer der beiden Schliessenden sein.
+    update: (c) => {
+      if (!c.can('write') || c.original.getString('closed_at')) return false;
+      for (const f of ['register', 'opened_by_a', 'opened_by_b', 'opened_at']) {
+        if (c.record.getString(f) !== c.original.getString(f)) return false;
+      }
+      if (c.record.getString('closed_at')) return isPair(c, 'closed_by_a', 'closed_by_b');
+      return true;
+    },
   },
   cashless_shift_denominations: {
     resource: 'crew.kasse',
-    // End-Bestand darf noch beim Schliessen geschrieben werden.
-    create: (c) =>
+    // Zaehlungen nur bei offener Schicht (End-Bestand wird vor dem Schliessen geschrieben).
+    create: (c) => c.can('write') && isShiftOpen(c.app, c.record.getString('shift')),
+    update: (c) =>
       c.can('write') &&
-      (c.record.getString('kind') === 'end' || isShiftOpen(c.app, c.record.getString('shift'))),
-    update: (c) => c.can('write') && isShiftOpen(c.app, c.record.getString('shift')),
+      c.record.getString('shift') === c.original.getString('shift') &&
+      isShiftOpen(c.app, c.record.getString('shift')),
   },
   cashless_movements: {
     resource: 'crew.kasse',
     create: (c) =>
       c.can('write') &&
       isShiftOpen(c.app, c.record.getString('shift')) &&
-      (c.record.getString('performed_by_a') === c.authId ||
-        c.record.getString('performed_by_b') === c.authId),
+      isPair(c, 'performed_by_a', 'performed_by_b'),
     update: (c) => c.admin,
   },
 
