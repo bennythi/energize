@@ -11,14 +11,16 @@ Browser ──https──> Apache (blackout42.de, ~/web)
 
 Warum ein PHP-Proxy: Der Webspace erlaubt kein `mod_proxy` (`[P]` liefert 503), und die Ports des Docker-Hosts sind vom Webserver aus nicht erreichbar. PHP-FPM mit curl erreicht `127.0.0.1` aber problemlos.
 
+`PUBLIC_PB_URL=/` bedeutet, dass die App ihr Backend immer auf der eigenen Domain anspricht. Der Webspace antwortet unter blackout42.de, www.blackout42.de und energize.blackout42.de. Eine feste Domain würde von den anderen Adressen aus an CSP und CORS scheitern.
+
 ## Dateien
 
-| Lokal                                                               | Server                           |
-| ------------------------------------------------------------------- | -------------------------------- |
-| `apps/web/build/` (Build mit `PUBLIC_PB_URL=https://blackout42.de`) | `~/web/`                         |
-| `deploy/anpa-webspace/api/index.php` + `.user.ini`                  | `~/web/api/`                     |
-| `backend/pocketbase/pb_hooks`, `pb_migrations`                      | `~/private/pocketbase/`          |
-| `deploy/anpa-webspace/pb-ctl.sh`                                    | `~/private/pocketbase/pb-ctl.sh` |
+| Lokal                                                           | Server                           |
+| --------------------------------------------------------------- | -------------------------------- |
+| `apps/web/build/` (Build mit `PUBLIC_PB_URL=/`, gleiche Domain) | `~/web/`                         |
+| `deploy/anpa-webspace/api/index.php` + `.user.ini`              | `~/web/api/`                     |
+| `backend/pocketbase/pb_hooks`, `pb_migrations`                  | `~/private/pocketbase/`          |
+| `deploy/anpa-webspace/pb-ctl.sh`                                | `~/private/pocketbase/pb-ctl.sh` |
 
 Nur auf dem Server liegen (chmod 600, nie committen):
 
@@ -46,7 +48,8 @@ Admin-UI von Pocketbase per SSH-Tunnel: `ssh -L 18095:127.0.0.1:18095 anpa`, dan
 
 ```sh
 # Frontend
-PUBLIC_PB_URL=https://blackout42.de pnpm build:energize --force
+# PowerShell (Git Bash wuerde "/" in "C:/Program Files/Git/" umschreiben!)
+$env:PUBLIC_PB_URL='/'; pnpm build:energize --force
 # Build + api/ nach ~/private/deploy-new packen, dann auf dem Server:
 rsync -a --delete --exclude=/stats --exclude=/error --exclude=/favicon.ico ~/private/deploy-new/ ~/web/
 
