@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { afterLoginPath } from '$lib/modules';
   import { Container, Heading, Button } from '@platform/ui';
   import { m } from '@platform/i18n';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
@@ -37,8 +38,8 @@
   });
 
   $effect(() => {
-    if (auth.user) {
-      void goto('/account', { replaceState: true });
+    if (auth.user && auth.adminChecked) {
+      void goto(afterLoginPath(auth.isCrew), { replaceState: true });
     }
   });
 </script>

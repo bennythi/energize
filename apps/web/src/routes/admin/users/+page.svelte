@@ -6,7 +6,9 @@
     adminDeleteUser,
     adminListUsers,
     adminSetFlags,
+    adminSetPassword,
     errorMessage,
+    generatePassword,
     type AdminUser,
   } from '$lib/crew-api';
 
@@ -15,6 +17,8 @@
   let errorMsg = $state<string | null>(null);
   let actingOn = $state<string | null>(null);
   let search = $state('');
+  // Zuletzt erzeugtes Startpasswort (nur einmal angezeigt).
+  let issued = $state<{ email: string; password: string } | null>(null);
 
   onMount(() => void load());
 
@@ -112,6 +116,28 @@
     }
   }
 
+  async function setPassword(u: AdminUser) {
+    if (
+      !confirm(
+        `Neues Startpasswort fuer ${label(u)} erzeugen? Ein altes Passwort gilt danach nicht mehr.`,
+      )
+    )
+      return;
+    actingOn = u.id;
+    errorMsg = null;
+    issued = null;
+    const password = generatePassword();
+    try {
+      await adminSetPassword(u.id, password);
+      issued = { email: u.email, password };
+    } catch (err) {
+      console.error('[admin/users] setPassword failed', err);
+      errorMsg = errorMessage(err, 'Passwort konnte nicht gesetzt werden.');
+    } finally {
+      actingOn = null;
+    }
+  }
+
   async function viewAs(u: AdminUser) {
     actingOn = u.id;
     errorMsg = null;
@@ -153,6 +179,7 @@
     <button class="pill" disabled={busy} onclick={() => toggleCrew(u)}>
       {u.is_crew ? 'Crew entziehen' : 'Crew geben'}
     </button>
+    <button class="pill" disabled={busy} onclick={() => setPassword(u)}>Startpasswort</button>
     <button
       class="pill"
       disabled={busy || isMe}
@@ -190,6 +217,21 @@
 
   {#if errorMsg}
     <p class="mt-4 text-sm text-danger">{errorMsg}</p>
+  {/if}
+
+  {#if issued}
+    <div class="card mt-4 flex flex-wrap items-center justify-between gap-3 p-4" role="status">
+      <p class="text-sm text-fg">
+        Startpasswort fuer <strong>{issued.email}</strong>:
+        <code class="ml-1 select-all rounded bg-black/30 px-2 py-0.5 font-mono text-accent"
+          >{issued.password}</code
+        >
+        <span class="block text-xs text-fg-muted"
+          >Wird nur jetzt angezeigt. Weitergeben und unter Account aendern lassen.</span
+        >
+      </p>
+      <button class="pill" onclick={() => (issued = null)}>Ausblenden</button>
+    </div>
   {/if}
 
   {#if loading}

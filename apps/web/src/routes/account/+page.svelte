@@ -4,6 +4,8 @@
   import { m, languageTag, type AvailableLanguageTag } from '@platform/i18n';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
   import SupportSection from '$lib/SupportSection.svelte';
+  import PasswordSection from '$lib/PasswordSection.svelte';
+  import { homePath, isModuleEnabled } from '$lib/modules';
 
   const locale = $derived(languageTag() as AvailableLanguageTag);
 
@@ -83,7 +85,7 @@
     signingOut = true;
     try {
       await auth.signOut();
-      await goto('/', { replaceState: true });
+      await goto(homePath(), { replaceState: true });
     } finally {
       signingOut = false;
     }
@@ -175,7 +177,11 @@
         </form>
       </section>
 
-      <SupportSection />
+      <PasswordSection />
+
+      {#if isModuleEnabled('support')}
+        <SupportSection />
+      {/if}
 
       <div class="mt-12">
         <Button variant="ghost" onclick={handleLogout}>

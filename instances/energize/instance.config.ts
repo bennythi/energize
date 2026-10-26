@@ -17,7 +17,6 @@ export const instance = {
   modules: [
     'accounts',
     'public-site',
-    'ticketshop',
     'community',
     'photo-wall',
     'cashless',

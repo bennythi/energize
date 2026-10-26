@@ -137,8 +137,21 @@ class AuthStore {
     }
   }
 
-  /** Stellt sicher, dass zum eingeloggten User ein profiles-Datensatz existiert. */
-  private async ensureProfile(): Promise<void> {
+  private profilePromise: Promise<void> | null = null;
+
+  /**
+   * Stellt sicher, dass zum eingeloggten User ein profiles-Datensatz existiert.
+   * init() und onChange() rufen das parallel auf; ein gemeinsames Promise
+   * verhindert, dass beide gleichzeitig ein Profil anlegen wollen.
+   */
+  private ensureProfile(): Promise<void> {
+    this.profilePromise ??= this.loadOrCreateProfile().finally(() => {
+      this.profilePromise = null;
+    });
+    return this.profilePromise;
+  }
+
+  private async loadOrCreateProfile(): Promise<void> {
     if (!this.pb || !this.user) return;
     try {
       this.profile = await this.pb
@@ -190,6 +203,28 @@ class AuthStore {
     await this.pb.collection('users').authWithOTP(otpId, code);
     this.syncUser();
     await this.loadPermissions();
+  }
+
+  /** Login mit E-Mail + Passwort (Alternative zum Mail-Code). */
+  async signInWithPassword(email: string, password: string): Promise<void> {
+    if (!this.pb) throw new Error('Auth ist nicht initialisiert');
+    await this.pb.collection('users').authWithPassword(email.trim().toLowerCase(), password);
+    this.syncUser();
+    await this.loadPermissions();
+  }
+
+  /**
+   * Setzt ein neues Passwort. Pocketbase verlangt das alte nur, wenn eines
+   * gesetzt war; nach der Aenderung sind alte Tokens ungueltig, daher neu einloggen.
+   */
+  async changePassword(oldPassword: string, password: string): Promise<void> {
+    if (!this.pb || !this.user) throw new Error('Nicht eingeloggt');
+    const email = this.user.email;
+    await this.pb
+      .collection('users')
+      .update(this.user.id, { oldPassword, password, passwordConfirm: password });
+    await this.pb.collection('users').authWithPassword(email, password);
+    this.syncUser();
   }
 
   async signOut(): Promise<void> {

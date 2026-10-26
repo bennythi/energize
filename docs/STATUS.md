@@ -63,6 +63,10 @@ und `pnpm build:energize` / `pnpm build:demo` sind gruen.
 - **Live auf https://blackout42.de** (ersetzt die alte Supabase-Seite, Backup
   `~/backup-web-20261026`). Pocketbase laeuft auf dem Webspace hinter einem
   PHP-Proxy, siehe `deploy/anpa-webspace/README.md`.
+- Energize-Instanz ist seitdem **nur Orga-Bereich**: Modul `ticketshop` ist aus,
+  Start fuehrt in `/crew`. Login per Passwort (Standard) oder Code per Mail;
+  Admins setzen Startpasswoerter unter Admin -> User, jeder aendert es unter Account.
+  Grund: ANPA-MX nimmt Mails vom Webserver an anpa.de vorlaeufig nicht an (450).
 
 ## Lokal starten
 

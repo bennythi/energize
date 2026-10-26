@@ -6,7 +6,7 @@
   import { auth } from '$lib/auth.svelte';
   import { favorites } from '$lib/favorites.svelte';
   import { initAnalytics } from '$lib/analytics.svelte';
-  import { isModuleEnabled } from '$lib/modules';
+  import { homePath, isModuleEnabled } from '$lib/modules';
   import { instance } from '$instance/instance.config';
 
   interface Props {
@@ -130,7 +130,7 @@
 {/snippet}
 
 {#snippet brand()}
-  <a href="/shop" class="flex items-center gap-3" aria-label={instance.name}>
+  <a href={homePath()} class="flex items-center gap-3" aria-label={instance.name}>
     <span class="brand-mark">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M13 3 4 14h6l-1 7 9-11h-6l1-7Z" />

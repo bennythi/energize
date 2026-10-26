@@ -15,6 +15,19 @@ export function isModuleEnabled(slug: ModuleSlug): boolean {
   return moduleEnabled(instance.modules, slug);
 }
 
+/** Startseite der Instanz: Ticketshop, falls aktiv, sonst der Crew-Bereich. */
+export function homePath(): string {
+  if (isModuleEnabled('ticketshop')) return '/shop';
+  if (isModuleEnabled('crew-core')) return '/crew';
+  return '/account';
+}
+
+/** Ziel nach dem Login: Crew/Admins in den Crew-Bereich, sonst Account. */
+export function afterLoginPath(isCrew: boolean): string {
+  if (isCrew && isModuleEnabled('crew-core')) return '/crew';
+  return '/account';
+}
+
 /**
  * Guard fuer Modul-Routen: in +layout.ts / +page.ts eines Moduls aufrufen.
  * Deaktivierte Module liefern 404 statt einer halb funktionierenden Seite.

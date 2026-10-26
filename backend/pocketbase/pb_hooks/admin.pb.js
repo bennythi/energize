@@ -222,3 +222,28 @@ routerAdd(
   },
   $apis.requireAuth('users'),
 );
+
+// POST /api/admin/set-password  { userId, password }  Startpasswort setzen
+// (fuer Accounts aus dem Code-Login, deren Zufallspasswort niemand kennt).
+routerAdd(
+  'POST',
+  '/api/admin/set-password',
+  (e) => {
+    const perms = require(`${__hooks}/lib/permissions.js`);
+    if (!perms.isAdmin(e.app, e.auth.id)) throw new ForbiddenError('Nur fuer Admins.');
+    const data = e.requestInfo().body;
+    const password = String(data.password || '');
+    if (!data.userId) throw new BadRequestError('userId fehlt.');
+    if (password.length < 10) throw new BadRequestError('Passwort braucht mindestens 10 Zeichen.');
+    let user;
+    try {
+      user = e.app.findRecordById('users', data.userId);
+    } catch (err) {
+      throw new NotFoundError('User nicht gefunden.');
+    }
+    user.setPassword(password);
+    e.app.save(user);
+    return e.json(200, { ok: true });
+  },
+  $apis.requireAuth('users'),
+);

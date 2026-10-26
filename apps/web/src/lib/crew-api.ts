@@ -64,6 +64,18 @@ export async function adminSetFlags(
   await pb().send('/api/admin/set-flags', { method: 'POST', body: { userId, ...patch } });
 }
 
+/** Startpasswort setzen (Admin). */
+export async function adminSetPassword(userId: string, password: string): Promise<void> {
+  await pb().send('/api/admin/set-password', { method: 'POST', body: { userId, password } });
+}
+
+/** Gut lesbares Zufallspasswort (ohne verwechselbare Zeichen). */
+export function generatePassword(length = 14): string {
+  const chars = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  const bytes = crypto.getRandomValues(new Uint32Array(length));
+  return Array.from(bytes, (b) => chars[b % chars.length]).join('');
+}
+
 export async function adminPermissions(): Promise<PermissionsOverview> {
   return pb().send<PermissionsOverview>('/api/admin/permissions', { method: 'GET' });
 }

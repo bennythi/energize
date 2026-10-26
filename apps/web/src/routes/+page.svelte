@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
+  import { homePath } from '$lib/modules';
 
-  // Neutrale Default-Instanz: Start fuehrt direkt in den Ticketshop.
-  onMount(() => void goto('/shop', { replaceState: true }));
+  // Start fuehrt in den Ticketshop bzw. (ohne Shop) in den Crew-Bereich.
+  onMount(() => void goto(homePath(), { replaceState: true }));
 </script>
 
 <svelte:head>
-  <title>Ticketshop</title>
+  <title>…</title>
 </svelte:head>
 
 <div class="flex min-h-[60vh] items-center justify-center">
