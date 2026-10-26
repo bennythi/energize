@@ -105,7 +105,7 @@ onFileDownloadRequest(
       // <a href>-Downloads tragen das Datei-Token als ?token=, nicht im Header.
       let authId = e.auth ? e.auth.id : '';
       if (!authId) {
-        const token = e.request.url.query().get('token');
+        const token = String(e.requestInfo().query['token'] || '');
         try {
           if (token) authId = e.app.findAuthRecordByToken(token, 'file').id;
         } catch (err) {

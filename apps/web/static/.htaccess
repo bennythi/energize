@@ -28,6 +28,13 @@ AddDefaultCharset UTF-8
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # Authorization-Header fuer PHP-FPM sichtbar machen (Pocketbase-Token).
+  RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+  # /api/* -> PHP-Proxy zur lokalen Pocketbase (deploy/anpa-webspace).
+  RewriteCond %{REQUEST_URI} !^/api/index\.php$
+  RewriteRule ^api(/.*)?$ /api/index.php [L,QSA]
+
   # Echte Files/Dirs durchlassen
   RewriteCond %{REQUEST_FILENAME} -f [OR]
   RewriteCond %{REQUEST_FILENAME} -d

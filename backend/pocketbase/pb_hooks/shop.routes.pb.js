@@ -119,7 +119,7 @@ routerAdd(
     const body = e.requestInfo().body || {};
     if (!body.order) throw new BadRequestError('order fehlt.');
     const order = e.app.findRecordById('shop_orders', body.order);
-    if (order.getString('provider') !== 'stub') {
+    if (order.getString('provider') !== 'stub' || $os.getenv('SHOP_DISABLE_STUB') === '1') {
       throw new BadRequestError('Nur im Stub-Modus erlaubt.');
     }
     if (order.get('buyer') !== e.auth.id) throw new ForbiddenError('Nicht deine Bestellung.');

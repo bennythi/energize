@@ -142,7 +142,13 @@ const stripe = {
 };
 
 function getProvider(name) {
-  if (name === 'stub') return stub;
+  if (name === 'stub') {
+    // Produktion: Stub abschalten, sonst gaebe es Tickets ohne Bezahlung.
+    if ($os.getenv('SHOP_DISABLE_STUB') === '1') {
+      throw new BadRequestError('Online-Bezahlung ist noch nicht eingerichtet.');
+    }
+    return stub;
+  }
   if (name === 'mollie') return mollie;
   if (name === 'stripe') return stripe;
   throw new BadRequestError('Unbekannter Zahlungsanbieter: ' + name);

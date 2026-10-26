@@ -1,6 +1,6 @@
 # Projektstatus event-platform
 
-Stand: 2026-07-16 (autonome Nacht-Session). Alles unten ist gebaut, getypt,
+Stand: 2026-10-26 (autonome Nacht-Session, Orga-Bereich + Live-Deploy). Alles unten ist gebaut, getypt,
 gelintet und (wo moeglich) end-to-end verifiziert. `pnpm turbo run typecheck lint`
 und `pnpm build:energize` / `pnpm build:demo` sind gruen.
 
@@ -48,6 +48,22 @@ und `pnpm build:energize` / `pnpm build:demo` sind gruen.
 - Verifiziert: 19/19 (Katalog -> Checkout -> Bezahlung -> Tickets -> Scan ->
   Doppelscan -> Oversell/Limit -> Isolation). UI-Routen liefern HTTP 200.
 
+**Phase 5 - Orga-Bereich auf Pocketbase + DJ-Planung** (2026-10-26)
+
+- Crew-Guard (`pb_hooks/crew.guard.pb.js`, `lib/crew-guard.js`): Feinrechte aller
+  Crew-Collections ueber `crewCan()` inkl. Realtime-Abos und geschuetzter Dateien;
+  Kasse mit Vier-Augen-Prinzip und max. einer offenen Schicht pro Kasse.
+- Portiert: Crew-Kalender, Funkgeraete, Briefings, Meilensteine, Cashless-Kassen,
+  Admin (User, Crew, Rechte, Briefings, Meilensteine, Kassen).
+- Neu: DJ-Planung `/crew/booking` (Modul `artist-booking`, Recht `crew.booking`):
+  Editionen, Artists mit Gage/Vertrag/Rider-Dateien, Anreise/Hotel/Transfer/
+  Zusatzkosten, Checkliste "gebucht", Kosten gegen Budget.
+- Verifiziert: Guard 34/34, Kassen-Flow 34/34, booking.ts-Tests, Browser-Smoke
+  aller Seiten (Desktop + Mobil), typecheck/lint/build gruen.
+- **Live auf https://blackout42.de** (ersetzt die alte Supabase-Seite, Backup
+  `~/backup-web-20261026`). Pocketbase laeuft auf dem Webspace hinter einem
+  PHP-Proxy, siehe `deploy/anpa-webspace/README.md`.
+
 ## Lokal starten
 
 ```powershell
@@ -74,10 +90,10 @@ per Node-Skripten geprueft.
 
 ## Was noch offen ist / deine Entscheidung braucht
 
-1. **Phase 4 Deploy** (braucht ANPA-Zugang): Directus als CMS aufsetzen,
-   Pocketbase + Directus als Container auf dem Docker-Host, Apache `ProxyPass`
-   fuer `api.`/`cms.`-Subdomains, additives rsync des statischen Builds. Ist
-   ausserdem outward-facing, daher bewusst nicht autonom gemacht.
+1. **Deploy**: Pocketbase laeuft auf dem Webspace (siehe `deploy/anpa-webspace/`).
+   Offen: Cron-Watchdog fuer Neustart nach Reboot (Befehl im README), SPF/DKIM
+   fuer `noreply@blackout42.de`, Directus als CMS. Daten der alten Supabase-
+   Crew-Tabellen wurden nicht uebernommen (kein Service-Key vorhanden).
 2. **Mollie- und Stripe-Testkonten**: Sobald vorhanden, Keys als PB-Env setzen
    (`SHOP_MOLLIE_API_KEY`, `SHOP_STRIPE_SECRET_KEY`, `SHOP_STRIPE_WEBHOOK_SECRET`)
    und `shop_settings.active_provider` auf `mollie`/`stripe`/`both` stellen.
@@ -87,9 +103,11 @@ per Node-Skripten geprueft.
 4. **Native Kamera (App)**: Der Web-Kamera-Scanner auf `/scan` ist da
    (`@zxing/browser`, gehaertet nach Review). Fuer die Capacitor-App folgt noch
    `@capacitor-mlkit/barcode-scanning` fuer nativen Scan.
-5. **Legacy-Module zurueckportieren**: `apps/web/legacy/` enthaelt die bisherigen
-   Supabase-Seiten (community, crew, admin, wall, friendships, feedback). Sie sind
-   aus dem Build genommen und werden modulweise auf Pocketbase portiert.
+5. **Legacy-Module zurueckportieren**: Crew + Admin-Kern sind portiert. In
+   `apps/web/legacy/` liegen noch community, wall, friendships, feedback sowie
+   Admin-Support/Moderation/Reports/Feedback (Supabase, nicht im Build).
+6. **Lineup auf blackout42.de**: Sanity blockt die Domain per CORS. In Sanity
+   unter API -> CORS origins `https://blackout42.de` eintragen.
 
 ## Git
 
