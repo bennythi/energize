@@ -247,3 +247,116 @@ routerAdd(
   },
   $apis.requireAuth('users'),
 );
+
+// POST /api/admin/invite  { email, display_name?, crew_roles?, role? }
+// Legt ein Crew-Mitglied an (Selbstregistrierung ist gesperrt) und schickt
+// die Willkommensmail. Login danach per Code (OTP) an diese Adresse.
+routerAdd(
+  'POST',
+  '/api/admin/invite',
+  (e) => {
+    const perms = require(`${__hooks}/lib/permissions.js`);
+    if (!perms.isAdmin(e.app, e.auth.id)) throw new ForbiddenError('Nur fuer Admins.');
+
+    const data = e.requestInfo().body || {};
+    const email = String(data.email || '')
+      .trim()
+      .toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) {
+      throw new BadRequestError('Bitte eine gueltige E-Mail-Adresse angeben.');
+    }
+    const name = String(data.display_name || '')
+      .trim()
+      .slice(0, 80);
+    const role = data.role === 'admin' ? 'admin' : 'user';
+    const roles = (Array.isArray(data.crew_roles) ? data.crew_roles : [])
+      .map((r) => String(r).trim().toLowerCase().replace(/\s+/g, '_').slice(0, 40))
+      .filter((r) => r)
+      .slice(0, 20);
+
+    let exists = true;
+    try {
+      e.app.findAuthRecordByEmail('users', email);
+    } catch (err) {
+      exists = false;
+    }
+    if (exists) throw new BadRequestError('Diese E-Mail-Adresse hat schon einen Zugang.');
+
+    let userId = '';
+    e.app.runInTransaction((txApp) => {
+      const user = new Record(txApp.findCollectionByNameOrId('users'));
+      user.setEmail(email);
+      user.setVerified(true);
+      user.setRandomPassword();
+      txApp.save(user);
+      userId = user.id;
+
+      const profile = new Record(txApp.findCollectionByNameOrId('profiles'));
+      profile.set('user', user.id);
+      profile.set('display_name', name);
+      profile.set('handle', '');
+      profile.set('locale', 'de');
+      txApp.save(profile);
+
+      perms.upsertFlags(txApp, user.id, { role, is_crew: true, crew_roles: roles });
+    });
+
+    let mailSent = true;
+    try {
+      let invitedBy = '';
+      try {
+        invitedBy = e.app
+          .findFirstRecordByFilter('profiles', 'user = {:u}', { u: e.auth.id })
+          .getString('display_name');
+      } catch (err) {
+        invitedBy = '';
+      }
+      require(`${__hooks}/lib/welcome-mail.js`).send(e.app, { email, name, invitedBy });
+    } catch (err) {
+      mailSent = false;
+      e.app.logger().error('Willkommensmail fehlgeschlagen', 'email', email, 'error', String(err));
+    }
+    return e.json(200, { id: userId, mailSent });
+  },
+  $apis.requireAuth('users'),
+);
+
+// POST /api/admin/resend-welcome  { userId }
+routerAdd(
+  'POST',
+  '/api/admin/resend-welcome',
+  (e) => {
+    const perms = require(`${__hooks}/lib/permissions.js`);
+    if (!perms.isAdmin(e.app, e.auth.id)) throw new ForbiddenError('Nur fuer Admins.');
+    const data = e.requestInfo().body || {};
+    let user;
+    try {
+      user = e.app.findRecordById('users', String(data.userId || ''));
+    } catch (err) {
+      throw new NotFoundError('User nicht gefunden.');
+    }
+    let name = '';
+    let invitedBy = '';
+    try {
+      name = e.app
+        .findFirstRecordByFilter('profiles', 'user = {:u}', { u: user.id })
+        .getString('display_name');
+      invitedBy = e.app
+        .findFirstRecordByFilter('profiles', 'user = {:u}', { u: e.auth.id })
+        .getString('display_name');
+    } catch (err) {
+      // Profile optional
+    }
+    try {
+      require(`${__hooks}/lib/welcome-mail.js`).send(e.app, {
+        email: user.email(),
+        name,
+        invitedBy,
+      });
+    } catch (err) {
+      throw new BadRequestError('Mail konnte nicht gesendet werden: ' + String(err));
+    }
+    return e.json(200, { ok: true });
+  },
+  $apis.requireAuth('users'),
+);

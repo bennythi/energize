@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { Button } from '@platform/ui';
   import { m } from '@platform/i18n';
@@ -21,6 +22,14 @@
     if (!auth.loading && auth.user && auth.adminChecked && !submitting) {
       void goto(afterLoginPath(auth.isCrew), { replaceState: true });
     }
+  });
+
+  // Aus der Willkommensmail: /login/?email=...&mode=code
+  onMount(() => {
+    const params = new URLSearchParams(location.search);
+    const preset = params.get('email');
+    if (preset) email = preset;
+    if (params.get('mode') === 'code') mode = 'code';
   });
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -111,6 +120,9 @@
       <p class="mt-2 text-sm text-fg-muted">{m.login_not_configured_body()}</p>
     </div>
   {:else}
+    <p class="mt-3 text-sm text-fg-muted">
+      Zugang nur fuer die Crew. Konten legt ein Admin an, du bekommst dann eine Willkommensmail.
+    </p>
     <div class="seg mt-6" role="group" aria-label="Anmeldeart">
       <button
         type="button"

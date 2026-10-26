@@ -67,6 +67,10 @@ und `pnpm build:energize` / `pnpm build:demo` sind gruen.
   Start fuehrt in `/crew`. Login per Passwort (Standard) oder Code per Mail;
   Admins setzen Startpasswoerter unter Admin -> User, jeder aendert es unter Account.
   Grund: ANPA-MX nimmt Mails vom Webserver an anpa.de vorlaeufig nicht an (450).
+- **Keine Selbstregistrierung** (users.createRule = null). Admins legen Mitglieder
+  unter Admin -> Crew an (`POST /api/admin/invite`), die Person bekommt die
+  Willkommensmail „Herzlich willkommen in der Crew“ (`lib/welcome-mail.js`) und
+  loggt sich per Code ein. Mailversand via mx1 als login@blackout42.de.
 
 ## Lokal starten
 

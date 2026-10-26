@@ -175,26 +175,13 @@ class AuthStore {
   }
 
   /**
-   * Fordert einen Login-Code (OTP) fuer die E-Mail an. Legt den User an, falls
-   * er noch nicht existiert (Magic-Link-Registrierung). Gibt die otpId zurueck,
-   * die zusammen mit dem per Mail zugestellten Code an confirmOtp() geht.
+   * Fordert einen Login-Code (OTP) fuer die E-Mail an. Accounts legt nur ein
+   * Admin an; fuer unbekannte Adressen antwortet Pocketbase trotzdem mit einer
+   * otpId (keine Enumeration), es kommt dann einfach keine Mail.
    */
   async requestLoginCode(email: string): Promise<string> {
     if (!this.pb) throw new Error('Auth ist nicht initialisiert');
     const normalized = email.trim().toLowerCase();
-    // User anlegen, falls neu. Fehler (existiert bereits) bewusst ignorieren.
-    // Zufallspasswort: eine UUID (36 Zeichen, genug Entropie, unter PB-Limit
-    // von 71). Der User nutzt es nie, Login laeuft ueber OTP/Magic-Link.
-    try {
-      const random = crypto.randomUUID();
-      await this.pb.collection('users').create({
-        email: normalized,
-        password: random,
-        passwordConfirm: random,
-      });
-    } catch {
-      // User existiert bereits, weiter mit OTP.
-    }
     const req = await this.pb.collection('users').requestOTP(normalized);
     return req.otpId;
   }

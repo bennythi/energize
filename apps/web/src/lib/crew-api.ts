@@ -64,6 +64,20 @@ export async function adminSetFlags(
   await pb().send('/api/admin/set-flags', { method: 'POST', body: { userId, ...patch } });
 }
 
+/** Crew-Mitglied anlegen + Willkommensmail (Admin). */
+export async function adminInvite(input: {
+  email: string;
+  display_name?: string;
+  crew_roles?: string[];
+  role?: 'user' | 'admin';
+}): Promise<{ id: string; mailSent: boolean }> {
+  return pb().send('/api/admin/invite', { method: 'POST', body: input });
+}
+
+export async function adminResendWelcome(userId: string): Promise<void> {
+  await pb().send('/api/admin/resend-welcome', { method: 'POST', body: { userId } });
+}
+
 /** Startpasswort setzen (Admin). */
 export async function adminSetPassword(userId: string, password: string): Promise<void> {
   await pb().send('/api/admin/set-password', { method: 'POST', body: { userId, password } });
