@@ -66,4 +66,4 @@ rsync -a --delete --exclude=/stats ~/backup-web-20261026/ ~/web/
 
 ## Mail
 
-Pocketbase verschickt über `sendmail` des Webservers (SMTP ist in den Settings aus). `127.0.0.1:25` scheitert an STARTTLS, weil das Zertifikat nicht auf die IP passt. Absender ist `noreply@blackout42.de`. Ohne SPF/DKIM für diesen Absender können Login-Codes im Spam landen.
+Pocketbase versendet per SMTP mit Login über `mx1.anpa-networks.de:587` (STARTTLS). Postfach und Absender ist `login@blackout42.de`, damit DMARC passt: blackout42.de hat `p=reject`, und Outlook verwirft Mails, die der Webserver direkt per sendmail verschickt. Das Passwort steht nur in den Pocketbase-Settings (Admin-UI → Settings → Mail), nicht im Repo.
