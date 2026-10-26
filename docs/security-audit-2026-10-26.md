@@ -1,0 +1,25 @@
+# Security-Audit 2026-10-26 (blackout42.de)
+
+Ein Audit-Agent hat am 26.10.2026 den Code geprüft und die Live-Seite passiv getestet. Alle unten als behoben markierten Punkte sind lokal durch Angriffstests verifiziert (`security-test.mjs`: 17/17 abgewehrt, Rechte-Regression 34/34) und live nachgeprüft.
+
+| #    | Fund                                                                                 | Status                                                                                                                                          |
+| ---- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| H1   | `?expand=` umging den Crew-Guard (Gagen über `users/<id>?expand=..._via_...` lesbar) | behoben: `onRecordEnrich` blendet geschützte Datensätze ohne Leserecht aus (gilt auch für Realtime)                                             |
+| H2   | Realtime-Abo per Collection-ID oder Großschreibung am Guard vorbei                   | behoben: Topic wird aufgelöst; Proxy normalisiert den Pfad, `/api/realtime` ist gesperrt                                                        |
+| M1   | Kein HTTP→HTTPS-Redirect                                                             | behoben (.htaccess, 301)                                                                                                                        |
+| M2   | Superuser-Login, `/api/settings`, `/api/logs` usw. öffentlich erreichbar             | behoben: Allowlist im PHP-Proxy (404)                                                                                                           |
+| M3   | DoS über hängende PHP-Worker (`/api/%72ealtime`)                                     | behoben: Pfad-Normalisierung, Timeout 30 s (Uploads 120 s)                                                                                      |
+| M4   | Vier-Augen-Prinzip der Kasse: zweite Person frei wählbar                             | teilweise: zweite Person braucht jetzt Kassen-Schreibrecht. Offen: echte Bestätigung durch die zweite Person (eigene Session/PIN)               |
+| M5   | Kein Rate-Limiting                                                                   | behoben: Rate-Limits an (OTP 3/min, Passwort 5/min), trustedProxy = X-Forwarded-For                                                             |
+| M6   | Profil per Update auf fremden User umhängbar                                         | behoben (updateRule)                                                                                                                            |
+| L1   | Support-Nachricht in fremdes Ticket mit Staff-Flag                                   | behoben (createRule)                                                                                                                            |
+| L2   | Profile öffentlich lesbar                                                            | behoben: nur für Eingeloggte                                                                                                                    |
+| L3   | `created_by` eines Meilensteins fälschbar                                            | behoben (crew-stamps)                                                                                                                           |
+| L4   | Shop serverseitig aktiv                                                              | behoben: `shop_settings.module_enabled=false` live. Offen: Stripe-Replay-Toleranz, Mollie-ID escapen (erst relevant, wenn der Shop zurückkommt) |
+| L5   | CSP veraltet                                                                         | teilweise: Supabase/Tickee/Sentry/Plausible raus. Offen: `'unsafe-inline'` durch Hashes ersetzen (SvelteKit `kit.csp`)                          |
+| L6   | Avatar ohne MIME-Beschränkung                                                        | behoben (nur Bilder)                                                                                                                            |
+| L7   | `pnpm audit`: Build-Tooling-Lücken                                                   | offen: Updates einplanen (kein Laufzeitrisiko für die statische SPA)                                                                            |
+| L8   | Realtime-Abos laufen nach Rechte-Entzug weiter                                       | behoben über H1 (Enrich gilt pro Nachricht)                                                                                                     |
+| Info | GitHub-Deploy hätte `~/web/api` per `rsync --delete` gelöscht                        | behoben (Excludes)                                                                                                                              |
+
+Weitere Infos ohne Handlungsbedarf: Admins können andere Admins ändern (gewollt, Audit-Log wäre nett); Datei-Tokens in URLs gelten 180 s.

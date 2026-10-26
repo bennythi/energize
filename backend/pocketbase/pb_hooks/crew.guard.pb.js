@@ -1,7 +1,7 @@
 /// <reference path="../pb_data/types.d.ts" />
 
 // Rechte-Guard fuer alle Crew-Collections (Kalender, Funk, Briefings,
-// Meilensteine, Cashless, DJ-Planung). Die Regeln selbst stehen in
+// Meilensteine, Cashless, DJ-Planung, Kostenplanung). Die Regeln stehen in
 // lib/crew-guard.js. Superuser-Requests (Admin-UI, Skripte) laufen durch.
 //
 // WICHTIG (PB-JSVM): Handler sehen keine Top-Level-Werte dieser Datei, daher
@@ -19,6 +19,8 @@ const GUARDED = [
   'booking_editions',
   'booking_artists',
   'booking_items',
+  'cost_items',
+  'cost_offers',
 ];
 
 onRecordsListRequest(
@@ -80,7 +82,32 @@ onRecordDeleteRequest(
   ...GUARDED,
 );
 
-// Realtime: Abos auf geschuetzte Collections nur mit Leserecht.
+// Jede Ausgabe eines geschuetzten Datensatzes (auch ueber ?expand= von einer
+// anderen Collection aus und in Realtime-Nachrichten) laeuft hier durch.
+// Ohne Leserecht werden alle Felder ausser der ID ausgeblendet.
+onRecordEnrich(
+  (e) => {
+    const info = e.requestInfo;
+    const authRec = info ? info.auth : null;
+    const isSuper = authRec && authRec.collection().name === '_superusers';
+    if (!isSuper) {
+      const guard = require(`${__hooks}/lib/crew-guard.js`);
+      const name = e.record.collection().name;
+      if (!guard.canRead(e.app, authRec ? authRec.id : '', name)) {
+        const hide = [];
+        for (const f of e.record.collection().fields) {
+          if (f.getName() !== 'id') hide.push(f.getName());
+        }
+        e.record.hide(...hide);
+      }
+    }
+    e.next();
+  },
+  ...GUARDED,
+);
+
+// Realtime: Abos auf geschuetzte Collections nur mit Leserecht. Topics koennen
+// auch Collection-IDs oder anders geschrieben sein, daher erst aufloesen.
 onRealtimeSubscribeRequest((e) => {
   const guard = require(`${__hooks}/lib/crew-guard.js`);
   const authRec = e.client.get('auth');
@@ -88,7 +115,13 @@ onRealtimeSubscribeRequest((e) => {
   if (!isSuper) {
     const authId = authRec ? authRec.id : '';
     for (const sub of e.subscriptions) {
-      const name = String(sub).split('/')[0].split('?')[0];
+      const raw = String(sub).split('?')[0].split('/')[0];
+      let name = raw;
+      try {
+        name = e.app.findCollectionByNameOrId(raw).name;
+      } catch (err) {
+        name = raw;
+      }
       if (guard.guarded(name) && !guard.canRead(e.app, authId, name)) {
         throw new ForbiddenError('Keine Berechtigung fuer dieses Abo.');
       }

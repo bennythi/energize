@@ -33,6 +33,10 @@ AddDefaultCharset UTF-8
 <IfModule mod_rewrite.c>
   RewriteEngine On
 
+  # Immer HTTPS (Logins/Tokens nie im Klartext).
+  RewriteCond %{HTTPS} off
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
   # Authorization-Header fuer PHP-FPM sichtbar machen (Pocketbase-Token).
   RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
@@ -61,8 +65,7 @@ AddDefaultCharset UTF-8
   # HSTS: ein Jahr, alle Subdomains
   Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 
-  # CSP: erlaubte Quellen sind self + Supabase (Projekt-Host) + Sanity-CDN
-  # + Google Fonts. Inline-Styles wegen Tailwind, Inline-Scripts wegen
+  # CSP: erlaubte Quellen sind self (inkl. /api) + Sanity + Google Fonts. Inline-Styles wegen Tailwind, Inline-Scripts wegen
   # SvelteKit-Hydration-Bootstrap (adapter-static kann keine Nonces setzen).
-  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: blob: https://zmazyriysvintuwlyzfm.supabase.co https://cdn.sanity.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline' https://plausible.blackout24.de; connect-src 'self' https://zmazyriysvintuwlyzfm.supabase.co https://oxliq7rf.api.sanity.io https://oxliq7rf.apicdn.sanity.io wss://zmazyriysvintuwlyzfm.supabase.co https://plausible.blackout24.de https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; frame-src https://shop.tickee.de"
+  Header always set Content-Security-Policy "default-src 'self'; img-src 'self' data: blob: https://cdn.sanity.io; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; script-src 'self' 'unsafe-inline'; connect-src 'self' https://oxliq7rf.api.sanity.io https://oxliq7rf.apicdn.sanity.io; media-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
 </IfModule>

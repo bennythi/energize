@@ -35,11 +35,17 @@ function hasOpenShift(app, registerId) {
   }
 }
 
-/** Zwei verschiedene Personen, eine davon der eingeloggte User. */
+/**
+ * Zwei verschiedene Personen, eine davon der eingeloggte User. Die zweite
+ * Person braucht selbst Schreibrecht auf die Kasse (sonst koennte man
+ * beliebige Accounts als "Zeugen" eintragen).
+ */
 function isPair(c, fieldA, fieldB) {
   const a = c.record.getString(fieldA);
   const b = c.record.getString(fieldB);
-  return !!a && !!b && a !== b && (a === c.authId || b === c.authId);
+  if (!a || !b || a === b || (a !== c.authId && b !== c.authId)) return false;
+  const other = a === c.authId ? b : a;
+  return perms.crewCan(c.app, other, 'crew.kasse', 'write');
 }
 
 // Eigene Eintraege (Kalender, Funk): lesen mit read, eigene anlegen/aendern mit
@@ -108,10 +114,33 @@ const POLICIES = {
     update: (c) => c.admin,
   },
 
-  booking_editions: { resource: 'crew.booking' },
+  // Editionen sind die gemeinsame Klammer von DJ-Planung und Kostenplanung.
+  booking_editions: { resources: ['crew.booking', 'crew.kosten'] },
   booking_artists: { resource: 'crew.booking' },
   booking_items: { resource: 'crew.booking' },
+
+  cost_items: { resource: 'crew.kosten' },
+  cost_offers: { resource: 'crew.kosten' },
 };
+
+function resourcesOf(policy) {
+  return policy.resources || [policy.resource];
+}
+
+// Kurzlebiger Cache fuer Leserechte: onRecordEnrich laeuft pro Datensatz,
+// ohne Cache waeren das bei Listen hunderte Rechte-Abfragen. Nur fuer
+// Lese-Checks; Schreib-Checks gehen immer frisch an crewCan().
+const READ_CACHE = {};
+const READ_TTL_MS = 3000;
+
+function cachedPermissions(app, userId) {
+  const now = Date.now();
+  const hit = READ_CACHE[userId];
+  if (hit && now - hit.t < READ_TTL_MS) return hit.v;
+  const v = perms.computePermissions(app, userId);
+  READ_CACHE[userId] = { t: now, v };
+  return v;
+}
 
 /** Ist die Collection durch den Guard geschuetzt? */
 function guarded(collectionName) {
@@ -134,7 +163,8 @@ function check(app, authId, action, collectionName, record) {
     admin,
     record,
     original: record && action === 'update' ? record.original() : record,
-    can: (level) => admin || perms.crewCan(app, authId, policy.resource, level),
+    can: (level) =>
+      admin || resourcesOf(policy).some((res) => perms.crewCan(app, authId, res, level)),
   };
 
   const rule = policy[action];
@@ -142,12 +172,14 @@ function check(app, authId, action, collectionName, record) {
   if (!ok) throw new ForbiddenError('Keine Berechtigung fuer diese Aktion.');
 }
 
-/** Lesezugriff auf eine Collection (fuer Realtime und Datei-Downloads). */
+/** Lesezugriff auf eine Collection (Enrich/expand, Realtime, Datei-Downloads). */
 function canRead(app, authId, collectionName) {
   const policy = POLICIES[collectionName];
   if (!policy) return true;
   if (!authId) return false;
-  return perms.crewCan(app, authId, policy.resource, 'read');
+  const p = cachedPermissions(app, authId);
+  if (p.role === 'admin') return true;
+  return resourcesOf(policy).some((res) => !!p.permissions[res]);
 }
 
 module.exports = { POLICIES, guarded, check, canRead };

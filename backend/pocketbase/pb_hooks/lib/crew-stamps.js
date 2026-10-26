@@ -9,6 +9,8 @@ function apply(collectionName, record, authId, action) {
       record.set('completed_by', '');
       return;
     }
+    // Ersteller bleibt fix.
+    record.set('created_by', record.original().getString('created_by'));
     const wasDone = !!record.original().getString('completed_at');
     const isDone = !!record.getString('completed_at');
     if (isDone && !wasDone) {
@@ -27,7 +29,11 @@ function apply(collectionName, record, authId, action) {
     record.set('updated_by', authId);
     return;
   }
-  if (collectionName === 'booking_artists' || collectionName === 'booking_items') {
+  if (
+    collectionName === 'booking_artists' ||
+    collectionName === 'booking_items' ||
+    collectionName === 'cost_items'
+  ) {
     record.set('updated_by', authId);
   }
 }

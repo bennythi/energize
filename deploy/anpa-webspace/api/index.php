@@ -8,19 +8,42 @@ declare(strict_types=1);
 
 const PB_UPSTREAM = 'http://127.0.0.1:18095';
 
-$uri = $_SERVER['REQUEST_URI'] ?? '/';
-if (strncmp($uri, '/api/', 5) !== 0 && $uri !== '/api') {
-    http_response_code(404);
+function deny(int $code, string $msg): void
+{
+    http_response_code($code);
+    header('Content-Type: application/json');
+    echo json_encode(['code' => $code, 'message' => $msg, 'data' => new stdClass()]);
     exit;
 }
 
-// Realtime (SSE) wuerde einen PHP-Worker dauerhaft blockieren; die App nutzt es nicht.
-if (strncmp($uri, '/api/realtime', 13) === 0) {
-    http_response_code(501);
-    header('Content-Type: application/json');
-    echo '{"code":501,"message":"Realtime ist ueber diesen Proxy nicht verfuegbar.","data":{}}';
-    exit;
+// Pfad dekodieren und normalisieren, BEVOR geprueft wird (sonst umgehen
+// /api/%72ealtime oder /api/./realtime die Sperren). Weitergeleitet wird der
+// normalisierte Pfad, damit Pruefung und Upstream dasselbe sehen.
+$rawUri = $_SERVER['REQUEST_URI'] ?? '/';
+$qPos = strpos($rawUri, '?');
+$rawPath = $qPos === false ? $rawUri : substr($rawUri, 0, $qPos);
+$query = $qPos === false ? '' : substr($rawUri, $qPos);
+$path = rawurldecode($rawPath);
+if (preg_match('#[\x00-\x1f\\\\]#', $path) || preg_match('#(^|/)\.\.?(/|$)#', $path)) {
+    deny(400, 'Ungueltiger Pfad.');
 }
+$path = preg_replace('#/+#', '/', $path);
+$lowerPath = strtolower($path);
+
+// Allowlist: nur was die App braucht. Gesperrt bleiben damit u.a. Superuser-
+// Login, /api/settings, /api/logs, /api/backups, /api/crons, Collection-
+// Schemata, /api/batch und /api/realtime (SSE wuerde PHP-Worker blockieren).
+$allowed =
+    $lowerPath === '/api/health' ||
+    preg_match('#^/api/collections/[a-z0-9][a-z0-9_]*/records(/[a-z0-9]+)?$#', $lowerPath) ||
+    preg_match('#^/api/collections/users/(auth-with-password|auth-with-otp|request-otp|auth-refresh|auth-methods)$#', $lowerPath) ||
+    $lowerPath === '/api/files/token' ||
+    preg_match('#^/api/files/[a-z0-9_]+/[a-z0-9]+/[^/]+$#', $lowerPath) ||
+    preg_match('#^/api/(crew|admin|shop)/[a-z0-9/_-]+$#', $lowerPath);
+if (!$allowed) {
+    deny(404, 'Nicht gefunden.');
+}
+$uri = $path . $query;
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
@@ -28,9 +51,9 @@ $forward = [];
 $incoming = function_exists('getallheaders') ? getallheaders() : [];
 $auth = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '';
 foreach ($incoming as $name => $value) {
-    $lower = strtolower((string) $name);
-    if (in_array($lower, ['content-type', 'accept', 'accept-language', 'user-agent', 'authorization', 'range', 'if-none-match', 'if-modified-since'], true)) {
-        $forward[$lower] = $name . ': ' . $value;
+    $hname = strtolower((string) $name);
+    if (in_array($hname, ['content-type', 'accept', 'accept-language', 'user-agent', 'authorization', 'range', 'if-none-match', 'if-modified-since'], true)) {
+        $forward[$hname] = $name . ': ' . $value;
     }
 }
 if ($auth !== '' && !isset($forward['authorization'])) {
@@ -40,6 +63,11 @@ $forward[] = 'X-Forwarded-For: ' . ($_SERVER['REMOTE_ADDR'] ?? '');
 $forward[] = 'X-Forwarded-Proto: https';
 $forward[] = 'Expect:';
 
+// Uploads/Downloads duerfen laenger dauern, alles andere kurz halten,
+// damit haengende Requests keine PHP-Worker blockieren.
+$long = stripos($_SERVER['CONTENT_TYPE'] ?? '', 'multipart/') === 0
+    || strncmp($lowerPath, '/api/files/', 11) === 0;
+
 $ch = curl_init(PB_UPSTREAM . $uri);
 curl_setopt_array($ch, [
     CURLOPT_CUSTOMREQUEST => $method,
@@ -47,7 +75,7 @@ curl_setopt_array($ch, [
     CURLOPT_RETURNTRANSFER => false,
     CURLOPT_FOLLOWLOCATION => false,
     CURLOPT_CONNECTTIMEOUT => 3,
-    CURLOPT_TIMEOUT => 120,
+    CURLOPT_TIMEOUT => $long ? 120 : 30,
 ]);
 
 if (!in_array($method, ['GET', 'HEAD', 'OPTIONS'], true)) {
@@ -71,7 +99,8 @@ curl_setopt($ch, CURLOPT_HEADERFUNCTION, function ($ch, string $line): int {
     $parts = explode(':', $trim, 2);
     if (count($parts) === 2) {
         $name = strtolower(trim($parts[0]));
-        if (!in_array($name, ['transfer-encoding', 'connection', 'content-length', 'keep-alive', 'content-encoding'], true)) {
+        // X-Content-Type-Options setzt Apache selbst (sonst doppelt).
+        if (!in_array($name, ['transfer-encoding', 'connection', 'content-length', 'keep-alive', 'content-encoding', 'x-content-type-options'], true)) {
             header($trim, false);
         }
     }

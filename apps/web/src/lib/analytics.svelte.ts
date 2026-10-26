@@ -5,7 +5,8 @@
 // und alle anderen Subdomains bleiben untracked.
 
 const PLAUSIBLE_HOST = 'https://plausible.blackout24.de';
-const PROD_HOSTS = ['energize.blackout42.de', 'www.energize-festival.de'];
+// blackout42.de-Hosts sind das interne Crew-Tool: kein Tracking.
+const PROD_HOSTS = ['www.energize-festival.de'];
 
 let injected = false;
 
