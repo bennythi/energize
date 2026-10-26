@@ -20,6 +20,7 @@
     type Edition,
   } from '$lib/booking';
   import CheckChips from '$lib/booking/CheckChips.svelte';
+  import EditionForm from '$lib/booking/EditionForm.svelte';
 
   const RES = CREW_RESOURCES.booking;
   const EDITION_KEY = 'platform.booking.edition';
@@ -37,12 +38,7 @@
 
   // Formulare
   let showEditionForm = $state(false);
-  let edName = $state('');
-  let edYear = $state(new Date().getFullYear() + 1);
-  let edStart = $state('');
-  let edEnd = $state('');
-  let edBudget = $state<number | null>(null);
-  let savingEdition = $state(false);
+  let editingEdition = $state<Edition | null>(null);
 
   let newArtistName = $state('');
   let newArtistStatus = $state<ArtistStatus>('idee');
@@ -152,50 +148,17 @@
   }
 
   function openEditionForm(existing: Edition | null) {
-    edYear = existing?.year ?? new Date().getFullYear() + 1;
-    edName = existing?.name ?? instanceYearName(edYear);
-    edStart = existing?.start_date ?? '';
-    edEnd = existing?.end_date ?? '';
-    edBudget = existing && existing.budget > 0 ? existing.budget : null;
+    editingEdition = existing;
     showEditionForm = true;
   }
 
-  function instanceYearName(year: number) {
-    return `Edition ${year}`;
-  }
-
-  let editingEditionId = $state<string | null>(null);
-
-  async function saveEdition(event: SubmitEvent) {
-    event.preventDefault();
-    if (!auth.pb || !canWrite) return;
-    savingEdition = true;
-    errorMsg = null;
-    const data = {
-      name: edName.trim() || instanceYearName(edYear),
-      year: edYear,
-      start_date: edStart,
-      end_date: edEnd,
-      budget: edBudget ?? 0,
-      currency: 'EUR',
-    };
-    try {
-      if (editingEditionId) {
-        await auth.pb.collection('booking_editions').update(editingEditionId, data);
-        editions = editions.map((e) => (e.id === editingEditionId ? { ...e, ...data } : e));
-      } else {
-        const rec = (await auth.pb
-          .collection('booking_editions')
-          .create({ ...data, archived: false })) as unknown as Edition;
-        editions = [rec, ...editions].sort((a, b) => b.year - a.year);
-        await selectEdition(rec.id);
-      }
-      showEditionForm = false;
-      editingEditionId = null;
-    } catch (err) {
-      errorMsg = errorMessage(err, 'Edition konnte nicht gespeichert werden.');
-    } finally {
-      savingEdition = false;
+  async function editionSaved(rec: Edition, isNew: boolean) {
+    showEditionForm = false;
+    if (isNew) {
+      editions = [rec, ...editions].sort((a, b) => b.year - a.year);
+      await selectEdition(rec.id);
+    } else {
+      editions = editions.map((e) => (e.id === rec.id ? rec : e));
     }
   }
 
@@ -267,14 +230,12 @@
           <Button
             variant="ghost"
             onclick={() => {
-              editingEditionId = edition?.id ?? null;
               openEditionForm(edition);
             }}>Bearbeiten</Button
           >
           <Button
             variant="ghost"
             onclick={() => {
-              editingEditionId = null;
               openEditionForm(null);
             }}>Neue Edition</Button
           >
@@ -299,34 +260,13 @@
     <div class="card mt-8 h-40 animate-pulse opacity-50"></div>
   {:else}
     {#if showEditionForm}
-      <form onsubmit={saveEdition} class="card mt-8 grid gap-4 p-6 sm:grid-cols-2 lg:grid-cols-5">
-        <label class="block lg:col-span-2">
-          <span class="text-xs font-medium text-fg-muted">Name</span>
-          <input class="field mt-1" bind:value={edName} required maxlength="120" />
-        </label>
-        <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Jahr</span>
-          <input class="field mt-1" type="number" min="2000" max="2100" bind:value={edYear} />
-        </label>
-        <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Von</span>
-          <input class="field mt-1" type="date" bind:value={edStart} />
-        </label>
-        <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Bis</span>
-          <input class="field mt-1" type="date" bind:value={edEnd} />
-        </label>
-        <label class="block sm:col-span-2 lg:col-span-2">
-          <span class="text-xs font-medium text-fg-muted">Budget Artists (EUR, optional)</span>
-          <input class="field mt-1" type="number" min="0" step="50" bind:value={edBudget} />
-        </label>
-        <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-3 lg:justify-end">
-          <Button variant="ghost" onclick={() => (showEditionForm = false)}>Abbrechen</Button>
-          <Button type="submit" disabled={savingEdition}>
-            {savingEdition ? 'Speichert …' : 'Speichern'}
-          </Button>
-        </div>
-      </form>
+      {#key editingEdition?.id ?? 'neu'}
+        <EditionForm
+          edition={editingEdition}
+          onSaved={(rec, isNew) => void editionSaved(rec, isNew)}
+          onCancel={() => (showEditionForm = false)}
+        />
+      {/key}
     {/if}
 
     {#if editions.length === 0}

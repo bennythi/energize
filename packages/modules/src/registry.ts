@@ -89,6 +89,13 @@ export const MODULE_REGISTRY: Record<ModuleSlug, ModuleConfig> = {
     germanOnly: true,
     pbCollections: ['booking_editions', 'booking_artists', 'booking_items'],
   },
+  'cost-planning': {
+    slug: 'cost-planning',
+    routeBase: '/crew/kosten',
+    dependsOn: ['crew-core'],
+    germanOnly: true,
+    pbCollections: ['cost_items', 'cost_offers'],
+  },
   support: {
     slug: 'support',
     routeBase: '/support',

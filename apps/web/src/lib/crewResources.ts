@@ -8,6 +8,7 @@ export const CREW_RESOURCES = {
   briefings: 'crew.briefings',
   meilensteine: 'crew.meilensteine',
   booking: 'crew.booking',
+  kosten: 'crew.kosten',
 } as const;
 
 export type CrewResource = (typeof CREW_RESOURCES)[keyof typeof CREW_RESOURCES];
@@ -36,6 +37,10 @@ export const CREW_RESOURCE_LABELS: Record<CrewResource, { label: string; descrip
   'crew.booking': {
     label: 'DJ-Planung',
     description: 'Gagen, Rider, Hotel, Anreise und was schon gebucht ist',
+  },
+  'crew.kosten': {
+    label: 'Kostenplanung',
+    description: 'Festival-Budget: Positionen, Angebote, Lieferanten und Tage',
   },
 };
 

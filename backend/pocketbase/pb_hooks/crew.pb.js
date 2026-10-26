@@ -39,3 +39,57 @@ routerAdd(
   },
   $apis.requireAuth('users'),
 );
+
+// POST /api/crew/cost-template  { edition, items: [...] }
+// Legt viele Kostenpositionen (Vorlage) in einer Transaktion an. Einzeln
+// wuerden 70+ Creates in das Rate-Limit laufen. Recht: crew.kosten write.
+routerAdd(
+  'POST',
+  '/api/crew/cost-template',
+  (e) => {
+    const perms = require(`${__hooks}/lib/permissions.js`);
+    if (!perms.crewCan(e.app, e.auth.id, 'crew.kosten', 'write')) {
+      throw new ForbiddenError('Keine Berechtigung fuer die Kostenplanung.');
+    }
+    const data = e.requestInfo().body || {};
+    const items = Array.isArray(data.items) ? data.items : [];
+    if (!data.edition || items.length === 0 || items.length > 200) {
+      throw new BadRequestError('edition und 1-200 Positionen erforderlich.');
+    }
+    try {
+      e.app.findRecordById('booking_editions', String(data.edition));
+    } catch (err) {
+      throw new NotFoundError('Edition nicht gefunden.');
+    }
+    const PRICING = ['pauschal', 'stueck', 'pro_tag', 'stunden'];
+    const DAY = /^\d{4}-\d{2}-\d{2}$/;
+    let created = 0;
+    e.app.runInTransaction((txApp) => {
+      const col = txApp.findCollectionByNameOrId('cost_items');
+      items.forEach((it, idx) => {
+        const rec = new Record(col);
+        rec.set('edition', String(data.edition));
+        rec.set('category', String(it.category || 'sonstiges').slice(0, 60));
+        rec.set('title', String(it.title || 'Position').slice(0, 200));
+        rec.set('supplier', String(it.supplier || '').slice(0, 200));
+        rec.set('pricing', PRICING.indexOf(it.pricing) >= 0 ? it.pricing : 'pauschal');
+        rec.set('quantity', Number(it.quantity) || 0);
+        rec.set('hours', Number(it.hours) || 0);
+        rec.set('unit_price', 0);
+        rec.set(
+          'days',
+          (Array.isArray(it.days) ? it.days : []).filter((d) => DAY.test(String(d))).slice(0, 60),
+        );
+        rec.set('status', 'offen');
+        rec.set('paid', false);
+        rec.set('sort', idx);
+        rec.set('notes', String(it.notes || '').slice(0, 4000));
+        rec.set('updated_by', e.auth.id);
+        txApp.save(rec);
+        created++;
+      });
+    });
+    return e.json(200, { created });
+  },
+  $apis.requireAuth('users'),
+);

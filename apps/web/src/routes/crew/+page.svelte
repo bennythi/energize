@@ -21,6 +21,7 @@
     { resource: CREW_RESOURCES.kalender, href: '/crew/kalender', module: 'crew-core' },
     { resource: CREW_RESOURCES.fungeraete, href: '/crew/fungeraete', module: 'crew-core' },
     { resource: CREW_RESOURCES.booking, href: '/crew/booking', module: 'artist-booking' },
+    { resource: CREW_RESOURCES.kosten, href: '/crew/kosten', module: 'cost-planning' },
     { resource: CREW_RESOURCES.kasse, href: '/crew/kasse', module: 'cashless' },
     { resource: CREW_RESOURCES.briefings, href: '/crew/briefings', module: 'crew-briefings' },
     {

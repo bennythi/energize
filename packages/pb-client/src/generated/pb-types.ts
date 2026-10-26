@@ -19,6 +19,8 @@ export const Collections = {
   CashlessRegisters: 'cashless_registers',
   CashlessShiftDenominations: 'cashless_shift_denominations',
   CashlessShifts: 'cashless_shifts',
+  CostItems: 'cost_items',
+  CostOffers: 'cost_offers',
   CrewAvailability: 'crew_availability',
   CrewBriefings: 'crew_briefings',
   CrewEquipmentRequests: 'crew_equipment_requests',
@@ -180,7 +182,10 @@ export type BookingEditionsRecord = {
   end_date?: string;
   id: string;
   name: string;
+  setup_days?: number;
   start_date?: string;
+  teardown_days?: number;
+  total_budget?: number;
   updated: IsoAutoDateString;
   year: number;
 };
@@ -271,6 +276,58 @@ export type CashlessShiftsRecord = {
   register: RecordIdString;
   starting_cents?: number;
   updated: IsoAutoDateString;
+};
+
+export const CostItemsPricingOptions = {
+  pauschal: 'pauschal',
+  stueck: 'stueck',
+  pro_tag: 'pro_tag',
+  stunden: 'stunden',
+} as const;
+export type CostItemsPricingOptions =
+  (typeof CostItemsPricingOptions)[keyof typeof CostItemsPricingOptions];
+
+export const CostItemsStatusOptions = {
+  offen: 'offen',
+  angefragt: 'angefragt',
+  angebot: 'angebot',
+  beauftragt: 'beauftragt',
+  abgesagt: 'abgesagt',
+} as const;
+export type CostItemsStatusOptions =
+  (typeof CostItemsStatusOptions)[keyof typeof CostItemsStatusOptions];
+export type CostItemsRecord<Tdays = unknown> = {
+  category: string;
+  created: IsoAutoDateString;
+  days?: null | Tdays;
+  edition: RecordIdString;
+  hours?: number;
+  id: string;
+  notes?: string;
+  paid?: boolean;
+  pricing: CostItemsPricingOptions;
+  quantity?: number;
+  sort?: number;
+  status: CostItemsStatusOptions;
+  supplier?: string;
+  title: string;
+  unit_price?: number;
+  updated: IsoAutoDateString;
+  updated_by?: RecordIdString;
+};
+
+export type CostOffersRecord = {
+  chosen?: boolean;
+  contact?: string;
+  created: IsoAutoDateString;
+  file?: FileNameString;
+  id: string;
+  item: RecordIdString;
+  notes?: string;
+  supplier: string;
+  unit_price?: number;
+  updated: IsoAutoDateString;
+  valid_until?: string;
 };
 
 export const CrewAvailabilityKindOptions = {
@@ -610,6 +667,12 @@ export type CashlessShiftDenominationsResponse<Texpand = unknown> =
   Required<CashlessShiftDenominationsRecord> & BaseSystemFields<Texpand>;
 export type CashlessShiftsResponse<Texpand = unknown> = Required<CashlessShiftsRecord> &
   BaseSystemFields<Texpand>;
+export type CostItemsResponse<Tdays = unknown, Texpand = unknown> = Required<
+  CostItemsRecord<Tdays>
+> &
+  BaseSystemFields<Texpand>;
+export type CostOffersResponse<Texpand = unknown> = Required<CostOffersRecord> &
+  BaseSystemFields<Texpand>;
 export type CrewAvailabilityResponse<Texpand = unknown> = Required<CrewAvailabilityRecord> &
   BaseSystemFields<Texpand>;
 export type CrewBriefingsResponse<Texpand = unknown> = Required<CrewBriefingsRecord> &
@@ -666,6 +729,8 @@ export type CollectionRecords = {
   cashless_registers: CashlessRegistersRecord;
   cashless_shift_denominations: CashlessShiftDenominationsRecord;
   cashless_shifts: CashlessShiftsRecord;
+  cost_items: CostItemsRecord;
+  cost_offers: CostOffersRecord;
   crew_availability: CrewAvailabilityRecord;
   crew_briefings: CrewBriefingsRecord;
   crew_equipment_requests: CrewEquipmentRequestsRecord;
@@ -700,6 +765,8 @@ export type CollectionResponses = {
   cashless_registers: CashlessRegistersResponse;
   cashless_shift_denominations: CashlessShiftDenominationsResponse;
   cashless_shifts: CashlessShiftsResponse;
+  cost_items: CostItemsResponse;
+  cost_offers: CostOffersResponse;
   crew_availability: CrewAvailabilityResponse;
   crew_briefings: CrewBriefingsResponse;
   crew_equipment_requests: CrewEquipmentRequestsResponse;

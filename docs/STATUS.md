@@ -71,6 +71,14 @@ und `pnpm build:energize` / `pnpm build:demo` sind gruen.
   unter Admin -> Crew an (`POST /api/admin/invite`), die Person bekommt die
   Willkommensmail „Herzlich willkommen in der Crew“ (`lib/welcome-mail.js`) und
   loggt sich per Code ein. Mailversand via mx1 als login@blackout42.de.
+- **Kostenplanung** `/crew/kosten` (Modul `cost-planning`, Recht `crew.kosten`):
+  Positionen pro Edition in 20 Kategorien, Abrechnung pauschal/Stueck/pro Tag/
+  Personal (Personen x Stunden x Satz x Tage), Tagesauswahl ueber Aufbau-,
+  Festival- und Abbautage der Edition, Angebote mehrerer Lieferanten (PDF,
+  „guenstigstes“, Auswahl uebernimmt Lieferant+Preis), Status/bezahlt,
+  Gesamtbudget inkl. Artist-Kosten aus der DJ-Planung, CSV-Export.
+  Vorlage „Hardstyle-Festival“ (73 Positionen) ueber `POST /api/crew/cost-template`.
+- Security-Audit 2026-10-26 umgesetzt, siehe `docs/security-audit-2026-10-26.md`.
 
 ## Lokal starten
 

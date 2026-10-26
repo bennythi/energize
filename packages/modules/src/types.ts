@@ -18,6 +18,7 @@ export type ModuleSlug =
   | 'crew-briefings' // Briefing-Dokumente mit Version
   | 'crew-milestones' // Meilenstein-Tracking
   | 'artist-booking' // Interne DJ-/Artist-Planung: Gage, Rider, Hotel, Reise
+  | 'cost-planning' // Festival-Kostenplanung mit Positionen und Angeboten
   | 'support' // Support-Tickets (User schreibt, Admin antwortet)
   | 'friendships' // Freundschaftsanfragen
   | 'map'; // Festival-Karte mit POIs

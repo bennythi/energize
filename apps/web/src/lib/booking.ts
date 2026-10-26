@@ -16,6 +16,12 @@ export interface Edition {
   budget: number;
   currency: string;
   archived: boolean;
+  /** Aufbautage vor dem ersten Festivaltag (Kostenplanung). */
+  setup_days: number;
+  /** Abbautage nach dem letzten Festivaltag (Kostenplanung). */
+  teardown_days: number;
+  /** Gesamtbudget des Festivals (Kostenplanung inkl. Artists). */
+  total_budget: number;
 }
 
 export interface Artist {
