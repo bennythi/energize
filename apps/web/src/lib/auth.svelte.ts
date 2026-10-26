@@ -1,8 +1,10 @@
 import { browser } from '$app/environment';
-import { env } from '$env/dynamic/public';
+// Statisch eingebaut statt $env/dynamic: _app/env.js hat keinen Hash im
+// Namen und kann im Browser veraltet gecacht sein (z.B. von der alten Seite).
+import { PUBLIC_PB_URL } from '$env/static/public';
 import { createPbClient, type TypedPocketBase } from '@platform/pb-client';
 
-const PB_URL = env.PUBLIC_PB_URL;
+const PB_URL = PUBLIC_PB_URL;
 
 export const isAuthConfigured = Boolean(PB_URL);
 

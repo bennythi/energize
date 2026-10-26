@@ -15,6 +15,11 @@ AddDefaultCharset UTF-8
   <FilesMatch "\.html$">
     Header set Cache-Control "public, max-age=0, must-revalidate"
   </FilesMatch>
+  # Nicht gehasht, daher nie langfristig cachen (sonst bleibt eine alte
+  # Konfiguration bis zu einem Jahr im Browser haengen).
+  <FilesMatch "^(env\.js|version\.json)$">
+    Header set Cache-Control "no-cache"
+  </FilesMatch>
 </IfModule>
 
 # Brotli/Gzip-Kompression einschalten falls verfügbar
