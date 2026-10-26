@@ -28,7 +28,7 @@
   interface NavItem {
     href: string;
     label: string;
-    icon: 'ticket' | 'wallet' | 'scan';
+    icon: 'ticket' | 'wallet' | 'scan' | 'crew' | 'admin';
     show: boolean;
   }
   const navItems = $derived(
@@ -46,6 +46,13 @@
         icon: 'scan',
         show: auth.isCrew && isModuleEnabled('ticketshop'),
       },
+      {
+        href: '/crew',
+        label: 'Crew-Bereich',
+        icon: 'crew',
+        show: auth.isCrew && isModuleEnabled('crew-core'),
+      },
+      { href: '/admin', label: 'Admin', icon: 'admin', show: auth.isAdmin },
     ].filter((i) => i.show) as NavItem[],
   );
 
@@ -106,6 +113,18 @@
         d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"
       />
       <path d="M4 12h16" />
+    </svg>
+  {:else if name === 'crew'}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="nav-icon">
+      <circle cx="9" cy="8.5" r="3" />
+      <path d="M3.5 19a5.5 5.5 0 0 1 11 0" />
+      <circle cx="17" cy="9.5" r="2.4" />
+      <path d="M15.5 14.2A4.5 4.5 0 0 1 21 18.5" />
+    </svg>
+  {:else if name === 'admin'}
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" class="nav-icon">
+      <path d="M12 3 5 6v5c0 4.4 3 8.3 7 10 4-1.7 7-5.6 7-10V6l-7-3Z" />
+      <path d="m9 12 2 2 4-4" />
     </svg>
   {/if}
 {/snippet}

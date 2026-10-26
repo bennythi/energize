@@ -1,5 +1,5 @@
-// Slugs der Crew-Resources. Müssen mit Migration 0018 / seed der
-// crew_resources-Tabelle übereinstimmen.
+// Slugs der Crew-Resources. Muessen mit dem Seed der crew_resources-Collection
+// uebereinstimmen (pb_migrations 1700000040 + 1700004000).
 
 export const CREW_RESOURCES = {
   kalender: 'crew.kalender',
@@ -7,6 +7,7 @@ export const CREW_RESOURCES = {
   kasse: 'crew.kasse',
   briefings: 'crew.briefings',
   meilensteine: 'crew.meilensteine',
+  booking: 'crew.booking',
 } as const;
 
 export type CrewResource = (typeof CREW_RESOURCES)[keyof typeof CREW_RESOURCES];
@@ -32,10 +33,14 @@ export const CREW_RESOURCE_LABELS: Record<CrewResource, { label: string; descrip
     label: 'Meilensteine',
     description: 'Jahres-Deadlines und Bestellungen',
   },
+  'crew.booking': {
+    label: 'DJ-Planung',
+    description: 'Gagen, Rider, Hotel, Anreise und was schon gebucht ist',
+  },
 };
 
 // Default-Rollen, die wir im Admin-UI als Vorschlaege anbieten.
-// Frei erweiterbar, der String wird einfach in profiles.crew_roles[] gespeichert.
+// Frei erweiterbar, der String wird in account_flags.crew_roles gespeichert.
 export const DEFAULT_CREW_ROLES = [
   'einlass',
   'security_einlass',
@@ -46,6 +51,7 @@ export const DEFAULT_CREW_ROLES = [
   'awareness',
   'medical',
   'logistik',
+  'booking',
 ];
 
 export type Level = 'read' | 'write' | 'delete';

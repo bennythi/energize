@@ -24,6 +24,7 @@ export const instance = {
     'crew-core',
     'crew-briefings',
     'crew-milestones',
+    'artist-booking',
     'support',
     'friendships',
     'map',

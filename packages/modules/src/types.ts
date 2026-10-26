@@ -17,6 +17,7 @@ export type ModuleSlug =
   | 'crew-core' // Crew-Dashboard + Permission-Gate (nur Deutsch)
   | 'crew-briefings' // Briefing-Dokumente mit Version
   | 'crew-milestones' // Meilenstein-Tracking
+  | 'artist-booking' // Interne DJ-/Artist-Planung: Gage, Rider, Hotel, Reise
   | 'support' // Support-Tickets (User schreibt, Admin antwortet)
   | 'friendships' // Freundschaftsanfragen
   | 'map'; // Festival-Karte mit POIs

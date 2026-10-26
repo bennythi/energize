@@ -131,3 +131,94 @@ routerAdd(
   },
   $apis.requireAuth('users'),
 );
+
+// GET /api/admin/users?q=...  Alle User mit Profil + Flags (Admin-Nutzerliste).
+routerAdd(
+  'GET',
+  '/api/admin/users',
+  (e) => {
+    const perms = require(`${__hooks}/lib/permissions.js`);
+    if (!perms.isAdmin(e.app, e.auth.id)) throw new ForbiddenError('Nur fuer Admins.');
+    const people = require(`${__hooks}/lib/people.js`);
+    const q = String(e.request.url.query().get('q') || '')
+      .trim()
+      .toLowerCase();
+    let rows = people.listUsers(e.app);
+    if (q) {
+      rows = rows.filter(
+        (r) =>
+          r.email.toLowerCase().includes(q) ||
+          r.display_name.toLowerCase().includes(q) ||
+          r.handle.toLowerCase().includes(q),
+      );
+    }
+    return e.json(200, { items: rows });
+  },
+  $apis.requireAuth('users'),
+);
+
+// GET /api/admin/crew  Nur User mit Crew-Flag oder Admin-Rolle.
+routerAdd(
+  'GET',
+  '/api/admin/crew',
+  (e) => {
+    const perms = require(`${__hooks}/lib/permissions.js`);
+    if (!perms.isAdmin(e.app, e.auth.id)) throw new ForbiddenError('Nur fuer Admins.');
+    const people = require(`${__hooks}/lib/people.js`);
+    const rows = people.listUsers(e.app).filter((r) => r.is_crew || r.role === 'admin');
+    return e.json(200, { items: rows });
+  },
+  $apis.requireAuth('users'),
+);
+
+// DELETE /api/admin/users/{id}  User samt Profil/Flags loeschen (Cascade).
+routerAdd(
+  'DELETE',
+  '/api/admin/users/{id}',
+  (e) => {
+    const perms = require(`${__hooks}/lib/permissions.js`);
+    if (!perms.isAdmin(e.app, e.auth.id)) throw new ForbiddenError('Nur fuer Admins.');
+    const id = e.request.pathValue('id');
+    if (id === e.auth.id) throw new BadRequestError('Du kannst dich nicht selbst loeschen.');
+    let user;
+    try {
+      user = e.app.findRecordById('users', id);
+    } catch (err) {
+      throw new NotFoundError('User nicht gefunden.');
+    }
+    e.app.delete(user);
+    return e.json(200, { ok: true });
+  },
+  $apis.requireAuth('users'),
+);
+
+// GET /api/admin/permissions  Ressourcen + Rollen-Rechte + User-Overrides.
+routerAdd(
+  'GET',
+  '/api/admin/permissions',
+  (e) => {
+    const perms = require(`${__hooks}/lib/permissions.js`);
+    if (!perms.isAdmin(e.app, e.auth.id)) throw new ForbiddenError('Nur fuer Admins.');
+    const resources = e.app
+      .findAllRecords('crew_resources')
+      .map((r) => ({
+        slug: r.getString('slug'),
+        label: r.getString('label'),
+        module: r.getString('module'),
+        sort_order: r.getInt('sort_order'),
+      }))
+      .sort((a, b) => a.sort_order - b.sort_order);
+    const rolePermissions = e.app.findAllRecords('crew_role_permissions').map((r) => ({
+      role: r.getString('role'),
+      resource: r.getString('resource'),
+      level: r.getString('level'),
+    }));
+    const userPermissions = e.app.findAllRecords('crew_user_permissions').map((r) => ({
+      user: r.getString('user'),
+      resource: r.getString('resource'),
+      level: r.getString('level'),
+    }));
+    return e.json(200, { resources, rolePermissions, userPermissions });
+  },
+  $apis.requireAuth('users'),
+);

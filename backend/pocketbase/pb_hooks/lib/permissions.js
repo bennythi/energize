@@ -129,4 +129,12 @@ function upsertFlags(app, userId, patch) {
   app.save(rec);
 }
 
-module.exports = { LEVEL_RANK, loadFlags, computePermissions, crewCan, isAdmin, upsertFlags };
+module.exports = {
+  LEVEL_RANK,
+  parseJsonArray,
+  loadFlags,
+  computePermissions,
+  crewCan,
+  isAdmin,
+  upsertFlags,
+};

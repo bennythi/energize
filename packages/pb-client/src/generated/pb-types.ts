@@ -12,6 +12,17 @@ export const Collections = {
   Otps: '_otps',
   Superusers: '_superusers',
   AccountFlags: 'account_flags',
+  BookingArtists: 'booking_artists',
+  BookingEditions: 'booking_editions',
+  BookingItems: 'booking_items',
+  CashlessMovements: 'cashless_movements',
+  CashlessRegisters: 'cashless_registers',
+  CashlessShiftDenominations: 'cashless_shift_denominations',
+  CashlessShifts: 'cashless_shifts',
+  CrewAvailability: 'crew_availability',
+  CrewBriefings: 'crew_briefings',
+  CrewEquipmentRequests: 'crew_equipment_requests',
+  CrewMilestones: 'crew_milestones',
   CrewResources: 'crew_resources',
   CrewRolePermissions: 'crew_role_permissions',
   CrewUserPermissions: 'crew_user_permissions',
@@ -121,6 +132,202 @@ export type AccountFlagsRecord<Tcrew_roles = unknown> = {
   role: AccountFlagsRoleOptions;
   updated: IsoAutoDateString;
   user: RecordIdString;
+};
+
+export const BookingArtistsStatusOptions = {
+  anfrage: 'anfrage',
+  angebot: 'angebot',
+  bestaetigt: 'bestaetigt',
+  abgesagt: 'abgesagt',
+} as const;
+export type BookingArtistsStatusOptions =
+  (typeof BookingArtistsStatusOptions)[keyof typeof BookingArtistsStatusOptions];
+export type BookingArtistsRecord<Tnot_needed = unknown> = {
+  agency?: string;
+  contact_email?: string;
+  contact_name?: string;
+  contact_phone?: string;
+  contract_signed?: boolean;
+  created: IsoAutoDateString;
+  day?: string;
+  edition: RecordIdString;
+  fee?: number;
+  fee_note?: string;
+  fee_paid?: boolean;
+  id: string;
+  invoice_received?: boolean;
+  name: string;
+  not_needed?: null | Tnot_needed;
+  notes?: string;
+  rider_files?: FileNameString[];
+  rider_hospitality?: string;
+  rider_tech?: string;
+  sanity_slug?: string;
+  slot_end?: string;
+  slot_start?: string;
+  stage?: string;
+  status: BookingArtistsStatusOptions;
+  updated: IsoAutoDateString;
+  updated_by?: RecordIdString;
+};
+
+export type BookingEditionsRecord = {
+  archived?: boolean;
+  budget?: number;
+  created: IsoAutoDateString;
+  currency?: string;
+  end_date?: string;
+  id: string;
+  name: string;
+  start_date?: string;
+  updated: IsoAutoDateString;
+  year: number;
+};
+
+export const BookingItemsKindOptions = {
+  anreise: 'anreise',
+  hotel: 'hotel',
+  transfer: 'transfer',
+  zusatzkosten: 'zusatzkosten',
+} as const;
+export type BookingItemsKindOptions =
+  (typeof BookingItemsKindOptions)[keyof typeof BookingItemsKindOptions];
+export type BookingItemsRecord = {
+  artist: RecordIdString;
+  booked?: boolean;
+  cost?: number;
+  created: IsoAutoDateString;
+  end_at?: string;
+  id: string;
+  kind: BookingItemsKindOptions;
+  location?: string;
+  notes?: string;
+  paid?: boolean;
+  persons?: number;
+  provider?: string;
+  reference?: string;
+  start_at?: string;
+  title: string;
+  updated: IsoAutoDateString;
+  updated_by?: RecordIdString;
+};
+
+export const CashlessMovementsKindOptions = {
+  withdrawal: 'withdrawal',
+  exchange_in: 'exchange_in',
+  exchange_out: 'exchange_out',
+} as const;
+export type CashlessMovementsKindOptions =
+  (typeof CashlessMovementsKindOptions)[keyof typeof CashlessMovementsKindOptions];
+export type CashlessMovementsRecord = {
+  amount_cents: number;
+  counterpart_register?: RecordIdString;
+  created: IsoAutoDateString;
+  id: string;
+  kind: CashlessMovementsKindOptions;
+  note?: string;
+  performed_at: IsoDateString;
+  performed_by_a: RecordIdString;
+  performed_by_b: RecordIdString;
+  shift: RecordIdString;
+};
+
+export type CashlessRegistersRecord = {
+  created: IsoAutoDateString;
+  id: string;
+  is_active?: boolean;
+  location?: string;
+  name: string;
+  updated: IsoAutoDateString;
+};
+
+export const CashlessShiftDenominationsKindOptions = {
+  start: 'start',
+  end: 'end',
+} as const;
+export type CashlessShiftDenominationsKindOptions =
+  (typeof CashlessShiftDenominationsKindOptions)[keyof typeof CashlessShiftDenominationsKindOptions];
+export type CashlessShiftDenominationsRecord = {
+  count?: number;
+  denomination_cents: number;
+  id: string;
+  kind: CashlessShiftDenominationsKindOptions;
+  shift: RecordIdString;
+};
+
+export type CashlessShiftsRecord = {
+  closed_at?: IsoDateString;
+  closed_by_a?: RecordIdString;
+  closed_by_b?: RecordIdString;
+  created: IsoAutoDateString;
+  ending_cents?: number;
+  has_ending?: boolean;
+  id: string;
+  note?: string;
+  opened_at: IsoDateString;
+  opened_by_a: RecordIdString;
+  opened_by_b: RecordIdString;
+  register: RecordIdString;
+  starting_cents?: number;
+  updated: IsoAutoDateString;
+};
+
+export const CrewAvailabilityKindOptions = {
+  all_day: 'all_day',
+  window: 'window',
+} as const;
+export type CrewAvailabilityKindOptions =
+  (typeof CrewAvailabilityKindOptions)[keyof typeof CrewAvailabilityKindOptions];
+export type CrewAvailabilityRecord = {
+  created: IsoAutoDateString;
+  end_at: IsoDateString;
+  id: string;
+  kind: CrewAvailabilityKindOptions;
+  note?: string;
+  start_at: IsoDateString;
+  updated: IsoAutoDateString;
+  user: RecordIdString;
+};
+
+export type CrewBriefingsRecord = {
+  body?: string;
+  created: IsoAutoDateString;
+  department: string;
+  id: string;
+  pinned?: boolean;
+  title: string;
+  updated: IsoAutoDateString;
+  updated_by?: RecordIdString;
+};
+
+export const CrewEquipmentRequestsEquipmentOptions = {
+  razor: 'razor',
+  headphones: 'headphones',
+  inear: 'inear',
+} as const;
+export type CrewEquipmentRequestsEquipmentOptions =
+  (typeof CrewEquipmentRequestsEquipmentOptions)[keyof typeof CrewEquipmentRequestsEquipmentOptions];
+export type CrewEquipmentRequestsRecord = {
+  created: IsoAutoDateString;
+  equipment: CrewEquipmentRequestsEquipmentOptions;
+  event_day: string;
+  id: string;
+  note?: string;
+  updated: IsoAutoDateString;
+  user: RecordIdString;
+};
+
+export type CrewMilestonesRecord = {
+  category: string;
+  completed_at?: IsoDateString;
+  completed_by?: RecordIdString;
+  created: IsoAutoDateString;
+  created_by?: RecordIdString;
+  description?: string;
+  due_date: string;
+  id: string;
+  title: string;
+  updated: IsoAutoDateString;
 };
 
 export type CrewResourcesRecord = {
@@ -386,6 +593,30 @@ export type AccountFlagsResponse<Tcrew_roles = unknown, Texpand = unknown> = Req
   AccountFlagsRecord<Tcrew_roles>
 > &
   BaseSystemFields<Texpand>;
+export type BookingArtistsResponse<Tnot_needed = unknown, Texpand = unknown> = Required<
+  BookingArtistsRecord<Tnot_needed>
+> &
+  BaseSystemFields<Texpand>;
+export type BookingEditionsResponse<Texpand = unknown> = Required<BookingEditionsRecord> &
+  BaseSystemFields<Texpand>;
+export type BookingItemsResponse<Texpand = unknown> = Required<BookingItemsRecord> &
+  BaseSystemFields<Texpand>;
+export type CashlessMovementsResponse<Texpand = unknown> = Required<CashlessMovementsRecord> &
+  BaseSystemFields<Texpand>;
+export type CashlessRegistersResponse<Texpand = unknown> = Required<CashlessRegistersRecord> &
+  BaseSystemFields<Texpand>;
+export type CashlessShiftDenominationsResponse<Texpand = unknown> =
+  Required<CashlessShiftDenominationsRecord> & BaseSystemFields<Texpand>;
+export type CashlessShiftsResponse<Texpand = unknown> = Required<CashlessShiftsRecord> &
+  BaseSystemFields<Texpand>;
+export type CrewAvailabilityResponse<Texpand = unknown> = Required<CrewAvailabilityRecord> &
+  BaseSystemFields<Texpand>;
+export type CrewBriefingsResponse<Texpand = unknown> = Required<CrewBriefingsRecord> &
+  BaseSystemFields<Texpand>;
+export type CrewEquipmentRequestsResponse<Texpand = unknown> =
+  Required<CrewEquipmentRequestsRecord> & BaseSystemFields<Texpand>;
+export type CrewMilestonesResponse<Texpand = unknown> = Required<CrewMilestonesRecord> &
+  BaseSystemFields<Texpand>;
 export type CrewResourcesResponse<Texpand = unknown> = Required<CrewResourcesRecord> &
   BaseSystemFields<Texpand>;
 export type CrewRolePermissionsResponse<Texpand = unknown> = Required<CrewRolePermissionsRecord> &
@@ -427,6 +658,17 @@ export type CollectionRecords = {
   _otps: OtpsRecord;
   _superusers: SuperusersRecord;
   account_flags: AccountFlagsRecord;
+  booking_artists: BookingArtistsRecord;
+  booking_editions: BookingEditionsRecord;
+  booking_items: BookingItemsRecord;
+  cashless_movements: CashlessMovementsRecord;
+  cashless_registers: CashlessRegistersRecord;
+  cashless_shift_denominations: CashlessShiftDenominationsRecord;
+  cashless_shifts: CashlessShiftsRecord;
+  crew_availability: CrewAvailabilityRecord;
+  crew_briefings: CrewBriefingsRecord;
+  crew_equipment_requests: CrewEquipmentRequestsRecord;
+  crew_milestones: CrewMilestonesRecord;
   crew_resources: CrewResourcesRecord;
   crew_role_permissions: CrewRolePermissionsRecord;
   crew_user_permissions: CrewUserPermissionsRecord;
@@ -450,6 +692,17 @@ export type CollectionResponses = {
   _otps: OtpsResponse;
   _superusers: SuperusersResponse;
   account_flags: AccountFlagsResponse;
+  booking_artists: BookingArtistsResponse;
+  booking_editions: BookingEditionsResponse;
+  booking_items: BookingItemsResponse;
+  cashless_movements: CashlessMovementsResponse;
+  cashless_registers: CashlessRegistersResponse;
+  cashless_shift_denominations: CashlessShiftDenominationsResponse;
+  cashless_shifts: CashlessShiftsResponse;
+  crew_availability: CrewAvailabilityResponse;
+  crew_briefings: CrewBriefingsResponse;
+  crew_equipment_requests: CrewEquipmentRequestsResponse;
+  crew_milestones: CrewMilestonesResponse;
   crew_resources: CrewResourcesResponse;
   crew_role_permissions: CrewRolePermissionsResponse;
   crew_user_permissions: CrewUserPermissionsResponse;
