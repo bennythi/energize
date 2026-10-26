@@ -10,6 +10,8 @@
     STATUS_LABELS,
     artistCosts,
     checkState,
+    editionDays,
+    formatDay,
     formatMoney,
     type Artist,
     type BookingItem,
@@ -42,6 +44,11 @@
   let fileToken = $state('');
 
   const currency = $derived(edition?.currency || 'EUR');
+  // Tage der Edition: 1 Tag = automatisch, mehrere = Auswahl, keiner = Datumsfeld.
+  const days = $derived(editionDays(edition));
+  const dayOptions = $derived(
+    form?.day && !days.includes(form.day) ? [...days, form.day].sort() : days,
+  );
   const costs = $derived(artist ? artistCosts(artist, items) : null);
   const dirty = $derived(
     !!artist &&
@@ -68,6 +75,7 @@
       };
       edition = rec.expand?.edition ?? null;
       setArtist(rec);
+      await autoSetSingleDay();
       await loadItems();
     } catch (err) {
       const status = (err as { status?: number }).status;
@@ -103,6 +111,21 @@
       rider_hospitality: plain.rider_hospitality,
       notes: plain.notes,
     };
+  }
+
+  /** Eintaegiges Event: Tag automatisch setzen und gleich speichern. */
+  async function autoSetSingleDay() {
+    const only = editionDays(edition);
+    if (!auth.pb || !artist || only.length !== 1 || artist.day === only[0]) return;
+    if (!auth.canWrite(RES)) return;
+    try {
+      const rec = (await auth.pb
+        .collection('booking_artists')
+        .update(artist.id, { day: only[0] })) as unknown as Artist;
+      setArtist(rec);
+    } catch (err) {
+      console.warn('[booking] auto day failed', err);
+    }
   }
 
   async function loadItems() {
@@ -283,13 +306,22 @@
             </label>
             <label class="block">
               <span class="text-xs font-medium text-fg-muted">Tag</span>
-              <input
-                class="field mt-1"
-                type="date"
-                bind:value={form.day}
-                min={edition?.start_date || undefined}
-                max={edition?.end_date || undefined}
-              />
+              {#if days.length === 1}
+                <p class="field mt-1 cursor-default opacity-80" title="Eintaegiges Event">
+                  {formatDay(days[0])}
+                </p>
+              {:else if days.length > 1}
+                <select class="field mt-1" bind:value={form.day}>
+                  <option value="">– noch offen –</option>
+                  {#each dayOptions as d (d)}
+                    <option value={d}
+                      >{formatDay(d)}{days.includes(d) ? '' : ' (ausserhalb)'}</option
+                    >
+                  {/each}
+                </select>
+              {:else}
+                <input class="field mt-1" type="date" bind:value={form.day} />
+              {/if}
             </label>
             <label class="block">
               <span class="text-xs font-medium text-fg-muted">Slot von</span>

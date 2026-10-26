@@ -9,6 +9,7 @@
     STATUS_LABELS,
     artistCosts,
     compareArtists,
+    editionDays,
     editionCosts,
     formatDay,
     formatMoney,
@@ -44,7 +45,7 @@
   let savingEdition = $state(false);
 
   let newArtistName = $state('');
-  let newArtistStatus = $state<ArtistStatus>('anfrage');
+  let newArtistStatus = $state<ArtistStatus>('idee');
   let creatingArtist = $state(false);
 
   const canWrite = $derived(auth.canWrite(RES));
@@ -206,6 +207,8 @@
     try {
       const rec = await auth.pb.collection('booking_artists').create({
         edition: editionId,
+        // Eintaegiges Event: Tag direkt setzen.
+        day: editionDays(edition).length === 1 ? editionDays(edition)[0] : '',
         name: newArtistName.trim(),
         status: newArtistStatus,
         not_needed: [],
@@ -222,6 +225,7 @@
   const FILTERS: { key: typeof filter; label: string }[] = [
     { key: 'all', label: 'Alle' },
     { key: 'open', label: 'Offene Punkte' },
+    { key: 'idee', label: 'Idee' },
     { key: 'anfrage', label: 'Anfrage' },
     { key: 'angebot', label: 'Angebot' },
     { key: 'bestaetigt', label: 'Bestaetigt' },
@@ -531,6 +535,9 @@
   .status-bestaetigt {
     color: var(--color-success);
     border-color: color-mix(in srgb, var(--color-success) 45%, transparent);
+  }
+  .status-idee {
+    border-style: dashed;
   }
   .status-angebot {
     color: var(--color-accent);

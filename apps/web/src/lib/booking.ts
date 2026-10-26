@@ -1,7 +1,7 @@
 // DJ-/Artist-Planung: Typen, Checklisten- und Kostenlogik.
 // Bewusst ohne Svelte-/PB-Imports, damit die Rechenlogik isoliert testbar ist.
 
-export type ArtistStatus = 'anfrage' | 'angebot' | 'bestaetigt' | 'abgesagt';
+export type ArtistStatus = 'idee' | 'anfrage' | 'angebot' | 'bestaetigt' | 'abgesagt';
 export type ItemKind = 'anreise' | 'hotel' | 'transfer' | 'zusatzkosten';
 /** Die vier Checkpunkte pro Artist. */
 export type CheckKey = 'vertrag' | 'anreise' | 'hotel' | 'transfer';
@@ -63,6 +63,7 @@ export interface BookingItem {
 }
 
 export const STATUS_LABELS: Record<ArtistStatus, string> = {
+  idee: 'Idee, Anfrage offen',
   anfrage: 'Anfrage',
   angebot: 'Angebot',
   bestaetigt: 'Bestaetigt',
@@ -218,6 +219,26 @@ export function formatDay(day: string): string {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return '';
   const d = new Date(`${day}T12:00:00`);
   return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+}
+
+/**
+ * Alle Tage einer Edition als 'YYYY-MM-DD' (Start bis Ende inklusive).
+ * Ohne Startdatum leer; ohne Enddatum nur der Starttag. Max. 31 Tage.
+ */
+export function editionDays(edition: Pick<Edition, 'start_date' | 'end_date'> | null): string[] {
+  const re = /^\d{4}-\d{2}-\d{2}$/;
+  if (!edition || !re.test(edition.start_date)) return [];
+  const end = re.test(edition.end_date) ? edition.end_date : edition.start_date;
+  const days: string[] = [];
+  // UTC-Mittag, damit Sommerzeit-Wechsel keinen Tag verschluckt.
+  const d = new Date(`${edition.start_date}T12:00:00Z`);
+  while (days.length < 31) {
+    const iso = d.toISOString().slice(0, 10);
+    if (iso > end) break;
+    days.push(iso);
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+  return days;
 }
 
 /** 'YYYY-MM-DDTHH:MM' -> '28.05. 14:30' */

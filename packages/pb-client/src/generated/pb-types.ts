@@ -135,6 +135,7 @@ export type AccountFlagsRecord<Tcrew_roles = unknown> = {
 };
 
 export const BookingArtistsStatusOptions = {
+  idee: 'idee',
   anfrage: 'anfrage',
   angebot: 'angebot',
   bestaetigt: 'bestaetigt',
