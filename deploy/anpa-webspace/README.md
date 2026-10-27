@@ -39,7 +39,7 @@ ssh anpa
 **Noch offen: automatischer Neustart.** Nach einem Server-Reboot oder Absturz startet Pocketbase nicht von selbst. Einmalig auf dem Server ausführen:
 
 ```sh
-(crontab -l 2>/dev/null; echo "* * * * * $HOME/private/pocketbase/pb-ctl.sh ensure >/dev/null 2>&1"; echo "@reboot $HOME/private/pocketbase/pb-ctl.sh start >/dev/null 2>&1") | crontab -
+(crontab -l 2>/dev/null; echo "* * * * * /var/www/clients/client7/web102/private/pocketbase/pb-ctl.sh ensure >/dev/null 2>&1"; echo "@reboot /var/www/clients/client7/web102/private/pocketbase/pb-ctl.sh start >/dev/null 2>&1") | crontab -
 ```
 
 Admin-UI von Pocketbase per SSH-Tunnel: `ssh -L 18095:127.0.0.1:18095 anpa`, dann http://127.0.0.1:18095/_/ öffnen.
