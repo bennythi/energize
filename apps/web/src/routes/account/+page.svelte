@@ -26,8 +26,9 @@
   });
 
   // Profil-Felder aus dem Auth-Store (via ensureProfile geladen).
-  let displayName = $state('');
-  let handle = $state('');
+  let firstName = $state('');
+  let lastName = $state('');
+  let phone = $state('');
   let profileLoaded = $state(false);
   let savingProfile = $state(false);
   let profileSaved = $state(false);
@@ -36,23 +37,14 @@
   // Sobald das Profil im Store da ist, Formularfelder befuellen (einmalig).
   $effect(() => {
     if (auth.profile && !profileLoaded) {
-      displayName = auth.profile.display_name ?? '';
-      handle = auth.profile.handle ?? '';
+      firstName = auth.profile.first_name ?? '';
+      lastName = auth.profile.last_name ?? '';
+      phone = auth.profile.phone ?? '';
       profileLoaded = true;
     }
   });
 
-  function slugifyHandle(raw: string): string {
-    return raw
-      .toLowerCase()
-      .replace(/[äÄ]/g, 'ae')
-      .replace(/[öÖ]/g, 'oe')
-      .replace(/[üÜ]/g, 'ue')
-      .replace(/[ß]/g, 'ss')
-      .replace(/[^a-z0-9]+/g, '_')
-      .replace(/^_+|_+$/g, '')
-      .slice(0, 40);
-  }
+  const phoneRegex = /^\+?[0-9 ()/-]{6,30}$/;
 
   async function handleProfileSave(event: SubmitEvent) {
     event.preventDefault();
@@ -61,15 +53,24 @@
     if (!pb || !profile) return;
     profileError = null;
     profileSaved = false;
+    const cleanPhone = phone.trim();
+    if (cleanPhone && !phoneRegex.test(cleanPhone)) {
+      profileError = 'Bitte eine gueltige Handynummer eingeben, z. B. +49 170 1234567.';
+      return;
+    }
     savingProfile = true;
     try {
-      const cleanHandle = slugifyHandle(handle);
+      const first = firstName.trim();
+      const last = lastName.trim();
       const updated = await pb.collection('profiles').update(profile.id, {
-        display_name: displayName.trim(),
-        handle: cleanHandle,
+        first_name: first,
+        last_name: last,
+        phone: cleanPhone,
+        // Anzeigename (Admin- und Crew-Listen) folgt dem echten Namen.
+        display_name: [first, last].filter(Boolean).join(' ') || profile.display_name,
       });
       auth.profile = updated as unknown as typeof auth.profile;
-      handle = cleanHandle;
+      phone = cleanPhone;
       profileSaved = true;
       setTimeout(() => (profileSaved = false), 3000);
     } catch (err) {
@@ -128,41 +129,57 @@
         </h2>
 
         <form onsubmit={handleProfileSave} class="mt-6 space-y-4">
-          <label class="block">
-            <span
-              class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
-            >
-              {m.account_display_name_label()}
-            </span>
-            <input
-              type="text"
-              bind:value={displayName}
-              placeholder={m.account_display_name_placeholder()}
-              disabled={!profileLoaded || savingProfile}
-              maxlength="80"
-              class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
-            />
-            <p class="mt-2 text-xs text-fg-muted">{m.account_display_name_hint()}</p>
-          </label>
-
-          <label class="block">
-            <span
-              class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
-            >
-              Handle
-            </span>
-            <input
-              type="text"
-              bind:value={handle}
-              placeholder="dein_handle"
-              disabled={!profileLoaded || savingProfile}
-              maxlength="40"
-              class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
-            />
-            <p class="mt-2 text-xs text-fg-muted">
-              Kleinbuchstaben, Zahlen und Unterstriche. Muss eindeutig sein.
-            </p>
-          </label>
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span
+                class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+              >
+                Vorname
+              </span>
+              <input
+                type="text"
+                autocomplete="given-name"
+                bind:value={firstName}
+                disabled={!profileLoaded || savingProfile}
+                maxlength="80"
+                class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+              />
+            </label>
+            <label class="block">
+              <span
+                class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+              >
+                Name
+              </span>
+              <input
+                type="text"
+                autocomplete="family-name"
+                bind:value={lastName}
+                disabled={!profileLoaded || savingProfile}
+                maxlength="80"
+                class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+              />
+            </label>
+            <label class="block sm:col-span-2">
+              <span
+                class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
+              >
+                Handynummer
+              </span>
+              <input
+                type="tel"
+                autocomplete="tel"
+                bind:value={phone}
+                placeholder="+49 170 1234567"
+                disabled={!profileLoaded || savingProfile}
+                maxlength="30"
+                class="mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50"
+              />
+            </label>
+          </div>
+          <p class="text-xs text-fg-muted">
+            Name und Handynummer sehen nur eingeloggte Crew-Mitglieder und Admins.
+          </p>
 
           {#if profileError}
             <p class="text-sm text-danger" role="alert">{profileError}</p>

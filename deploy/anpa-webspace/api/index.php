@@ -36,7 +36,7 @@ $lowerPath = strtolower($path);
 $allowed =
     $lowerPath === '/api/health' ||
     preg_match('#^/api/collections/[a-z0-9][a-z0-9_]*/records(/[a-z0-9]+)?$#', $lowerPath) ||
-    preg_match('#^/api/collections/users/(auth-with-password|auth-with-otp|request-otp|auth-refresh|auth-methods)$#', $lowerPath) ||
+    preg_match('#^/api/collections/users/(auth-with-password|auth-with-otp|request-otp|auth-refresh|auth-methods|request-password-reset|confirm-password-reset)$#', $lowerPath) ||
     $lowerPath === '/api/files/token' ||
     preg_match('#^/api/files/[a-z0-9_]+/[a-z0-9]+/[^/]+$#', $lowerPath) ||
     preg_match('#^/api/(crew|admin|shop)/[a-z0-9/_-]+$#', $lowerPath);

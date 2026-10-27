@@ -3,14 +3,17 @@
   import { auth } from '$lib/auth.svelte';
 
   // Passwort aendern. Pocketbase verlangt dafuer das aktuelle Passwort.
-  // Accounts aus dem Code-Login haben ein unbekanntes Zufallspasswort; ein
-  // Admin setzt dann unter Admin -> User ein Startpasswort.
+  // Wer es nicht kennt (z. B. Konto vom Admin angelegt), setzt es per Mail zurueck.
   let oldPassword = $state('');
   let password = $state('');
   let confirm = $state('');
   let saving = $state(false);
   let saved = $state(false);
   let errorMsg = $state<string | null>(null);
+
+  let sendingReset = $state(false);
+  let resetSent = $state(false);
+  let resetError = $state<string | null>(null);
 
   async function save(event: SubmitEvent) {
     event.preventDefault();
@@ -37,6 +40,26 @@
     }
   }
 
+  async function sendReset() {
+    const email = auth.user?.email;
+    if (!email) return;
+    resetError = null;
+    sendingReset = true;
+    try {
+      await auth.requestPasswordReset(email);
+      resetSent = true;
+    } catch (err) {
+      console.error('[account] password reset failed', err);
+      const status = (err as { status?: number }).status;
+      resetError =
+        status === 429
+          ? 'Zu viele Versuche. Bitte warte eine Minute.'
+          : 'Die Mail konnte nicht verschickt werden.';
+    } finally {
+      sendingReset = false;
+    }
+  }
+
   const fieldCls =
     'mt-2 w-full border-2 border-border bg-bg px-4 py-3 font-mono text-base text-fg placeholder:text-fg-muted focus:border-accent focus:outline-none disabled:opacity-50';
 </script>
@@ -47,12 +70,30 @@
   >
     Passwort
   </h2>
-  <p class="mt-2 text-sm text-fg-muted">
-    Damit meldest du dich ohne Code per E-Mail an. Kein aktuelles Passwort? Ein Admin kann dir unter
-    Admin → User ein Startpasswort setzen.
-  </p>
 
-  <form onsubmit={save} class="mt-6 space-y-4">
+  <div class="mt-4 border-2 border-border p-4">
+    <p class="text-sm text-fg">Passwort vergessen oder nie eins gesetzt?</p>
+    <p class="mt-1 text-sm text-fg-muted">
+      Wir schicken dir einen Link an {auth.user?.email ?? 'deine E-Mail'}, damit legst du ein neues
+      fest.
+    </p>
+    <div class="mt-3">
+      {#if resetSent}
+        <p class="text-sm text-success" aria-live="polite">
+          ✓ Mail ist unterwegs. Schau in dein Postfach (auch in den Spam-Ordner).
+        </p>
+      {:else}
+        <Button variant="ghost" onclick={() => void sendReset()} disabled={sendingReset}>
+          {sendingReset ? 'Sendet …' : 'Passwort zuruecksetzen'}
+        </Button>
+      {/if}
+      {#if resetError}<p class="mt-2 text-sm text-danger" role="alert">{resetError}</p>{/if}
+    </div>
+  </div>
+
+  <p class="mt-8 text-sm text-fg-muted">Oder direkt aendern, wenn du dein aktuelles kennst:</p>
+
+  <form onsubmit={save} class="mt-4 space-y-4">
     <input type="email" class="hidden" autocomplete="username" value={auth.user?.email ?? ''} />
     <label class="block">
       <span class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">

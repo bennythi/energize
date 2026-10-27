@@ -94,6 +94,28 @@
     }
   }
 
+  let resetInfo = $state<string | null>(null);
+  async function forgotPassword() {
+    errorMsg = null;
+    resetInfo = null;
+    if (!emailRegex.test(email)) {
+      errorMsg = 'Trag oben deine E-Mail-Adresse ein, dann schicken wir dir einen Link.';
+      return;
+    }
+    submitting = true;
+    try {
+      await auth.requestPasswordReset(email);
+      resetInfo = `Wenn ${email.trim()} bei uns angelegt ist, kommt gleich eine Mail mit einem Link.`;
+    } catch (err) {
+      console.error('[login] password reset failed', err);
+      const status = (err as { status?: number }).status;
+      errorMsg =
+        status === 429 ? 'Zu viele Versuche. Bitte warte eine Minute.' : m.login_error_generic();
+    } finally {
+      submitting = false;
+    }
+  }
+
   function reset() {
     otpId = null;
     code = '';
@@ -103,6 +125,7 @@
   function switchMode(next: 'password' | 'code') {
     mode = next;
     errorMsg = null;
+    resetInfo = null;
     otpId = null;
   }
 </script>
@@ -167,8 +190,15 @@
         <div>
           <Button type="submit">{submitting ? 'Pruefe …' : 'Einloggen'}</Button>
         </div>
+        {#if resetInfo}<p class="text-sm text-success" aria-live="polite">{resetInfo}</p>{/if}
         <p class="text-xs text-fg-muted">
-          Noch kein Passwort? Melde dich einmal per Code an und lege es unter Account fest.
+          Noch kein Passwort oder vergessen?
+          <button
+            type="button"
+            class="text-accent underline"
+            disabled={submitting}
+            onclick={() => void forgotPassword()}>Link zum Zuruecksetzen schicken</button
+          >
         </p>
       </form>
     {:else if otpId}

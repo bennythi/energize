@@ -42,11 +42,19 @@
 
 <div class="mx-auto w-full max-w-5xl px-5 py-10 md:py-16">
   <p class="text-xs font-medium uppercase tracking-wider text-accent">Crew-Bereich</p>
-  <h1 class="mt-2 text-3xl font-semibold tracking-tight text-fg md:text-4xl">Hallo, Crew.</h1>
+  <h1 class="mt-2 text-3xl font-semibold tracking-tight text-fg md:text-4xl">
+    {auth.greetingName ? `Hallo ${auth.greetingName}, schoen dass du da bist!` : 'Hallo, Crew.'}
+  </h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
     Alles, was wir intern fuer die Organisation brauchen. Festival-Tag {festivalLabel}, Crew-Fenster
     {windowLabel}.
   </p>
+  {#if auth.profile && !auth.profile.first_name}
+    <p class="mt-3 text-sm text-fg-muted">
+      Trag unter <a href="/account" class="text-accent underline">Account</a> deinen Namen und deine Handynummer
+      ein, dann wissen alle, wie sie dich erreichen.
+    </p>
+  {/if}
 
   {#if visibleTiles.length > 0}
     <ul class="stagger-list mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

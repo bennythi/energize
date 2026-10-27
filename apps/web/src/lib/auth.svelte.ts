@@ -17,6 +17,9 @@ interface ProfileData {
   id: string;
   user: string;
   display_name: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
   handle: string;
   avatar: string;
   locale: string;
@@ -214,6 +217,31 @@ class AuthStore {
       .update(this.user.id, { oldPassword, password, passwordConfirm: password });
     await this.pb.collection('users').authWithPassword(email, password);
     this.syncUser();
+  }
+
+  /**
+   * Schickt eine Mail mit Link zum Zuruecksetzen des Passworts. Pocketbase
+   * antwortet auch fuer unbekannte Adressen mit Erfolg (keine Enumeration).
+   */
+  async requestPasswordReset(email: string): Promise<void> {
+    if (!this.pb) throw new Error('Auth ist nicht initialisiert');
+    await this.pb.collection('users').requestPasswordReset(email.trim().toLowerCase());
+  }
+
+  /** Setzt das Passwort mit dem Token aus der Reset-Mail. Danach neu einloggen. */
+  async confirmPasswordReset(token: string, password: string): Promise<void> {
+    if (!this.pb) throw new Error('Auth ist nicht initialisiert');
+    await this.pb.collection('users').confirmPasswordReset(token, password, password);
+  }
+
+  /** Vorname fuer Begruessungen, sonst Anzeigename oder E-Mail-Anfang. */
+  get greetingName(): string {
+    const p = this.profile;
+    const first = p?.first_name?.trim();
+    if (first) return first;
+    const display = p?.display_name?.trim();
+    if (display) return display.split(/\s+/)[0];
+    return '';
   }
 
   async signOut(): Promise<void> {

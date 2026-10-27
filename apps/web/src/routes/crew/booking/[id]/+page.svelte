@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
+  import { beforeNavigate, goto } from '$app/navigation';
   import { Button } from '@platform/ui';
   import { auth } from '$lib/auth.svelte';
   import { CREW_RESOURCES } from '$lib/crewResources';
@@ -153,6 +153,24 @@
       saving = false;
     }
   }
+
+  /** Aenderungen verwerfen und zurueck zur Uebersicht. */
+  async function cancel() {
+    if (dirty && !confirm('Ungespeicherte Aenderungen verwerfen?')) return;
+    if (artist) setArtist(artist);
+    await goto('/crew/booking');
+  }
+
+  // Nicht aus Versehen mit ungespeicherten Aenderungen wegnavigieren.
+  beforeNavigate((nav) => {
+    if (!dirty || saving) return;
+    if (nav.type === 'leave') {
+      nav.cancel();
+      return;
+    }
+    if (!confirm('Du hast ungespeicherte Aenderungen. Seite trotzdem verlassen?')) nav.cancel();
+    else if (artist) setArtist(artist);
+  });
 
   async function toggleNotNeeded(key: CheckKey) {
     if (!auth.pb || !artist || !canWrite) return;
@@ -472,17 +490,6 @@
           </div>
         </section>
       </fieldset>
-
-      {#if canWrite && (dirty || saving || savedAt)}
-        <div class="savebar glass-strong">
-          <span class="text-sm text-fg-muted">
-            {#if dirty}Ungespeicherte Aenderungen{:else if savedAt}Gespeichert{/if}
-          </span>
-          <Button type="submit" disabled={saving || !dirty}>
-            {saving ? 'Speichert …' : 'Speichern'}
-          </Button>
-        </div>
-      {/if}
     </form>
 
     <!-- Reise, Hotel, Transfer, Extras -->
@@ -516,13 +523,6 @@
           disabled={!canWrite}
           placeholder="Absprachen, Gaesteliste, Besonderheiten …"
         ></textarea>
-        {#if canWrite}
-          <div class="mt-3">
-            <Button variant="ghost" onclick={() => void save()} disabled={saving || !dirty}
-              >Speichern</Button
-            >
-          </div>
-        {/if}
       </section>
       {#if costs}
         <section class="card p-5 md:p-6" aria-label="Kosten">
@@ -552,6 +552,19 @@
         </section>
       {/if}
     </div>
+
+    {#if canWrite}
+      <div class="savebar glass-strong" class:savebar-dirty={dirty}>
+        <span class="text-sm" class:text-fg-muted={!dirty} class:text-fg={dirty}>
+          {#if saving}Speichert …{:else if dirty}Ungespeicherte Aenderungen{:else if savedAt}✓
+            Gespeichert{:else}Alles gespeichert{/if}
+        </span>
+        <div class="flex gap-2">
+          <Button variant="ghost" onclick={() => void cancel()} disabled={saving}>Abbrechen</Button>
+          <Button onclick={() => void save()} disabled={saving || !dirty}>Speichern</Button>
+        </div>
+      </div>
+    {/if}
 
     {#if canDelete}
       <div class="mt-10">
@@ -610,6 +623,7 @@
   .savebar {
     position: sticky;
     bottom: 1rem;
+    margin-top: 1.25rem;
     z-index: 20;
     display: flex;
     align-items: center;
@@ -617,5 +631,8 @@
     gap: 1rem;
     padding: 0.75rem 1rem;
     border-radius: var(--radius-pill);
+  }
+  .savebar-dirty {
+    border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
   }
 </style>
