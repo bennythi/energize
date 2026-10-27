@@ -248,9 +248,11 @@ routerAdd(
   $apis.requireAuth('users'),
 );
 
-// POST /api/admin/invite  { email, display_name?, crew_roles?, role? }
-// Legt ein Crew-Mitglied an (Selbstregistrierung ist gesperrt) und schickt
-// die Willkommensmail. Login danach per Code (OTP) an diese Adresse.
+// POST /api/admin/invite
+//   { email, first_name?, last_name?, phone?, display_name?, crew_roles?, role?,
+//     is_crew? (Standard true), password? (Startpasswort), send_mail? (Standard true) }
+// Legt einen User an (Selbstregistrierung ist gesperrt) und schickt auf Wunsch
+// die Willkommensmail. Login danach per Code, Startpasswort oder Reset-Link.
 routerAdd(
   'POST',
   '/api/admin/invite',
@@ -265,9 +267,23 @@ routerAdd(
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) {
       throw new BadRequestError('Bitte eine gueltige E-Mail-Adresse angeben.');
     }
-    const name = String(data.display_name || '')
-      .trim()
-      .slice(0, 80);
+    const clean = (v, max) =>
+      String(v || '')
+        .trim()
+        .slice(0, max);
+    const firstName = clean(data.first_name, 80);
+    const lastName = clean(data.last_name, 80);
+    const phone = clean(data.phone, 40);
+    if (phone && !/^\+?[0-9 ()\/-]{6,30}$/.test(phone)) {
+      throw new BadRequestError('Bitte eine gueltige Handynummer angeben.');
+    }
+    const name = clean(data.display_name, 80) || clean(firstName + ' ' + lastName, 80);
+    const isCrew = data.is_crew !== false;
+    const sendMail = data.send_mail !== false;
+    const password = data.password ? String(data.password) : '';
+    if (password && (password.length < 10 || password.length > 72)) {
+      throw new BadRequestError('Das Startpasswort braucht 10 bis 72 Zeichen.');
+    }
     const role = data.role === 'admin' ? 'admin' : 'user';
     const roles = (Array.isArray(data.crew_roles) ? data.crew_roles : [])
       .map((r) => String(r).trim().toLowerCase().replace(/\s+/g, '_').slice(0, 40))
@@ -287,20 +303,25 @@ routerAdd(
       const user = new Record(txApp.findCollectionByNameOrId('users'));
       user.setEmail(email);
       user.setVerified(true);
-      user.setRandomPassword();
+      if (password) user.setPassword(password);
+      else user.setRandomPassword();
       txApp.save(user);
       userId = user.id;
 
       const profile = new Record(txApp.findCollectionByNameOrId('profiles'));
       profile.set('user', user.id);
       profile.set('display_name', name);
+      profile.set('first_name', firstName);
+      profile.set('last_name', lastName);
+      profile.set('phone', phone);
       profile.set('handle', '');
       profile.set('locale', 'de');
       txApp.save(profile);
 
-      perms.upsertFlags(txApp, user.id, { role, is_crew: true, crew_roles: roles });
+      perms.upsertFlags(txApp, user.id, { role, is_crew: isCrew, crew_roles: isCrew ? roles : [] });
     });
 
+    if (!sendMail) return e.json(200, { id: userId, mailSent: false });
     let mailSent = true;
     try {
       let invitedBy = '';
@@ -311,7 +332,13 @@ routerAdd(
       } catch (err) {
         invitedBy = '';
       }
-      require(`${__hooks}/lib/welcome-mail.js`).send(e.app, { email, name, invitedBy });
+      require(`${__hooks}/lib/welcome-mail.js`).send(e.app, {
+        email,
+        name: firstName || name,
+        invitedBy,
+        hasPassword: !!password,
+        isCrew,
+      });
     } catch (err) {
       mailSent = false;
       e.app.logger().error('Willkommensmail fehlgeschlagen', 'email', email, 'error', String(err));

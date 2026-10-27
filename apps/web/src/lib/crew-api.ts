@@ -14,6 +14,9 @@ export interface AdminUser extends CrewMember {
   email: string;
   created: string;
   is_crew: boolean;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
 }
 
 export type PermissionLevel = 'read' | 'write' | 'delete';
@@ -67,9 +70,16 @@ export async function adminSetFlags(
 /** Crew-Mitglied anlegen + Willkommensmail (Admin). */
 export async function adminInvite(input: {
   email: string;
+  first_name?: string;
+  last_name?: string;
+  phone?: string;
   display_name?: string;
   crew_roles?: string[];
   role?: 'user' | 'admin';
+  is_crew?: boolean;
+  /** Startpasswort; ohne meldet sich die Person per Login-Link an. */
+  password?: string;
+  send_mail?: boolean;
 }): Promise<{ id: string; mailSent: boolean }> {
   return pb().send('/api/admin/invite', { method: 'POST', body: input });
 }

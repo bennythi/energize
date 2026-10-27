@@ -2,7 +2,6 @@
   import { onMount } from 'svelte';
   import { auth } from '$lib/auth.svelte';
   import {
-    adminInvite,
     adminListCrew,
     adminListUsers,
     adminResendWelcome,
@@ -11,6 +10,7 @@
     type AdminUser,
   } from '$lib/crew-api';
   import { DEFAULT_CREW_ROLES } from '$lib/crewResources';
+  import NewUserForm from '$lib/admin/NewUserForm.svelte';
 
   let crew = $state<AdminUser[]>([]);
   let allUsers = $state<AdminUser[]>([]);
@@ -21,44 +21,6 @@
   let editingId = $state<string | null>(null);
   let customRole = $state('');
   let notice = $state<string | null>(null);
-
-  // Neues Mitglied anlegen
-  let invEmail = $state('');
-  let invName = $state('');
-  let invRoles = $state<string[]>([]);
-  let invAdmin = $state(false);
-  let inviting = $state(false);
-
-  async function invite(event: SubmitEvent) {
-    event.preventDefault();
-    errorMsg = null;
-    notice = null;
-    inviting = true;
-    try {
-      const res = await adminInvite({
-        email: invEmail,
-        display_name: invName,
-        crew_roles: invRoles,
-        role: invAdmin ? 'admin' : 'user',
-      });
-      notice = res.mailSent
-        ? `${invEmail} ist angelegt, die Willkommensmail ist unterwegs.`
-        : `${invEmail} ist angelegt, aber die Willkommensmail konnte nicht gesendet werden. Spaeter erneut senden.`;
-      invEmail = invName = '';
-      invRoles = [];
-      invAdmin = false;
-      await load(false);
-    } catch (err) {
-      console.error('[admin/crew] invite failed', err);
-      errorMsg = errorMessage(err, 'Mitglied konnte nicht angelegt werden.');
-    } finally {
-      inviting = false;
-    }
-  }
-
-  function toggleInvRole(role: string) {
-    invRoles = invRoles.includes(role) ? invRoles.filter((r) => r !== role) : [...invRoles, role];
-  }
 
   async function resendWelcome(u: AdminUser) {
     if (!confirm(`Willkommensmail erneut an ${u.email} senden?`)) return;
@@ -183,55 +145,7 @@
     <div class="card mt-8 h-40 animate-pulse opacity-50"></div>
   {:else}
     <!-- Neues Mitglied -->
-    <form onsubmit={invite} class="card mt-8 flex flex-col gap-4 p-6">
-      <div>
-        <h2 class="text-lg font-semibold text-fg">Neues Crew-Mitglied anlegen</h2>
-        <p class="mt-1 text-sm text-fg-muted">
-          Selbst registrieren kann sich niemand. Die Person bekommt eine Willkommensmail und meldet
-          sich danach per Code an ihre E-Mail-Adresse an.
-        </p>
-      </div>
-      <div class="grid gap-3 sm:grid-cols-2">
-        <label class="block">
-          <span class="text-xs font-medium text-fg-muted">E-Mail</span>
-          <input
-            type="email"
-            required
-            maxlength="200"
-            bind:value={invEmail}
-            class="field mt-1"
-            placeholder="name@example.com"
-          />
-        </label>
-        <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Name (optional)</span>
-          <input type="text" maxlength="80" bind:value={invName} class="field mt-1" />
-        </label>
-      </div>
-      <div>
-        <span class="text-xs font-medium text-fg-muted">Rollen</span>
-        <div class="mt-2 flex flex-wrap gap-2">
-          {#each DEFAULT_CREW_ROLES as role (role)}
-            {@const on = invRoles.includes(role)}
-            <button
-              type="button"
-              class="chip"
-              class:chip-on={on}
-              aria-pressed={on}
-              onclick={() => toggleInvRole(role)}>{role}</button
-            >
-          {/each}
-        </div>
-      </div>
-      <label class="flex items-center gap-2 text-sm text-fg">
-        <input type="checkbox" bind:checked={invAdmin} /> Auch Admin (darf alles inkl. Rechte vergeben)
-      </label>
-      <div>
-        <button class="pill pill-on" type="submit" disabled={inviting || !invEmail.trim()}>
-          {inviting ? 'Legt an …' : 'Anlegen und Willkommensmail senden'}
-        </button>
-      </div>
-    </form>
+    <NewUserForm onCreated={() => load(false)} />
 
     <!-- Bestehenden Account zur Crew -->
     <section class="card mt-6 p-6">

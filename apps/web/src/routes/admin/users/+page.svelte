@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { goto } from '$app/navigation';
   import { auth } from '$lib/auth.svelte';
+  import NewUserForm from '$lib/admin/NewUserForm.svelte';
   import {
     adminDeleteUser,
     adminListUsers,
@@ -19,11 +20,12 @@
   let search = $state('');
   // Zuletzt erzeugtes Startpasswort (nur einmal angezeigt).
   let issued = $state<{ email: string; password: string } | null>(null);
+  let showNew = $state(false);
 
   onMount(() => void load());
 
-  async function load() {
-    loading = true;
+  async function load(showSkeleton = true) {
+    if (showSkeleton) loading = true;
     errorMsg = null;
     try {
       items = await adminListUsers();
@@ -40,7 +42,7 @@
     const q = search.trim().toLowerCase();
     if (!q) return items;
     return items.filter((u) =>
-      [u.email, u.display_name, u.handle].join(' ').toLowerCase().includes(q),
+      [u.email, u.display_name, u.handle, u.phone].join(' ').toLowerCase().includes(q),
     );
   });
 
@@ -205,12 +207,19 @@
       User
       {#if !loading}<span class="text-fg-muted">{items.length}</span>{/if}
     </h1>
+    {#if !showNew}
+      <button class="pill pill-on" onclick={() => (showNew = true)}>+ Neuen User anlegen</button>
+    {/if}
   </div>
+
+  {#if showNew}
+    <NewUserForm onCreated={() => load(false)} onCancel={() => (showNew = false)} />
+  {/if}
 
   <input
     type="search"
     bind:value={search}
-    placeholder="E-Mail, Name oder Handle suchen …"
+    placeholder="E-Mail, Name oder Handynummer suchen …"
     class="field mt-6 sm:max-w-md"
     aria-label="User suchen"
   />
@@ -258,8 +267,8 @@
               <td class="px-5 py-3 align-top">
                 <p class="font-medium text-fg">{u.display_name || '(kein Name)'}</p>
                 <p class="text-xs text-fg-muted">
-                  {u.email}{#if u.handle}
-                    · @{u.handle}{/if}
+                  {u.email}{#if u.phone}
+                    · {u.phone}{/if}
                 </p>
               </td>
               <td class="px-5 py-3 align-top">
@@ -290,7 +299,7 @@
           </div>
           <p class="mt-1 break-all text-xs text-fg-muted">{u.email}</p>
           <p class="mt-1 text-xs text-fg-muted">
-            {#if u.handle}@{u.handle} ·
+            {#if u.phone}{u.phone} ·
             {/if}registriert {fmtDate(u.created)}
           </p>
           <div class="mt-4">{@render actions(u)}</div>
@@ -334,12 +343,17 @@
       border-color var(--dur-hover) var(--ease-out),
       color var(--dur-hover) var(--ease-out);
   }
+  .pill-on {
+    color: var(--color-fg-inverse);
+    background-color: var(--color-accent);
+    border-color: transparent;
+  }
   .pill:disabled {
     opacity: 0.4;
     cursor: not-allowed;
   }
   @media (hover: hover) and (pointer: fine) {
-    .pill:not(:disabled):hover {
+    .pill:not(:disabled):not(.pill-on):hover {
       border-color: var(--color-accent);
       background-color: var(--glass-bg-strong);
     }
