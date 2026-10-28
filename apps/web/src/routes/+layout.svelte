@@ -3,6 +3,7 @@
   import { page } from '$app/state';
   import '../app.css';
   import { languageTag, type AvailableLanguageTag } from '@platform/i18n';
+  import { t } from '$lib/i18n';
   import { auth } from '$lib/auth.svelte';
   import { favorites } from '$lib/favorites.svelte';
   import { initAnalytics } from '$lib/analytics.svelte';
@@ -36,19 +37,19 @@
       { href: '/shop', label: 'Ticketshop', icon: 'ticket', show: isModuleEnabled('ticketshop') },
       {
         href: '/account/tickets',
-        label: 'Meine Tickets',
+        label: t('Meine Tickets', 'My tickets'),
         icon: 'wallet',
         show: !!auth.user && isModuleEnabled('ticketshop'),
       },
       {
         href: '/scan',
-        label: 'Einlass-Scan',
+        label: t('Einlass-Scan', 'Entry scan'),
         icon: 'scan',
         show: auth.isCrew && isModuleEnabled('ticketshop'),
       },
       {
         href: '/crew',
-        label: 'Crew-Bereich',
+        label: t('Crew-Bereich', 'Crew area'),
         icon: 'crew',
         show: auth.isCrew && isModuleEnabled('crew-core'),
       },
@@ -179,9 +180,13 @@
         <span>Account</span>
       </a>
     {:else}
-      <a href="/login" onclick={closeMobile} class="btn-cta">Anmelden</a>
+      <a href="/login" onclick={closeMobile} class="btn-cta">{t('Anmelden', 'Sign in')}</a>
     {/if}
-    <button onclick={toggleLang} class="lang-toggle" aria-label="Sprache wechseln">
+    <button
+      onclick={toggleLang}
+      class="lang-toggle"
+      aria-label={t('Sprache wechseln', 'Switch language')}
+    >
       <span class:on={currentLang === 'de'}>DE</span>
       <span class="opacity-40">/</span>
       <span class:on={currentLang === 'en'}>EN</span>
@@ -191,8 +196,9 @@
 
 {#if auth.viewAs}
   <div class="viewas-banner">
-    Du siehst gerade als <strong>{auth.viewAs.displayName}</strong> ({auth.viewAs.email}).
-    <button onclick={() => auth.exitViewAs()} class="viewas-exit">Aussteigen</button>
+    {t('Du siehst gerade als', 'You are viewing as')} <strong>{auth.viewAs.displayName}</strong>
+    ({auth.viewAs.email}).
+    <button onclick={() => auth.exitViewAs()} class="viewas-exit">{t('Aussteigen', 'Exit')}</button>
   </div>
 {/if}
 
@@ -213,7 +219,9 @@
         bind:this={burgerButton}
         type="button"
         onclick={() => (mobileOpen = !mobileOpen)}
-        aria-label={mobileOpen ? 'Menue schliessen' : 'Menue oeffnen'}
+        aria-label={mobileOpen
+          ? t('Menue schliessen', 'Close menu')
+          : t('Menue oeffnen', 'Open menu')}
         aria-expanded={mobileOpen}
         class="burger"
       >
@@ -227,7 +235,8 @@
 
 <!-- Mobile-Drawer -->
 {#if mobileOpen}
-  <button class="scrim" aria-label="Menue schliessen" onclick={closeMobile}></button>
+  <button class="scrim" aria-label={t('Menue schliessen', 'Close menu')} onclick={closeMobile}
+  ></button>
   <div class="drawer glass-strong" role="dialog" aria-modal="true" aria-label={instance.name}>
     <div class="mb-8">{@render brand()}</div>
     {@render navList()}

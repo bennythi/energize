@@ -7,6 +7,7 @@
   import { parsePbDate } from '$lib/crew/dates';
   import BackLink from '$lib/crew/BackLink.svelte';
   import NoAccess from '$lib/crew/NoAccess.svelte';
+  import { t, lang, locale } from '$lib/i18n';
 
   interface Briefing {
     id: string;
@@ -46,7 +47,10 @@
       }));
     } catch (err) {
       console.error('[crew/briefings] load failed', err);
-      errorMsg = errorMessage(err, 'Konnte die Briefings nicht laden.');
+      errorMsg = errorMessage(
+        err,
+        t('Konnte die Briefings nicht laden.', 'Could not load the briefings.'),
+      );
     } finally {
       loading = false;
     }
@@ -56,7 +60,7 @@
   const groups = $derived.by(() => {
     const map = new Map<string, Briefing[]>();
     for (const b of briefings) {
-      const key = b.department || 'Allgemein';
+      const key = b.department || t('Allgemein', 'General');
       const list = map.get(key) ?? [];
       list.push(b);
       map.set(key, list);
@@ -66,11 +70,11 @@
         (a, b) => Number(b.pinned) - Number(a.pinned) || b.updated.localeCompare(a.updated),
       );
     }
-    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b, 'de'));
+    return [...map.entries()].sort(([a], [b]) => a.localeCompare(b, lang));
   });
 
   function fmtDate(value: string): string {
-    return parsePbDate(value).toLocaleDateString('de-DE', {
+    return parsePbDate(value).toLocaleDateString(locale, {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -86,15 +90,20 @@
   <BackLink />
   <h1 class="mt-4 text-3xl font-semibold tracking-tight text-fg md:text-4xl">Briefings</h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
-    Briefing-Dokumente nach Abteilung. Angepinnte Briefings stehen oben.
+    {t(
+      'Briefing-Dokumente nach Abteilung. Angepinnte Briefings stehen oben.',
+      'Briefing documents by department. Pinned briefings are at the top.',
+    )}
   </p>
 
   {#if !canRead}
-    <NoAccess area="die Briefings" />
+    <NoAccess area={t('die Briefings', 'the briefings')} />
   {:else}
     {#if auth.isAdmin}
       <div class="mt-6">
-        <Button href="/admin/briefings" variant="ghost">Briefings verwalten</Button>
+        <Button href="/admin/briefings" variant="ghost"
+          >{t('Briefings verwalten', 'Manage briefings')}</Button
+        >
       </div>
     {/if}
 
@@ -107,7 +116,7 @@
     {:else if groups.length === 0}
       {#if !errorMsg}
         <div class="card mt-8 p-6">
-          <p class="text-fg-muted">Noch keine Briefings hinterlegt.</p>
+          <p class="text-fg-muted">{t('Noch keine Briefings hinterlegt.', 'No briefings yet.')}</p>
         </div>
       {/if}
     {:else}
@@ -124,12 +133,17 @@
                   >
                     <span class="flex items-start gap-2 font-medium text-fg">
                       {#if b.pinned}
-                        <span class="pin" title="Angepinnt" aria-label="Angepinnt">★</span>
+                        <span
+                          class="pin"
+                          title={t('Angepinnt', 'Pinned')}
+                          aria-label={t('Angepinnt', 'Pinned')}>★</span
+                        >
                       {/if}
                       <span class="min-w-0 break-words">{b.title}</span>
                     </span>
                     <span class="mt-auto text-xs text-fg-muted">
-                      Aktualisiert {fmtDate(b.updated)}
+                      {t('Aktualisiert', 'Updated')}
+                      {fmtDate(b.updated)}
                     </span>
                   </a>
                 </li>

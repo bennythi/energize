@@ -1,6 +1,7 @@
 <script lang="ts">
   import { DENOMINATIONS } from '$lib/denominations';
   import { countsTotal, formatEur } from './summary';
+  import { t } from '$lib/i18n';
 
   interface Props {
     counts: Record<number, number>;
@@ -8,12 +9,16 @@
     totalLabel?: string;
   }
 
-  let { counts = $bindable(), disabled = false, totalLabel = 'Summe' }: Props = $props();
+  let {
+    counts = $bindable(),
+    disabled = false,
+    totalLabel = t('Summe', 'Total'),
+  }: Props = $props();
 
   const total = $derived(countsTotal(counts));
   const groups = [
-    { label: 'Scheine', items: DENOMINATIONS.filter((d) => d.type === 'note') },
-    { label: 'Muenzen', items: DENOMINATIONS.filter((d) => d.type === 'coin') },
+    { label: t('Scheine', 'Notes'), items: DENOMINATIONS.filter((d) => d.type === 'note') },
+    { label: t('Muenzen', 'Coins'), items: DENOMINATIONS.filter((d) => d.type === 'coin') },
   ];
 
   function setCount(cents: number, raw: string) {

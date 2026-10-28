@@ -1,8 +1,10 @@
 // Reine Rechenfunktionen fuer die Cashless-Kassen (ohne Svelte/PB-Abhaengigkeit,
-// damit sie direkt mit node --experimental-strip-types testbar sind).
+// damit sie direkt mit node --experimental-strip-types testbar sind; $lib/i18n
+// wird im Test per Loader durch eine Attrappe ersetzt).
 // Port von cashless_shift_summary aus Supabase 0015:
 //   erwartet  = start + wechsel_rein - (wechsel_raus + entnahme)
 //   differenz = gezaehlt - erwartet
+import { locale, t } from '$lib/i18n';
 
 export type MovementKind = 'withdrawal' | 'exchange_in' | 'exchange_out';
 
@@ -88,7 +90,7 @@ export function parseEuroToCents(raw: string): number | null {
   return Number.isFinite(cents) && cents > 0 ? cents : null;
 }
 
-const EUR = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' });
+const EUR = new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR' });
 
 export function formatEur(cents: number | null | undefined): string {
   if (cents === null || cents === undefined) return '–';
@@ -106,7 +108,7 @@ export function formatDateTime(iso: string | undefined): string {
   // PB liefert "2026-10-26 12:00:00.000Z"; Safari parst das nur mit "T".
   const d = new Date(iso.replace(' ', 'T'));
   if (Number.isNaN(d.getTime())) return '–';
-  return d.toLocaleString('de-DE', {
+  return d.toLocaleString(locale, {
     day: '2-digit',
     month: '2-digit',
     hour: '2-digit',
@@ -115,7 +117,7 @@ export function formatDateTime(iso: string | undefined): string {
 }
 
 export const MOVEMENT_LABELS: Record<MovementKind, string> = {
-  withdrawal: 'Entnahme',
-  exchange_in: 'Wechselgeld rein',
-  exchange_out: 'Wechselgeld raus',
+  withdrawal: t('Entnahme', 'Withdrawal'),
+  exchange_in: t('Wechselgeld rein', 'Change in'),
+  exchange_out: t('Wechselgeld raus', 'Change out'),
 };

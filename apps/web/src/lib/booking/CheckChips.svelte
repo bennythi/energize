@@ -6,6 +6,7 @@
     type Artist,
     type BookingItem,
   } from '$lib/booking';
+  import { t } from '$lib/i18n';
 
   interface Props {
     artist: Pick<Artist, 'contract_signed' | 'not_needed'>;
@@ -18,10 +19,10 @@
 
   function title(label: string, state: string): string {
     return state === 'done'
-      ? `${label}: gebucht`
+      ? `${label}: ${t('gebucht', 'booked')}`
       : state === 'na'
-        ? `${label}: nicht noetig`
-        : `${label}: offen`;
+        ? `${label}: ${t('nicht noetig', 'not needed')}`
+        : `${label}: ${t('offen', 'open')}`;
   }
 </script>
 

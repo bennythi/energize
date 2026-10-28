@@ -23,6 +23,7 @@
   } from '$lib/cashless/summary';
   import DenominationInput from '$lib/cashless/DenominationInput.svelte';
   import NoAccess from '$lib/cashless/NoAccess.svelte';
+  import { t, lang } from '$lib/i18n';
 
   const canRead = $derived(auth.canRead(CREW_RESOURCES.kasse));
   const canWrite = $derived(auth.canWrite(CREW_RESOURCES.kasse));
@@ -46,7 +47,7 @@
   const partners = $derived(
     members
       .filter((m) => m.id !== auth.user?.id)
-      .sort((a, b) => memberName(a).localeCompare(memberName(b), 'de')),
+      .sort((a, b) => memberName(a).localeCompare(memberName(b), lang)),
   );
   const openByRegister = $derived(new Map(openShifts.map((s) => [s.register, s])));
   // Aktive Kassen plus inaktive, an denen noch eine Schicht offen ist.
@@ -79,7 +80,10 @@
       closedMovements = await listMovements(closed.map((s) => s.id));
     } catch (err) {
       console.error('[crew/kasse] load failed', err);
-      errorMsg = errorMessage(err, 'Konnte die Kassen nicht laden.');
+      errorMsg = errorMessage(
+        err,
+        t('Konnte die Kassen nicht laden.', 'Could not load the cash registers.'),
+      );
     } finally {
       loading = false;
     }
@@ -109,11 +113,14 @@
     event.preventDefault();
     if (!openFor) return;
     if (!partner) {
-      formError = 'Bitte einen zweiten Kassierer waehlen.';
+      formError = t('Bitte einen zweiten Kassierer waehlen.', 'Please choose a second cashier.');
       return;
     }
     if (startingTotal <= 0) {
-      formError = 'Startbestand ist 0. Trag die Stueckzahl pro Geldwert ein.';
+      formError = t(
+        'Startbestand ist 0. Trag die Stueckzahl pro Geldwert ein.',
+        'Starting float is 0. Enter the count for each denomination.',
+      );
       return;
     }
     saving = true;
@@ -130,7 +137,7 @@
       console.error('[crew/kasse] open failed', err);
       formError = errorMessage(
         err,
-        err instanceof Error ? err.message : 'Speichern fehlgeschlagen.',
+        err instanceof Error ? err.message : t('Speichern fehlgeschlagen.', 'Saving failed.'),
       );
     } finally {
       saving = false;
@@ -139,16 +146,20 @@
 </script>
 
 <svelte:head>
-  <title>Crew · Kassen</title>
+  <title>{t('Crew · Kassen', 'Crew · Cash registers')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-5xl px-5 py-10 md:py-16">
   <a href="/crew" class="text-sm text-fg-muted transition-colors hover:text-accent">← Crew</a>
   <p class="mt-6 text-xs font-medium uppercase tracking-wider text-accent">Cashless</p>
-  <h1 class="mt-2 text-3xl font-semibold tracking-tight text-fg md:text-4xl">Kassen</h1>
+  <h1 class="mt-2 text-3xl font-semibold tracking-tight text-fg md:text-4xl">
+    {t('Kassen', 'Cash registers')}
+  </h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
-    Pro Kasse ist eine Schicht offen. Eroeffnen, Bewegungen und Abschluss laufen im
-    Vier-Augen-Prinzip mit zwei Kassierern.
+    {t(
+      'Pro Kasse ist eine Schicht offen. Eroeffnen, Bewegungen und Abschluss laufen im Vier-Augen-Prinzip mit zwei Kassierern.',
+      'Each cash register has one open shift. Opening, movements and closing follow the four-eyes principle with two cashiers.',
+    )}
   </p>
 
   {#if !canRead}
@@ -161,21 +172,27 @@
   {:else if errorMsg}
     <div class="card mt-8 p-6">
       <p class="text-sm text-danger" role="alert">{errorMsg}</p>
-      <div class="mt-4"><Button variant="ghost" onclick={load}>Erneut laden</Button></div>
+      <div class="mt-4">
+        <Button variant="ghost" onclick={load}>{t('Erneut laden', 'Reload')}</Button>
+      </div>
     </div>
   {:else if openFor}
     <!-- Schicht eroeffnen -->
     <form onsubmit={submitOpen} class="card mt-8 flex flex-col gap-6 p-6">
       <div>
-        <p class="text-xs font-medium uppercase tracking-wider text-accent">Schicht eroeffnen</p>
+        <p class="text-xs font-medium uppercase tracking-wider text-accent">
+          {t('Schicht eroeffnen', 'Open shift')}
+        </p>
         <p class="mt-1 text-xl font-semibold text-fg">{openFor.name}</p>
         {#if openFor.location}<p class="text-sm text-fg-muted">{openFor.location}</p>{/if}
       </div>
 
       <label class="block">
-        <span class="text-xs font-medium text-fg-muted">Zweiter Kassierer (Vier-Augen)</span>
+        <span class="text-xs font-medium text-fg-muted">
+          {t('Zweiter Kassierer (Vier-Augen)', 'Second cashier (four eyes)')}
+        </span>
         <select bind:value={partner} disabled={saving} class="field mt-2">
-          <option value="">Bitte waehlen …</option>
+          <option value="">{t('Bitte waehlen …', 'Please choose …')}</option>
           {#each partners as p (p.id)}
             <option value={p.id}>{memberName(p)}</option>
           {/each}
@@ -183,10 +200,21 @@
       </label>
 
       <div>
-        <p class="text-sm font-medium text-fg">Wechselgeld-Startbestand</p>
-        <p class="mt-1 text-xs text-fg-muted">Stueckzahl pro Geldwert, gemeinsam gezaehlt.</p>
+        <p class="text-sm font-medium text-fg">
+          {t('Wechselgeld-Startbestand', 'Starting change float')}
+        </p>
+        <p class="mt-1 text-xs text-fg-muted">
+          {t(
+            'Stueckzahl pro Geldwert, gemeinsam gezaehlt.',
+            'Count per denomination, counted together.',
+          )}
+        </p>
         <div class="mt-4">
-          <DenominationInput bind:counts disabled={saving} totalLabel="Startbestand" />
+          <DenominationInput
+            bind:counts
+            disabled={saving}
+            totalLabel={t('Startbestand', 'Starting float')}
+          />
         </div>
       </div>
 
@@ -194,24 +222,28 @@
 
       <div class="flex flex-wrap gap-3">
         <Button type="submit" disabled={saving || !partner || startingTotal <= 0}>
-          {saving ? 'Speichere …' : 'Schicht eroeffnen'}
+          {saving ? t('Speichere …', 'Saving …') : t('Schicht eroeffnen', 'Open shift')}
         </Button>
         <Button variant="ghost" onclick={() => (openFor = null)} disabled={saving}>
-          Abbrechen
+          {t('Abbrechen', 'Cancel')}
         </Button>
       </div>
     </form>
   {:else}
     {#if visibleRegisters.length === 0}
       <div class="card mt-8 p-6">
-        <p class="font-medium text-fg">Keine aktiven Kassen</p>
+        <p class="font-medium text-fg">{t('Keine aktiven Kassen', 'No active cash registers')}</p>
         <p class="mt-2 text-sm text-fg-muted">
           {#if auth.isAdmin}
-            Leg unter <a href="/admin/cashless-kassen" class="text-accent hover:underline"
-              >Admin → Kassen</a
-            > die erste Kasse an.
+            {t('Leg unter', 'Create the first cash register under')}
+            <a href="/admin/cashless-kassen" class="text-accent hover:underline"
+              >{t('Admin → Kassen', 'Admin → Cash registers')}</a
+            >{t(' die erste Kasse an.', '.')}
           {:else}
-            Sag einem Admin Bescheid, dass die Kassen-Stammdaten angelegt werden muessen.
+            {t(
+              'Sag einem Admin Bescheid, dass die Kassen-Stammdaten angelegt werden muessen.',
+              'Let an admin know that the cash register master data needs to be set up.',
+            )}
           {/if}
         </p>
       </div>
@@ -223,28 +255,39 @@
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <p class="text-lg font-semibold text-fg">{r.name}</p>
-                <p class="text-sm text-fg-muted">{r.location || 'Standort offen'}</p>
+                <p class="text-sm text-fg-muted">
+                  {r.location || t('Standort offen', 'Location not set')}
+                </p>
               </div>
               {#if shift}
-                <span class="shrink-0 text-xs font-medium text-success">● Offen</span>
+                <span class="shrink-0 text-xs font-medium text-success">● {t('Offen', 'Open')}</span
+                >
               {:else}
-                <span class="shrink-0 text-xs font-medium text-fg-muted">○ Zu</span>
+                <span class="shrink-0 text-xs font-medium text-fg-muted">○ {t('Zu', 'Closed')}</span
+                >
               {/if}
             </div>
 
             {#if shift}
               <p class="mt-4 text-sm text-fg-muted">
-                Seit {formatDateTime(shift.opened_at)} · Start
+                {t('Seit', 'Since')}
+                {formatDateTime(shift.opened_at)} · {t('Start', 'Start')}
                 <span class="tabular-nums text-fg">{formatEur(shift.starting_cents)}</span>
               </p>
               <div class="mt-auto pt-5">
-                <Button href={`/crew/kasse/${shift.id}`}>Zur Schicht →</Button>
+                <Button href={`/crew/kasse/${shift.id}`}
+                  >{t('Zur Schicht →', 'Go to shift →')}</Button
+                >
               </div>
             {:else}
-              <p class="mt-4 text-sm text-fg-muted">Keine offene Schicht.</p>
+              <p class="mt-4 text-sm text-fg-muted">
+                {t('Keine offene Schicht.', 'No open shift.')}
+              </p>
               {#if canWrite && r.is_active}
                 <div class="mt-auto pt-5">
-                  <Button variant="ghost" onclick={() => startOpen(r)}>Schicht eroeffnen</Button>
+                  <Button variant="ghost" onclick={() => startOpen(r)}>
+                    {t('Schicht eroeffnen', 'Open shift')}
+                  </Button>
                 </div>
               {/if}
             {/if}
@@ -254,7 +297,9 @@
     {/if}
 
     {#if closedShifts.length > 0}
-      <h2 class="mt-12 text-xl font-semibold tracking-tight text-fg">Letzte Schichten</h2>
+      <h2 class="mt-12 text-xl font-semibold tracking-tight text-fg">
+        {t('Letzte Schichten', 'Recent shifts')}
+      </h2>
       <ul class="card mt-4 divide-y divide-[var(--glass-border)]">
         {#each closedShifts as s (s.id)}
           {@const diff = differenceOf(s)}
@@ -265,7 +310,9 @@
             >
               <span class="min-w-0">
                 <span class="block truncate font-medium text-fg">
-                  {s.expand?.register?.name ?? registerNames.get(s.register) ?? 'Kasse'}
+                  {s.expand?.register?.name ??
+                    registerNames.get(s.register) ??
+                    t('Kasse', 'Cash register')}
                 </span>
                 <span class="block text-xs text-fg-muted">
                   {formatDateTime(s.opened_at)} – {formatDateTime(s.closed_at)}
@@ -273,9 +320,9 @@
               </span>
               <span class="shrink-0 text-right">
                 <span class="block text-sm tabular-nums {diffClass(diff)}">
-                  {diff === null ? 'ohne Zaehlung' : formatSignedEur(diff)}
+                  {diff === null ? t('ohne Zaehlung', 'not counted') : formatSignedEur(diff)}
                 </span>
-                <span class="block text-xs text-fg-muted">Differenz</span>
+                <span class="block text-xs text-fg-muted">{t('Differenz', 'Difference')}</span>
               </span>
             </a>
           </li>
@@ -285,7 +332,9 @@
 
     {#if auth.isAdmin}
       <div class="mt-10">
-        <Button href="/admin/cashless-kassen" variant="ghost">Kassen-Stammdaten</Button>
+        <Button href="/admin/cashless-kassen" variant="ghost">
+          {t('Kassen-Stammdaten', 'Cash register master data')}
+        </Button>
       </div>
     {/if}
   {/if}

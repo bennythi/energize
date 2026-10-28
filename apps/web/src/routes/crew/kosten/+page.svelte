@@ -28,6 +28,7 @@
     type Pricing,
   } from '$lib/costs';
   import EditionForm from '$lib/booking/EditionForm.svelte';
+  import { t } from '$lib/i18n';
 
   const RES = CREW_RESOURCES.kosten;
   const EDITION_KEY = 'platform.booking.edition';
@@ -104,7 +105,10 @@
         editions.find((e) => e.id === stored) ?? editions.find((e) => !e.archived) ?? editions[0];
       if (pick) await selectEdition(pick.id);
     } catch (err) {
-      errorMsg = errorMessage(err, 'Editionen konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Editionen konnten nicht geladen werden.', 'Editions could not be loaded.'),
+      );
     } finally {
       loading = false;
     }
@@ -144,7 +148,10 @@
         artistTotal = null;
       }
     } catch (err) {
-      errorMsg = errorMessage(err, 'Kosten konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Kosten konnten nicht geladen werden.', 'Costs could not be loaded.'),
+      );
     } finally {
       loadingItems = false;
     }
@@ -164,7 +171,12 @@
     if (!auth.pb || !edition || !canWrite) return;
     if (
       items.length > 0 &&
-      !confirm('Die Vorlage fuegt alle Positionen zusaetzlich hinzu. Fortfahren?')
+      !confirm(
+        t(
+          'Die Vorlage fuegt alle Positionen zusaetzlich hinzu. Fortfahren?',
+          'The template adds all line items in addition to the existing ones. Continue?',
+        ),
+      )
     )
       return;
     loadingTemplate = true;
@@ -175,13 +187,19 @@
         method: 'POST',
         body: {
           edition: edition.id,
-          items: HARDSTYLE_TEMPLATE.map((t) => ({ ...t, days: presetDays(t.days, days) })),
+          items: HARDSTYLE_TEMPLATE.map((p) => ({ ...p, days: presetDays(p.days, days) })),
         },
       });
-      notice = `${res.created} Positionen aus der Vorlage angelegt. Preise kommen aus den Angeboten.`;
+      notice = t(
+        `${res.created} Positionen aus der Vorlage angelegt. Preise kommen aus den Angeboten.`,
+        `${res.created} line items created from the template. Prices come from the quotes.`,
+      );
       await loadItems();
     } catch (err) {
-      errorMsg = errorMessage(err, 'Vorlage konnte nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Vorlage konnte nicht geladen werden.', 'Template could not be loaded.'),
+      );
     } finally {
       loadingTemplate = false;
     }
@@ -216,7 +234,10 @@
       });
       await goto(`/crew/kosten/${rec.id}`);
     } catch (err) {
-      errorMsg = errorMessage(err, 'Position konnte nicht angelegt werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Position konnte nicht angelegt werden.', 'Line item could not be created.'),
+      );
     } finally {
       creating = false;
     }
@@ -225,15 +246,15 @@
   function exportCsv() {
     const rows = [
       [
-        'Kategorie',
-        'Position',
-        'Lieferant',
-        'Abrechnung',
-        'Rechnung',
-        'Betrag',
-        'Status',
-        'Bezahlt',
-        'Notizen',
+        t('Kategorie', 'Category'),
+        t('Position', 'Line item'),
+        t('Lieferant', 'Supplier'),
+        t('Abrechnung', 'Billing'),
+        t('Rechnung', 'Calculation'),
+        t('Betrag', 'Amount'),
+        t('Status', 'Status'),
+        t('Bezahlt', 'Paid'),
+        t('Notizen', 'Notes'),
       ],
       ...groupByCategory(items).flatMap((g) =>
         g.items.map((i) => [
@@ -244,7 +265,7 @@
           formula(i, money),
           itemAmount(i).toFixed(2).replace('.', ','),
           STATUS_LABELS[i.status],
-          i.paid ? 'ja' : 'nein',
+          i.paid ? t('ja', 'yes') : t('nein', 'no'),
           i.notes.replace(/\s+/g, ' '),
         ]),
       ),
@@ -252,7 +273,7 @@
     if (artistTotal !== null)
       rows.push([
         'Artists',
-        'Gagen, Reise, Hotel (DJ-Planung)',
+        t('Gagen, Reise, Hotel (DJ-Planung)', 'Fees, travel, hotel (DJ planning)'),
         '',
         '',
         '',
@@ -273,12 +294,12 @@
   }
 
   const FILTERS: { key: typeof filter; label: string }[] = [
-    { key: 'alle', label: 'Alle' },
-    { key: 'offen', label: 'Offen' },
-    { key: 'angefragt', label: 'Angefragt' },
-    { key: 'angebot', label: 'Angebot da' },
-    { key: 'beauftragt', label: 'Beauftragt' },
-    { key: 'unbezahlt', label: 'Noch nicht bezahlt' },
+    { key: 'alle', label: t('Alle', 'All') },
+    { key: 'offen', label: t('Offen', 'Open') },
+    { key: 'angefragt', label: t('Angefragt', 'Requested') },
+    { key: 'angebot', label: t('Angebot da', 'Quote received') },
+    { key: 'beauftragt', label: t('Beauftragt', 'Commissioned') },
+    { key: 'unbezahlt', label: t('Noch nicht bezahlt', 'Not yet paid') },
   ];
 
   function groupSum(list: CostItem[]): number {
@@ -287,21 +308,26 @@
 </script>
 
 <svelte:head>
-  <title>Kostenplanung</title>
+  <title>{t('Kostenplanung', 'Cost planning')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-6xl px-5 py-10 md:py-16">
-  <a href="/crew" class="text-sm text-fg-muted hover:text-fg">← Crew-Bereich</a>
+  <a href="/crew" class="text-sm text-fg-muted hover:text-fg">← {t('Crew-Bereich', 'Crew area')}</a>
   <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
     <div>
-      <h1 class="text-3xl font-semibold tracking-tight text-fg md:text-4xl">Kostenplanung</h1>
+      <h1 class="text-3xl font-semibold tracking-tight text-fg md:text-4xl">
+        {t('Kostenplanung', 'Cost planning')}
+      </h1>
       <p class="mt-2 text-fg-muted">
-        Alle Festivalkosten pro Edition, mit Angeboten und Lieferanten.
+        {t(
+          'Alle Festivalkosten pro Edition, mit Angeboten und Lieferanten.',
+          'All festival costs per edition, with quotes and suppliers.',
+        )}
       </p>
     </div>
     {#if editions.length > 0}
       <div class="flex flex-wrap items-center gap-2">
-        <label class="sr-only" for="edition">Edition</label>
+        <label class="sr-only" for="edition">{t('Edition', 'Edition')}</label>
         <select
           id="edition"
           class="field w-auto"
@@ -309,7 +335,9 @@
           onchange={(e) => void selectEdition((e.currentTarget as HTMLSelectElement).value)}
         >
           {#each editions as e (e.id)}
-            <option value={e.id}>{e.name}{e.archived ? ' (archiviert)' : ''}</option>
+            <option value={e.id}
+              >{e.name}{e.archived ? t(' (archiviert)', ' (archived)') : ''}</option
+            >
           {/each}
         </select>
         {#if canWrite}
@@ -318,14 +346,14 @@
             onclick={() => {
               editingEdition = edition;
               showEditionForm = true;
-            }}>Bearbeiten</Button
+            }}>{t('Bearbeiten', 'Edit')}</Button
           >
           <Button
             variant="ghost"
             onclick={() => {
               editingEdition = null;
               showEditionForm = true;
-            }}>Neue Edition</Button
+            }}>{t('Neue Edition', 'New edition')}</Button
           >
         {/if}
       </div>
@@ -337,9 +365,12 @@
 
   {#if !auth.canRead(RES)}
     <div class="card mt-8 p-6">
-      <p class="font-medium text-fg">Kein Zugriff</p>
+      <p class="font-medium text-fg">{t('Kein Zugriff', 'No access')}</p>
       <p class="mt-2 text-sm text-fg-muted">
-        Fuer die Kostenplanung brauchst du das Recht „Kostenplanung“. Ein Admin kann es dir geben.
+        {t(
+          'Fuer die Kostenplanung brauchst du das Recht „Kostenplanung“. Ein Admin kann es dir geben.',
+          'Cost planning requires the “Cost planning” permission. An admin can grant it to you.',
+        )}
       </p>
     </div>
   {:else if loading}
@@ -357,21 +388,31 @@
 
     {#if editions.length === 0}
       <div class="card mt-8 p-6">
-        <p class="font-medium text-fg">Noch keine Edition</p>
+        <p class="font-medium text-fg">{t('Noch keine Edition', 'No edition yet')}</p>
         <p class="mt-2 text-sm text-fg-muted">
-          Lege zuerst eine Edition mit Festivaltagen, Auf- und Abbautagen an.
+          {t(
+            'Lege zuerst eine Edition mit Festivaltagen, Auf- und Abbautagen an.',
+            'First create an edition with festival, setup and teardown days.',
+          )}
         </p>
         {#if canWrite && !showEditionForm}
           <div class="mt-4">
-            <Button onclick={() => (showEditionForm = true)}>Edition anlegen</Button>
+            <Button onclick={() => (showEditionForm = true)}
+              >{t('Edition anlegen', 'Create edition')}</Button
+            >
           </div>
         {/if}
       </div>
     {:else}
       <!-- Kennzahlen -->
-      <section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Summen">
+      <section
+        class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        aria-label={t('Summen', 'Totals')}
+      >
         <div class="card p-5">
-          <p class="text-xs font-medium text-fg-muted">Gesamtkosten geplant</p>
+          <p class="text-xs font-medium text-fg-muted">
+            {t('Gesamtkosten geplant', 'Total planned costs')}
+          </p>
           <p class="mt-1 text-2xl font-semibold text-fg tabular-nums">{money(grandTotal)}</p>
           {#if budgetPct !== null && edition}
             <div class="budget mt-3" aria-hidden="true">
@@ -379,39 +420,54 @@
               ></span>
             </div>
             <p class="mt-1 text-xs text-fg-muted">
-              von {money(edition.total_budget)} Budget
+              {t('von', 'of')}
+              {money(edition.total_budget)}
+              {t('Budget', 'budget')}
               {#if grandTotal > edition.total_budget}
-                · <span class="text-danger">{money(grandTotal - edition.total_budget)} drueber</span
+                · <span class="text-danger"
+                  >{money(grandTotal - edition.total_budget)} {t('drueber', 'over')}</span
                 >
               {:else}
-                · {money(edition.total_budget - grandTotal)} frei
+                · {money(edition.total_budget - grandTotal)} {t('frei', 'left')}
               {/if}
             </p>
           {:else}
-            <p class="mt-1 text-xs text-fg-muted">Gesamtbudget unter „Bearbeiten“ eintragen</p>
+            <p class="mt-1 text-xs text-fg-muted">
+              {t(
+                'Gesamtbudget unter „Bearbeiten“ eintragen',
+                'Enter the total budget under “Edit”',
+              )}
+            </p>
           {/if}
         </div>
         <div class="card p-5">
-          <p class="text-xs font-medium text-fg-muted">Beauftragt</p>
+          <p class="text-xs font-medium text-fg-muted">{t('Beauftragt', 'Commissioned')}</p>
           <p class="mt-1 text-2xl font-semibold text-fg tabular-nums">
             {money(summary.commissioned)}
           </p>
-          <p class="mt-1 text-xs text-fg-muted">noch offen {money(summary.open)}</p>
+          <p class="mt-1 text-xs text-fg-muted">
+            {t('noch offen', 'still open')}
+            {money(summary.open)}
+          </p>
         </div>
         <div class="card p-5">
-          <p class="text-xs font-medium text-fg-muted">Bezahlt</p>
+          <p class="text-xs font-medium text-fg-muted">{t('Bezahlt', 'Paid')}</p>
           <p class="mt-1 text-2xl font-semibold text-success tabular-nums">{money(summary.paid)}</p>
-          <p class="mt-1 text-xs text-fg-muted">ohne Artists</p>
+          <p class="mt-1 text-xs text-fg-muted">{t('ohne Artists', 'excluding artists')}</p>
         </div>
         <div class="card p-5">
-          <p class="text-xs font-medium text-fg-muted">Artists (DJ-Planung)</p>
+          <p class="text-xs font-medium text-fg-muted">
+            {t('Artists (DJ-Planung)', 'Artists (DJ planning)')}
+          </p>
           <p class="mt-1 text-2xl font-semibold text-fg tabular-nums">
             {artistTotal === null ? '–' : money(artistTotal)}
           </p>
           <p class="mt-1 text-xs text-fg-muted">
-            {#if artistTotal === null}kein Zugriff auf die DJ-Planung{:else}<a
-                href="/crew/booking"
-                class="text-accent hover:underline">Gagen, Reise, Hotel →</a
+            {#if artistTotal === null}{t(
+                'kein Zugriff auf die DJ-Planung',
+                'no access to DJ planning',
+              )}{:else}<a href="/crew/booking" class="text-accent hover:underline"
+                >{t('Gagen, Reise, Hotel', 'Fees, travel, hotel')} →</a
               >{/if}
           </p>
         </div>
@@ -419,7 +475,12 @@
 
       {#if withoutPrice > 0 && items.length > 0}
         <p class="mt-4 text-sm text-fg-muted">
-          {withoutPrice} Position{withoutPrice === 1 ? '' : 'en'} noch ohne Preis.
+          {withoutPrice === 1
+            ? t('1 Position noch ohne Preis.', '1 line item without a price yet.')
+            : t(
+                `${withoutPrice} Positionen noch ohne Preis.`,
+                `${withoutPrice} line items without a price yet.`,
+              )}
         </p>
       {/if}
 
@@ -427,19 +488,23 @@
         <div class="card mt-6 h-40 animate-pulse opacity-50"></div>
       {:else if items.length === 0}
         <div class="card mt-8 p-6">
-          <p class="font-medium text-fg">Noch keine Positionen</p>
+          <p class="font-medium text-fg">{t('Noch keine Positionen', 'No line items yet')}</p>
           <p class="mt-2 text-sm text-fg-muted">
-            Starte mit der Vorlage fuer ein Hardstyle-Festival ({HARDSTYLE_TEMPLATE.length} Positionen
-            in {CATEGORIES.length} Kategorien: Security, Stage-Hands, Verkehr, Toiletten, SFX, Sanitaet,
-            Strom, Zaeune, Abgaben …). Mengen und Tage sind vorbelegt, Preise traegst du ueber die Angebote
-            ein. Oder lege Positionen einzeln an.
+            {t(
+              `Starte mit der Vorlage fuer ein Hardstyle-Festival (${HARDSTYLE_TEMPLATE.length} Positionen in ${CATEGORIES.length} Kategorien: Security, Stage-Hands, Verkehr, Toiletten, SFX, Sanitaet, Strom, Zaeune, Abgaben …). Mengen und Tage sind vorbelegt, Preise traegst du ueber die Angebote ein. Oder lege Positionen einzeln an.`,
+              `Start with the template for a hardstyle festival (${HARDSTYLE_TEMPLATE.length} line items in ${CATEGORIES.length} categories: security, stagehands, traffic, toilets, SFX, first aid, power, fences, fees …). Quantities and days are prefilled; you enter prices via the quotes. Or create line items one by one.`,
+            )}
           </p>
           {#if canWrite}
             <div class="mt-4 flex flex-wrap gap-3">
               <Button onclick={() => void loadTemplate()} disabled={loadingTemplate}>
-                {loadingTemplate ? 'Lege an …' : 'Vorlage Hardstyle-Festival laden'}
+                {loadingTemplate
+                  ? t('Lege an …', 'Creating …')
+                  : t('Vorlage Hardstyle-Festival laden', 'Load hardstyle festival template')}
               </Button>
-              <Button variant="ghost" onclick={() => startAdd('sonstiges')}>Einzeln anlegen</Button>
+              <Button variant="ghost" onclick={() => startAdd('sonstiges')}
+                >{t('Einzeln anlegen', 'Create individually')}</Button
+              >
             </div>
           {/if}
         </div>
@@ -447,7 +512,7 @@
 
       {#if items.length > 0 || addingIn}
         <div class="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div class="seg" role="group" aria-label="Filter">
+          <div class="seg" role="group" aria-label={t('Filter', 'Filter')}>
             {#each FILTERS as f (f.key)}
               <button
                 type="button"
@@ -461,7 +526,7 @@
             <input
               class="field lg:w-64"
               type="search"
-              placeholder="Suchen (Position, Lieferant)"
+              placeholder={t('Suchen (Position, Lieferant)', 'Search (line item, supplier)')}
               bind:value={search}
             />
             <Button variant="ghost" onclick={exportCsv}>CSV</Button>
@@ -497,13 +562,13 @@
                         <div class="min-w-0">
                           <p class="truncate font-medium text-fg">{i.title}</p>
                           <p class="truncate text-xs text-fg-muted">
-                            {i.supplier || 'kein Lieferant'} · {formula(i, money)}
+                            {i.supplier || t('kein Lieferant', 'no supplier')} · {formula(i, money)}
                           </p>
                         </div>
                         <span class="status status-{i.status}">{STATUS_LABELS[i.status]}</span>
                         <span class="amount tabular-nums" class:muted={itemAmount(i) === 0}>
                           {money(itemAmount(i))}
-                          {#if i.paid}<span class="paid" title="bezahlt">✓</span>{/if}
+                          {#if i.paid}<span class="paid" title={t('bezahlt', 'paid')}>✓</span>{/if}
                         </span>
                       </a>
                     </li>
@@ -514,7 +579,7 @@
                     <form class="add" onsubmit={(e) => void createItem(e, g.key)}>
                       <input
                         class="field"
-                        placeholder="Neue Position"
+                        placeholder={t('Neue Position', 'New line item')}
                         bind:value={newTitle}
                         required
                         maxlength="200"
@@ -524,12 +589,14 @@
                           <option value={k}>{label}</option>
                         {/each}
                       </select>
-                      <Button type="submit" disabled={creating}>Anlegen</Button>
-                      <Button variant="ghost" onclick={() => (addingIn = null)}>Abbrechen</Button>
+                      <Button type="submit" disabled={creating}>{t('Anlegen', 'Create')}</Button>
+                      <Button variant="ghost" onclick={() => (addingIn = null)}
+                        >{t('Abbrechen', 'Cancel')}</Button
+                      >
                     </form>
                   {:else}
                     <button type="button" class="add-link" onclick={() => startAdd(g.key)}
-                      >+ Position</button
+                      >+ {t('Position', 'Line item')}</button
                     >
                   {/if}
                 {/if}
@@ -540,7 +607,7 @@
 
         {#if canWrite}
           <div class="mt-6 flex flex-wrap items-center gap-3">
-            <label class="sr-only" for="newcat">Kategorie</label>
+            <label class="sr-only" for="newcat">{t('Kategorie', 'Category')}</label>
             <select
               id="newcat"
               class="field w-auto"
@@ -550,7 +617,8 @@
                 (e.currentTarget as HTMLSelectElement).value = '';
               }}
             >
-              <option value="">+ Position in Kategorie …</option>
+              <option value="">{t('+ Position in Kategorie …', '+ Line item in category …')}</option
+              >
               {#each CATEGORIES as c (c.key)}
                 <option value={c.key}>{c.label}</option>
               {/each}
@@ -559,7 +627,7 @@
               <form class="add flex-1" onsubmit={(e) => void createItem(e, addingIn!)}>
                 <input
                   class="field"
-                  placeholder="Neue Position"
+                  placeholder={t('Neue Position', 'New line item')}
                   bind:value={newTitle}
                   required
                   maxlength="200"
@@ -569,7 +637,7 @@
                     <option value={k}>{label}</option>
                   {/each}
                 </select>
-                <Button type="submit" disabled={creating}>Anlegen</Button>
+                <Button type="submit" disabled={creating}>{t('Anlegen', 'Create')}</Button>
               </form>
             {/if}
             {#if items.length > 0}
@@ -578,7 +646,7 @@
                 onclick={() => void loadTemplate()}
                 disabled={loadingTemplate}
               >
-                Vorlage zusaetzlich laden
+                {t('Vorlage zusaetzlich laden', 'Load template additionally')}
               </Button>
             {/if}
           </div>

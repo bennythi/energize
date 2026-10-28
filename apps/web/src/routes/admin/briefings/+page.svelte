@@ -3,6 +3,7 @@
   import { Button } from '@platform/ui';
   import { auth } from '$lib/auth.svelte';
   import { errorMessage } from '$lib/crew-api';
+  import { t, locale } from '$lib/i18n';
 
   interface Briefing {
     id: string;
@@ -53,7 +54,10 @@
         .getFullList({ sort: '-pinned,department,title' });
     } catch (err) {
       console.error('[admin/briefings] load failed', err);
-      errorMsg = errorMessage(err, 'Briefings konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Briefings konnten nicht geladen werden.', 'Briefings could not be loaded.'),
+      );
     } finally {
       loading = false;
     }
@@ -96,7 +100,7 @@
       pinned: editing.pinned,
     };
     if (!data.department || !data.title) {
-      formError = 'Abteilung und Titel sind Pflicht.';
+      formError = t('Abteilung und Titel sind Pflicht.', 'Department and title are required.');
       return;
     }
     saving = true;
@@ -109,7 +113,10 @@
       await load(false);
     } catch (err) {
       console.error('[admin/briefings] save failed', err);
-      formError = errorMessage(err, 'Briefing konnte nicht gespeichert werden.');
+      formError = errorMessage(
+        err,
+        t('Briefing konnte nicht gespeichert werden.', 'Briefing could not be saved.'),
+      );
     } finally {
       saving = false;
     }
@@ -117,7 +124,12 @@
 
   async function remove(b: Briefing) {
     if (!auth.pb) return;
-    if (!confirm(`Briefing "${b.title}" wirklich loeschen?`)) return;
+    if (
+      !confirm(
+        t(`Briefing "${b.title}" wirklich loeschen?`, `Really delete briefing "${b.title}"?`),
+      )
+    )
+      return;
     deletingId = b.id;
     errorMsg = null;
     try {
@@ -126,7 +138,10 @@
       if (editing?.id === b.id) editing = null;
     } catch (err) {
       console.error('[admin/briefings] delete failed', err);
-      errorMsg = errorMessage(err, 'Briefing konnte nicht geloescht werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Briefing konnte nicht geloescht werden.', 'Briefing could not be deleted.'),
+      );
     } finally {
       deletingId = null;
     }
@@ -144,7 +159,7 @@
 
   function fmtDate(iso: string): string {
     const d = new Date(iso.replace(' ', 'T'));
-    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString('de-DE');
+    return Number.isNaN(d.getTime()) ? '—' : d.toLocaleDateString(locale);
   }
 </script>
 
@@ -157,12 +172,14 @@
     <div>
       <h1 class="text-3xl font-semibold tracking-tight text-fg">Briefings</h1>
       <p class="mt-3 max-w-2xl text-fg-muted">
-        Briefing-Dokumente pro Abteilung. Crew mit Leserecht auf Briefings sieht sie im
-        Crew-Bereich, Zeilenumbrueche bleiben erhalten.
+        {t(
+          'Briefing-Dokumente pro Abteilung. Crew mit Leserecht auf Briefings sieht sie im Crew-Bereich, Zeilenumbrueche bleiben erhalten.',
+          'Briefing documents per department. Crew with read permission on briefings see them in the crew area; line breaks are preserved.',
+        )}
       </p>
     </div>
     {#if !editing}
-      <Button onclick={openNew}>+ Neues Briefing</Button>
+      <Button onclick={openNew}>+ {t('Neues Briefing', 'New briefing')}</Button>
     {/if}
   </div>
 
@@ -173,11 +190,13 @@
   {#if editing}
     <form bind:this={editorEl} class="card mt-8 scroll-mt-6 p-6" onsubmit={save}>
       <h2 class="text-lg font-semibold text-fg">
-        {editing.id ? 'Briefing bearbeiten' : 'Neues Briefing'}
+        {editing.id
+          ? t('Briefing bearbeiten', 'Edit briefing')
+          : t('Neues Briefing', 'New briefing')}
       </h2>
       <div class="mt-5 grid gap-4 sm:grid-cols-2">
         <label class="block">
-          <span class="text-sm text-fg-muted">Abteilung</span>
+          <span class="text-sm text-fg-muted">{t('Abteilung', 'Department')}</span>
           <input
             type="text"
             bind:value={editing.department}
@@ -193,7 +212,7 @@
           </datalist>
         </label>
         <label class="block">
-          <span class="text-sm text-fg-muted">Titel</span>
+          <span class="text-sm text-fg-muted">{t('Titel', 'Title')}</span>
           <input
             type="text"
             bind:value={editing.title}
@@ -204,7 +223,9 @@
         </label>
       </div>
       <label class="mt-4 block">
-        <span class="text-sm text-fg-muted">Inhalt (Text mit Zeilenumbruechen)</span>
+        <span class="text-sm text-fg-muted"
+          >{t('Inhalt (Text mit Zeilenumbruechen)', 'Content (text with line breaks)')}</span
+        >
         <textarea
           bind:value={editing.body}
           rows="14"
@@ -214,15 +235,20 @@
       </label>
       <label class="mt-4 flex items-center gap-2 text-sm text-fg">
         <input type="checkbox" bind:checked={editing.pinned} class="accent-[var(--color-accent)]" />
-        Anpinnen (erscheint ganz oben in der Crew-Ansicht)
+        {t(
+          'Anpinnen (erscheint ganz oben in der Crew-Ansicht)',
+          'Pin (appears at the top of the crew view)',
+        )}
       </label>
       {#if formError}
         <p class="mt-4 text-sm text-danger">{formError}</p>
       {/if}
       <div class="mt-6 flex flex-wrap gap-3">
-        <Button type="submit" disabled={saving}>{saving ? 'Speichere …' : 'Speichern'}</Button>
+        <Button type="submit" disabled={saving}
+          >{saving ? t('Speichere …', 'Saving …') : t('Speichern', 'Save')}</Button
+        >
         <Button variant="ghost" onclick={() => (editing = null)} disabled={saving}>
-          Abbrechen
+          {t('Abbrechen', 'Cancel')}
         </Button>
       </div>
     </form>
@@ -232,7 +258,9 @@
     <div class="card mt-8 h-40 animate-pulse opacity-50"></div>
   {:else if groups.length === 0}
     <div class="card mt-8 p-6">
-      <p class="text-fg-muted">Noch keine Briefings angelegt.</p>
+      <p class="text-fg-muted">
+        {t('Noch keine Briefings angelegt.', 'No briefings created yet.')}
+      </p>
     </div>
   {:else}
     {#each groups as [department, list] (department)}
@@ -245,20 +273,25 @@
             >
               <div class="min-w-0">
                 <p class="font-medium text-fg">
-                  {#if b.pinned}<span class="text-accent" title="Angepinnt">★</span>
+                  {#if b.pinned}<span class="text-accent" title={t('Angepinnt', 'Pinned')}>★</span>
                   {/if}{b.title}
                 </p>
-                <p class="mt-0.5 text-xs text-fg-muted">aktualisiert {fmtDate(b.updated)}</p>
+                <p class="mt-0.5 text-xs text-fg-muted">
+                  {t('aktualisiert', 'updated')}
+                  {fmtDate(b.updated)}
+                </p>
               </div>
               <div class="flex shrink-0 gap-2">
-                <Button variant="ghost" onclick={() => openEdit(b)}>Bearbeiten</Button>
+                <Button variant="ghost" onclick={() => openEdit(b)}
+                  >{t('Bearbeiten', 'Edit')}</Button
+                >
                 <button
                   class="del"
                   disabled={deletingId === b.id}
                   onclick={() => remove(b)}
-                  aria-label="Briefing {b.title} loeschen"
+                  aria-label={t(`Briefing ${b.title} loeschen`, `Delete briefing ${b.title}`)}
                 >
-                  Loeschen
+                  {t('Loeschen', 'Delete')}
                 </button>
               </div>
             </li>

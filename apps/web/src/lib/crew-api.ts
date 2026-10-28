@@ -1,4 +1,5 @@
 import { auth } from '$lib/auth.svelte';
+import { t } from '$lib/i18n';
 
 /** Crew-Mitglied, wie /api/crew/members es liefert. */
 export interface CrewMember {
@@ -28,13 +29,13 @@ export interface PermissionsOverview {
 }
 
 function pb() {
-  if (!auth.pb) throw new Error('Backend ist nicht bereit.');
+  if (!auth.pb) throw new Error(t('Backend ist nicht bereit.', 'Backend is not ready.'));
   return auth.pb;
 }
 
 /** Anzeigename mit Fallback auf Handle bzw. gekuerzte ID. */
 export function memberName(m: Pick<CrewMember, 'display_name' | 'handle' | 'id'> | undefined) {
-  if (!m) return 'Unbekannt';
+  if (!m) return t('Unbekannt', 'Unknown');
   return m.display_name || (m.handle ? `@${m.handle}` : `User ${m.id.slice(0, 6)}`);
 }
 
@@ -131,6 +132,7 @@ export async function adminSetUserPermission(
 /** Fehlertext aus einem Pocketbase-ClientResponseError ziehen. */
 export function errorMessage(err: unknown, fallback: string): string {
   const e = err as { response?: { message?: string }; message?: string; status?: number };
-  if (e?.status === 403) return 'Dafuer fehlt dir die Berechtigung.';
+  if (e?.status === 403)
+    return t('Dafuer fehlt dir die Berechtigung.', 'You do not have permission for this.');
   return e?.response?.message || fallback;
 }

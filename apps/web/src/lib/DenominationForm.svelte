@@ -1,5 +1,6 @@
 <script lang="ts">
   import { DENOMINATIONS, totalCents } from '$lib/denominations';
+  import { t, locale } from '$lib/i18n';
 
   interface Props {
     counts: Record<number, number>;
@@ -19,7 +20,7 @@
   }
 
   function eur(c: number): string {
-    return (c / 100).toLocaleString('de-DE', { style: 'currency', currency: 'EUR' });
+    return (c / 100).toLocaleString(locale, { style: 'currency', currency: 'EUR' });
   }
 </script>
 
@@ -50,7 +51,7 @@
 
   <div class="mt-4 flex items-baseline justify-between border-t border-border pt-3">
     <span class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-      Summe
+      {t('Summe', 'Total')}
     </span>
     <span class="font-display text-2xl font-black tabular-nums text-accent">
       {eur(total)}

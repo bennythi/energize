@@ -1,3 +1,5 @@
+import { isEn } from '$lib/i18n';
+
 export const FESTIVAL_DATE = '2027-05-29T14:30:00+02:00';
 export const FESTIVAL_DAY = '2027-05-29';
 
@@ -65,8 +67,25 @@ export function monthGrid(year: number, month: number): CalendarCell[] {
   return cells;
 }
 
-export const WEEKDAY_LABELS_DE = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-export const MONTH_LABELS_DE = [
+// Namen historisch "_DE"; Inhalt folgt der aktiven Sprache.
+export const WEEKDAY_LABELS_DE = isEn
+  ? ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+  : ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+const MONTH_LABELS_EN = [
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
+const MONTH_LABELS_GERMAN = [
   'Januar',
   'Februar',
   'Maerz',
@@ -80,3 +99,4 @@ export const MONTH_LABELS_DE = [
   'November',
   'Dezember',
 ];
+export const MONTH_LABELS_DE = isEn ? MONTH_LABELS_EN : MONTH_LABELS_GERMAN;

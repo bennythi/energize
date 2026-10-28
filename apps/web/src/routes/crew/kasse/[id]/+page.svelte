@@ -31,6 +31,7 @@
   import DenominationInput from '$lib/cashless/DenominationInput.svelte';
   import DenominationList from '$lib/cashless/DenominationList.svelte';
   import NoAccess from '$lib/cashless/NoAccess.svelte';
+  import { t, lang } from '$lib/i18n';
 
   const shiftId = $derived(page.params.id ?? '');
   const canRead = $derived(auth.canRead(CREW_RESOURCES.kasse));
@@ -72,7 +73,7 @@
   const partners = $derived(
     members
       .filter((m) => m.id !== auth.user?.id)
-      .sort((a, b) => memberName(a).localeCompare(memberName(b), 'de')),
+      .sort((a, b) => memberName(a).localeCompare(memberName(b), lang)),
   );
   const counterparts = $derived(registers.filter((r) => r.is_active && r.id !== shift?.register));
   const mvCents = $derived(parseEuroToCents(mvAmount));
@@ -104,7 +105,11 @@
     } catch (err) {
       console.error('[crew/kasse/detail] load failed', err);
       if ((err as { status?: number })?.status === 404) notFound = true;
-      else errorMsg = errorMessage(err, 'Konnte die Schicht nicht laden.');
+      else
+        errorMsg = errorMessage(
+          err,
+          t('Konnte die Schicht nicht laden.', 'Could not load the shift.'),
+        );
     } finally {
       loading = false;
     }
@@ -140,11 +145,14 @@
     event.preventDefault();
     if (!shift) return;
     if (!mvPartner) {
-      formError = 'Bitte einen zweiten Kassierer waehlen.';
+      formError = t('Bitte einen zweiten Kassierer waehlen.', 'Please choose a second cashier.');
       return;
     }
     if (!mvCents) {
-      formError = 'Betrag ungueltig. Beispiel: 50 oder 12,50';
+      formError = t(
+        'Betrag ungueltig. Beispiel: 50 oder 12,50',
+        'Invalid amount. Example: 50 or 12.50',
+      );
       return;
     }
     saving = true;
@@ -164,7 +172,7 @@
       console.error('[crew/kasse/detail] movement failed', err);
       formError = errorMessage(
         err,
-        err instanceof Error ? err.message : 'Speichern fehlgeschlagen.',
+        err instanceof Error ? err.message : t('Speichern fehlgeschlagen.', 'Saving failed.'),
       );
     } finally {
       saving = false;
@@ -175,10 +183,18 @@
     event.preventDefault();
     if (!shift) return;
     if (!closePartner) {
-      formError = 'Bitte einen zweiten Kassierer waehlen.';
+      formError = t('Bitte einen zweiten Kassierer waehlen.', 'Please choose a second cashier.');
       return;
     }
-    if (closingTotal === 0 && !confirm('Endbestand ist 0,00 €. Schicht trotzdem so schliessen?')) {
+    if (
+      closingTotal === 0 &&
+      !confirm(
+        t(
+          'Endbestand ist 0,00 €. Schicht trotzdem so schliessen?',
+          'Closing float is €0.00. Close the shift anyway?',
+        ),
+      )
+    ) {
       return;
     }
     saving = true;
@@ -198,7 +214,7 @@
       console.error('[crew/kasse/detail] close failed', err);
       formError = errorMessage(
         err,
-        err instanceof Error ? err.message : 'Schliessen fehlgeschlagen.',
+        err instanceof Error ? err.message : t('Schliessen fehlgeschlagen.', 'Closing failed.'),
       );
     } finally {
       saving = false;
@@ -207,12 +223,12 @@
 </script>
 
 <svelte:head>
-  <title>Crew · Kasse {register?.name ?? ''}</title>
+  <title>{t('Crew · Kasse', 'Crew · Cash register')} {register?.name ?? ''}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-5xl px-5 py-10 md:py-16">
   <a href="/crew/kasse" class="text-sm text-fg-muted transition-colors hover:text-accent">
-    ← Kassen
+    ← {t('Kassen', 'Cash registers')}
   </a>
 
   {#if !canRead}
@@ -222,27 +238,36 @@
     <div class="card mt-8 h-40 animate-pulse opacity-50"></div>
   {:else if notFound}
     <div class="card mt-8 p-6">
-      <p class="font-medium text-fg">Schicht nicht gefunden</p>
+      <p class="font-medium text-fg">{t('Schicht nicht gefunden', 'Shift not found')}</p>
       <p class="mt-2 text-sm text-fg-muted">
-        Der Link ist ungueltig oder die Schicht wurde entfernt.
+        {t(
+          'Der Link ist ungueltig oder die Schicht wurde entfernt.',
+          'The link is invalid or the shift has been removed.',
+        )}
       </p>
-      <div class="mt-5"><Button href="/crew/kasse" variant="ghost">Zu den Kassen</Button></div>
+      <div class="mt-5">
+        <Button href="/crew/kasse" variant="ghost">
+          {t('Zu den Kassen', 'To the cash registers')}
+        </Button>
+      </div>
     </div>
   {:else if errorMsg || !shift || !summary}
     <div class="card mt-8 p-6">
-      <p class="text-sm text-danger" role="alert">{errorMsg ?? 'Unbekannter Fehler.'}</p>
+      <p class="text-sm text-danger" role="alert">
+        {errorMsg ?? t('Unbekannter Fehler.', 'Unknown error.')}
+      </p>
       <div class="mt-4">
-        <Button variant="ghost" onclick={load}>Erneut laden</Button>
+        <Button variant="ghost" onclick={load}>{t('Erneut laden', 'Reload')}</Button>
       </div>
     </div>
   {:else}
     <div class="mt-6 flex flex-wrap items-end justify-between gap-3">
       <div class="min-w-0">
         <p class="text-xs font-medium uppercase tracking-wider text-accent">
-          {open ? 'Offene Schicht' : 'Abgeschlossene Schicht'}
+          {open ? t('Offene Schicht', 'Open shift') : t('Abgeschlossene Schicht', 'Closed shift')}
         </p>
         <h1 class="mt-2 text-3xl font-semibold tracking-tight text-fg md:text-4xl">
-          {register?.name ?? 'Kasse'}
+          {register?.name ?? t('Kasse', 'Cash register')}
         </h1>
         {#if register?.location}<p class="mt-1 text-fg-muted">{register.location}</p>{/if}
       </div>
@@ -251,14 +276,14 @@
     <!-- Kopfdaten -->
     <dl class="card mt-8 grid gap-4 p-6 text-sm sm:grid-cols-2">
       <div>
-        <dt class="text-xs font-medium text-fg-muted">Eroeffnet</dt>
+        <dt class="text-xs font-medium text-fg-muted">{t('Eroeffnet', 'Opened')}</dt>
         <dd class="mt-1 text-fg">{formatDateTime(shift.opened_at)}</dd>
         <dd class="text-fg-muted">{who(shift.opened_by_a, shift.opened_by_b)}</dd>
       </div>
       <div>
-        <dt class="text-xs font-medium text-fg-muted">Geschlossen</dt>
+        <dt class="text-xs font-medium text-fg-muted">{t('Geschlossen', 'Closed')}</dt>
         {#if open}
-          <dd class="mt-1 font-medium text-success">● noch offen</dd>
+          <dd class="mt-1 font-medium text-success">● {t('noch offen', 'still open')}</dd>
         {:else}
           <dd class="mt-1 text-fg">{formatDateTime(shift.closed_at)}</dd>
           <dd class="text-fg-muted">{who(shift.closed_by_a, shift.closed_by_b)}</dd>
@@ -266,7 +291,7 @@
       </div>
       {#if shift.note}
         <div class="sm:col-span-2">
-          <dt class="text-xs font-medium text-fg-muted">Notiz</dt>
+          <dt class="text-xs font-medium text-fg-muted">{t('Notiz', 'Note')}</dt>
           <dd class="mt-1 whitespace-pre-line text-fg">{shift.note}</dd>
         </div>
       {/if}
@@ -275,38 +300,38 @@
     <!-- Saldo -->
     <section class="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
       <div class="card p-4">
-        <p class="text-xs text-fg-muted">Start</p>
+        <p class="text-xs text-fg-muted">{t('Start', 'Start')}</p>
         <p class="mt-1 text-lg font-semibold tabular-nums text-fg">
           {formatEur(summary.starting_cents)}
         </p>
       </div>
       <div class="card p-4">
-        <p class="text-xs text-fg-muted">Eingang</p>
+        <p class="text-xs text-fg-muted">{t('Eingang', 'In')}</p>
         <p class="mt-1 text-lg font-semibold tabular-nums text-fg">
           {formatEur(summary.movement_in_cents)}
         </p>
       </div>
       <div class="card p-4">
-        <p class="text-xs text-fg-muted">Ausgang</p>
+        <p class="text-xs text-fg-muted">{t('Ausgang', 'Out')}</p>
         <p class="mt-1 text-lg font-semibold tabular-nums text-fg">
           {formatEur(summary.movement_out_cents)}
         </p>
       </div>
       <div class="card p-4">
-        <p class="text-xs text-accent">Erwartet</p>
+        <p class="text-xs text-accent">{t('Erwartet', 'Expected')}</p>
         <p class="mt-1 text-lg font-semibold tabular-nums text-accent">
           {formatEur(summary.expected_cents)}
         </p>
       </div>
       {#if summary.ending_cents !== null}
         <div class="card p-4">
-          <p class="text-xs text-fg-muted">Gezaehlt</p>
+          <p class="text-xs text-fg-muted">{t('Gezaehlt', 'Counted')}</p>
           <p class="mt-1 text-lg font-semibold tabular-nums text-fg">
             {formatEur(summary.ending_cents)}
           </p>
         </div>
         <div class="card p-4">
-          <p class="text-xs text-fg-muted">Differenz</p>
+          <p class="text-xs text-fg-muted">{t('Differenz', 'Difference')}</p>
           <p class="mt-1 text-lg font-semibold tabular-nums {diffClass(summary.difference_cents)}">
             {formatSignedEur(summary.difference_cents ?? 0)}
           </p>
@@ -317,21 +342,28 @@
     <!-- Aktionen -->
     {#if open && canWrite && mode === 'none'}
       <div class="mt-6 flex flex-wrap gap-3">
-        <Button variant="ghost" onclick={() => showForm('movement')}>+ Bewegung</Button>
-        <Button onclick={() => showForm('close')}>Schicht schliessen</Button>
+        <Button variant="ghost" onclick={() => showForm('movement')}>
+          + {t('Bewegung', 'Movement')}
+        </Button>
+        <Button onclick={() => showForm('close')}>
+          {t('Schicht schliessen', 'Close shift')}
+        </Button>
       </div>
     {:else if open && !canWrite}
       <p class="mt-6 text-sm text-fg-muted">
-        Du hast nur Leserechte. Bewegungen und Abschluss brauchen Schreibrechte.
+        {t(
+          'Du hast nur Leserechte. Bewegungen und Abschluss brauchen Schreibrechte.',
+          'You only have read access. Movements and closing require write access.',
+        )}
       </p>
     {/if}
 
     {#if open && canWrite && mode === 'movement'}
       <form onsubmit={submitMovement} class="card mt-6 flex flex-col gap-5 p-6">
-        <p class="text-lg font-semibold text-fg">Bewegung erfassen</p>
+        <p class="text-lg font-semibold text-fg">{t('Bewegung erfassen', 'Record movement')}</p>
 
         <fieldset>
-          <legend class="text-xs font-medium text-fg-muted">Art</legend>
+          <legend class="text-xs font-medium text-fg-muted">{t('Art', 'Type')}</legend>
           <div class="seg mt-2">
             {#each Object.keys(MOVEMENT_LABELS) as MovementKind[] as k (k)}
               <button
@@ -345,13 +377,15 @@
         </fieldset>
 
         <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Betrag in EUR</span>
+          <span class="text-xs font-medium text-fg-muted"
+            >{t('Betrag in EUR', 'Amount in EUR')}</span
+          >
           <input
             type="text"
             inputmode="decimal"
             autocomplete="off"
             bind:value={mvAmount}
-            placeholder="0,00"
+            placeholder={t('0,00', '0.00')}
             disabled={saving}
             class="field mt-2 tabular-nums"
           />
@@ -362,9 +396,11 @@
 
         {#if mvKind !== 'withdrawal'}
           <label class="block">
-            <span class="text-xs font-medium text-fg-muted">Andere Kasse (optional)</span>
+            <span class="text-xs font-medium text-fg-muted">
+              {t('Andere Kasse (optional)', 'Other cash register (optional)')}
+            </span>
             <select bind:value={mvCounterpart} disabled={saving} class="field mt-2">
-              <option value="">extern / nicht relevant</option>
+              <option value="">{t('extern / nicht relevant', 'external / not relevant')}</option>
               {#each counterparts as r (r.id)}
                 <option value={r.id}>{r.name}</option>
               {/each}
@@ -373,9 +409,11 @@
         {/if}
 
         <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Zweiter Kassierer</span>
+          <span class="text-xs font-medium text-fg-muted"
+            >{t('Zweiter Kassierer', 'Second cashier')}</span
+          >
           <select bind:value={mvPartner} disabled={saving} class="field mt-2">
-            <option value="">Bitte waehlen …</option>
+            <option value="">{t('Bitte waehlen …', 'Please choose …')}</option>
             {#each partners as p (p.id)}
               <option value={p.id}>{memberName(p)}</option>
             {/each}
@@ -383,7 +421,9 @@
         </label>
 
         <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Notiz (optional)</span>
+          <span class="text-xs font-medium text-fg-muted"
+            >{t('Notiz (optional)', 'Note (optional)')}</span
+          >
           <input
             type="text"
             bind:value={mvNote}
@@ -397,10 +437,10 @@
 
         <div class="flex flex-wrap gap-3">
           <Button type="submit" disabled={saving || !mvPartner || !mvCents}>
-            {saving ? 'Speichere …' : 'Speichern'}
+            {saving ? t('Speichere …', 'Saving …') : t('Speichern', 'Save')}
           </Button>
           <Button variant="ghost" onclick={() => (mode = 'none')} disabled={saving}>
-            Abbrechen
+            {t('Abbrechen', 'Cancel')}
           </Button>
         </div>
       </form>
@@ -409,16 +449,21 @@
     {#if open && canWrite && mode === 'close'}
       <form onsubmit={submitClose} class="card mt-6 flex flex-col gap-6 p-6">
         <div>
-          <p class="text-lg font-semibold text-fg">Schicht schliessen</p>
+          <p class="text-lg font-semibold text-fg">{t('Schicht schliessen', 'Close shift')}</p>
           <p class="mt-1 text-sm text-fg-muted">
-            Endbestand gemeinsam zaehlen. Danach sind keine Aenderungen mehr moeglich.
+            {t(
+              'Endbestand gemeinsam zaehlen. Danach sind keine Aenderungen mehr moeglich.',
+              'Count the closing float together. No changes are possible afterwards.',
+            )}
           </p>
         </div>
 
         <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Zweiter Kassierer (Vier-Augen)</span>
+          <span class="text-xs font-medium text-fg-muted">
+            {t('Zweiter Kassierer (Vier-Augen)', 'Second cashier (four eyes)')}
+          </span>
           <select bind:value={closePartner} disabled={saving} class="field mt-2">
-            <option value="">Bitte waehlen …</option>
+            <option value="">{t('Bitte waehlen …', 'Please choose …')}</option>
             {#each partners as p (p.id)}
               <option value={p.id}>{memberName(p)}</option>
             {/each}
@@ -426,18 +471,22 @@
         </label>
 
         <div>
-          <p class="text-sm font-medium text-fg">Wechselgeld-Endbestand</p>
+          <p class="text-sm font-medium text-fg">
+            {t('Wechselgeld-Endbestand', 'Closing change float')}
+          </p>
           <div class="mt-4">
             <DenominationInput
               bind:counts={closeCounts}
               disabled={saving}
-              totalLabel="Endbestand"
+              totalLabel={t('Endbestand', 'Closing float')}
             />
           </div>
         </div>
 
         <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Notiz (optional)</span>
+          <span class="text-xs font-medium text-fg-muted"
+            >{t('Notiz (optional)', 'Note (optional)')}</span
+          >
           <textarea
             bind:value={closeNote}
             rows="3"
@@ -448,13 +497,15 @@
         </label>
 
         <div class="rounded-2xl border border-[var(--glass-border)] p-4 text-sm">
-          <p class="text-xs font-medium uppercase tracking-wider text-accent">Saldo-Vorschau</p>
+          <p class="text-xs font-medium uppercase tracking-wider text-accent">
+            {t('Saldo-Vorschau', 'Balance preview')}
+          </p>
           <dl class="mt-3 grid grid-cols-2 gap-y-1.5">
-            <dt class="text-fg-muted">Erwartet</dt>
+            <dt class="text-fg-muted">{t('Erwartet', 'Expected')}</dt>
             <dd class="text-right tabular-nums text-fg">{formatEur(summary.expected_cents)}</dd>
-            <dt class="text-fg-muted">Gezaehlt</dt>
+            <dt class="text-fg-muted">{t('Gezaehlt', 'Counted')}</dt>
             <dd class="text-right tabular-nums text-fg">{formatEur(closingTotal)}</dd>
-            <dt class="font-medium text-fg">Differenz</dt>
+            <dt class="font-medium text-fg">{t('Differenz', 'Difference')}</dt>
             <dd class="text-right font-semibold tabular-nums {diffClass(closePreview)}">
               {formatSignedEur(closePreview)}
             </dd>
@@ -465,10 +516,10 @@
 
         <div class="flex flex-wrap gap-3">
           <Button type="submit" disabled={saving || !closePartner}>
-            {saving ? 'Schliesse …' : 'Schicht schliessen'}
+            {saving ? t('Schliesse …', 'Closing …') : t('Schicht schliessen', 'Close shift')}
           </Button>
           <Button variant="ghost" onclick={() => (mode = 'none')} disabled={saving}>
-            Abbrechen
+            {t('Abbrechen', 'Cancel')}
           </Button>
         </div>
       </form>
@@ -477,10 +528,10 @@
     <!-- Bewegungen -->
     <section class="mt-10">
       <h2 class="text-xl font-semibold tracking-tight text-fg">
-        Bewegungen <span class="text-fg-muted">({movements.length})</span>
+        {t('Bewegungen', 'Movements')} <span class="text-fg-muted">({movements.length})</span>
       </h2>
       {#if movements.length === 0}
-        <p class="mt-3 text-sm text-fg-muted">Noch keine Bewegungen.</p>
+        <p class="mt-3 text-sm text-fg-muted">{t('Noch keine Bewegungen.', 'No movements yet.')}</p>
       {:else}
         <ul class="card mt-4 divide-y divide-[var(--glass-border)]">
           {#each movements as m (m.id)}
@@ -490,8 +541,9 @@
                   {MOVEMENT_LABELS[m.kind]}
                   {#if m.counterpart_register}
                     <span class="font-normal text-fg-muted">
-                      {m.kind === 'exchange_in' ? 'von' : 'an'}
-                      {registerById.get(m.counterpart_register)?.name ?? 'Kasse'}
+                      {m.kind === 'exchange_in' ? t('von', 'from') : t('an', 'to')}
+                      {registerById.get(m.counterpart_register)?.name ??
+                        t('Kasse', 'Cash register')}
                     </span>
                   {/if}
                 </p>
@@ -516,12 +568,16 @@
     <!-- Stueckelung -->
     <section class="mt-10 grid gap-4 md:grid-cols-2">
       <details class="card p-6" open={!open}>
-        <summary class="cursor-pointer font-medium text-fg">Startbestand</summary>
+        <summary class="cursor-pointer font-medium text-fg">
+          {t('Startbestand', 'Starting float')}
+        </summary>
         <div class="mt-4"><DenominationList counts={startCounts} /></div>
       </details>
       {#if !open}
         <details class="card p-6" open>
-          <summary class="cursor-pointer font-medium text-fg">Endbestand</summary>
+          <summary class="cursor-pointer font-medium text-fg">
+            {t('Endbestand', 'Closing float')}
+          </summary>
           <div class="mt-4"><DenominationList counts={endCounts} /></div>
         </details>
       {/if}

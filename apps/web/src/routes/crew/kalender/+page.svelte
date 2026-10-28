@@ -11,6 +11,7 @@
   import NoAccess from '$lib/crew/NoAccess.svelte';
   import Sheet from '$lib/crew/Sheet.svelte';
   import Segmented from '$lib/crew/Segmented.svelte';
+  import { t, locale } from '$lib/i18n';
 
   type Kind = 'all_day' | 'window';
 
@@ -115,7 +116,10 @@
       members = new Map(people.map((m) => [m.id, m]));
     } catch (err) {
       console.error('[crew/kalender] load failed', err);
-      errorMsg = errorMessage(err, 'Konnte den Kalender nicht laden.');
+      errorMsg = errorMessage(
+        err,
+        t('Konnte den Kalender nicht laden.', 'Could not load the calendar.'),
+      );
     } finally {
       loading = false;
     }
@@ -171,7 +175,7 @@
       start_at = localDateTimeIso(formDay, formStart);
       end_at = localDateTimeIso(formDay, formEnd);
       if (new Date(end_at) <= new Date(start_at)) {
-        formError = 'Das Ende muss nach dem Start liegen.';
+        formError = t('Das Ende muss nach dem Start liegen.', 'The end must be after the start.');
         return;
       }
     }
@@ -190,7 +194,10 @@
       selectedDay = day;
     } catch (err) {
       console.error('[crew/kalender] save failed', err);
-      formError = errorMessage(err, 'Konnte den Eintrag nicht speichern.');
+      formError = errorMessage(
+        err,
+        t('Konnte den Eintrag nicht speichern.', 'Could not save the entry.'),
+      );
     } finally {
       saving = false;
     }
@@ -201,8 +208,11 @@
     if (!pb) return;
     const question =
       e.user === myId
-        ? 'Eintrag wirklich loeschen?'
-        : `Eintrag von ${memberName(members.get(e.user))} wirklich loeschen?`;
+        ? t('Eintrag wirklich loeschen?', 'Really delete this entry?')
+        : t(
+            `Eintrag von ${memberName(members.get(e.user))} wirklich loeschen?`,
+            `Really delete the entry by ${memberName(members.get(e.user))}?`,
+          );
     if (!confirm(question)) return;
     deleting = e.id;
     errorMsg = null;
@@ -212,18 +222,23 @@
       if (editId === e.id) formOpen = false;
     } catch (err) {
       console.error('[crew/kalender] delete failed', err);
-      errorMsg = errorMessage(err, 'Konnte den Eintrag nicht loeschen.');
+      errorMsg = errorMessage(
+        err,
+        t('Konnte den Eintrag nicht loeschen.', 'Could not delete the entry.'),
+      );
     } finally {
       deleting = null;
     }
   }
 
   function timeLabel(e: Entry): string {
-    return e.kind === 'all_day' ? 'Ganzer Tag' : `${fmtTime(e.start)} – ${fmtTime(e.end)}`;
+    return e.kind === 'all_day'
+      ? t('Ganzer Tag', 'All day')
+      : `${fmtTime(e.start)} – ${fmtTime(e.end)}`;
   }
 
   function shortDay(iso: string): string {
-    return new Date(`${iso}T12:00:00`).toLocaleDateString('de-DE', {
+    return new Date(`${iso}T12:00:00`).toLocaleDateString(locale, {
       weekday: 'short',
       day: '2-digit',
       month: '2-digit',
@@ -232,19 +247,23 @@
 </script>
 
 <svelte:head>
-  <title>Crew-Kalender</title>
+  <title>{t('Crew-Kalender', 'Crew calendar')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-5xl px-5 py-10 md:py-16">
   <BackLink />
-  <h1 class="mt-4 text-3xl font-semibold tracking-tight text-fg md:text-4xl">Crew-Kalender</h1>
+  <h1 class="mt-4 text-3xl font-semibold tracking-tight text-fg md:text-4xl">
+    {t('Crew-Kalender', 'Crew calendar')}
+  </h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
-    Wer ist wann da? 14 Tage vor und nach dem Festival. Tippe auf einen Tag, um die Eintraege zu
-    sehen{canWrite ? ' oder dich einzutragen' : ''}. Der Festivaltag ist hervorgehoben.
+    {t(
+      `Wer ist wann da? 14 Tage vor und nach dem Festival. Tippe auf einen Tag, um die Eintraege zu sehen${canWrite ? ' oder dich einzutragen' : ''}. Der Festivaltag ist hervorgehoben.`,
+      `Who is around when? 14 days before and after the festival. Tap a day to see the entries${canWrite ? ' or add yourself' : ''}. The festival day is highlighted.`,
+    )}
   </p>
 
   {#if !canRead}
-    <NoAccess area="den Crew-Kalender" />
+    <NoAccess area={t('den Crew-Kalender', 'the crew calendar')} />
   {:else}
     {#if errorMsg}
       <p class="card mt-6 p-4 text-sm text-danger" role="alert">{errorMsg}</p>
@@ -270,8 +289,13 @@
       </div>
 
       <div class="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-xs text-fg-muted">
-        <span>Zahl im Tag: Anzahl Eintraege</span>
-        <span><span class="text-accent">Akzentfarbe</span>: du bist eingetragen</span>
+        <span>{t('Zahl im Tag: Anzahl Eintraege', 'Number in a day: number of entries')}</span>
+        <span
+          ><span class="text-accent">{t('Akzentfarbe', 'Accent colour')}</span>: {t(
+            'du bist eingetragen',
+            'you are signed up',
+          )}</span
+        >
       </div>
 
       {#if selectedDay}
@@ -281,12 +305,14 @@
               {fmtLongDay(selectedDay)}
             </h2>
             {#if canWrite}
-              <Button onclick={() => openNew(selectedDay)}>Eintragen</Button>
+              <Button onclick={() => openNew(selectedDay)}>{t('Eintragen', 'Sign up')}</Button>
             {/if}
           </div>
 
           {#if selectedEntries.length === 0}
-            <p class="mt-4 text-sm text-fg-muted">Noch niemand eingetragen.</p>
+            <p class="mt-4 text-sm text-fg-muted">
+              {t('Noch niemand eingetragen.', 'Nobody signed up yet.')}
+            </p>
           {:else}
             <ul class="mt-5 flex flex-col gap-2">
               {#each selectedEntries as e (e.id)}
@@ -295,7 +321,7 @@
                   <div class="min-w-0 flex-1">
                     <p class="text-sm">
                       <span class="font-medium" class:text-accent={mine} class:text-fg={!mine}>
-                        {memberName(members.get(e.user))}{mine ? ' (du)' : ''}
+                        {memberName(members.get(e.user))}{mine ? t(' (du)', ' (you)') : ''}
                       </span>
                       <span class="text-fg-muted"> · {timeLabel(e)}</span>
                     </p>
@@ -306,7 +332,7 @@
                   <div class="flex shrink-0 gap-1">
                     {#if mine && canWrite}
                       <button type="button" class="link" onclick={() => openEdit(e)}>
-                        Bearbeiten
+                        {t('Bearbeiten', 'Edit')}
                       </button>
                     {/if}
                     {#if (mine && canWrite) || canDeleteAny}
@@ -316,7 +342,7 @@
                         disabled={deleting === e.id}
                         onclick={() => deleteEntry(e)}
                       >
-                        {deleting === e.id ? '…' : 'Loeschen'}
+                        {deleting === e.id ? '…' : t('Loeschen', 'Delete')}
                       </button>
                     {/if}
                   </div>
@@ -327,13 +353,18 @@
         </section>
       {:else}
         <p class="mt-6 text-center text-sm text-fg-muted">
-          Tag im Kalender antippen, um Eintraege zu sehen.
+          {t(
+            'Tag im Kalender antippen, um Eintraege zu sehen.',
+            'Tap a day in the calendar to see entries.',
+          )}
         </p>
       {/if}
 
       {#if myEntries.length > 0}
         <section class="mt-10">
-          <h2 class="text-lg font-semibold tracking-tight text-fg">Deine Eintraege</h2>
+          <h2 class="text-lg font-semibold tracking-tight text-fg">
+            {t('Deine Eintraege', 'Your entries')}
+          </h2>
           <ul class="mt-3 flex flex-col gap-2">
             {#each myEntries as e (e.id)}
               <li class="entry mine">
@@ -349,7 +380,9 @@
                   {/if}
                 </button>
                 {#if canWrite}
-                  <button type="button" class="link" onclick={() => openEdit(e)}>Bearbeiten</button>
+                  <button type="button" class="link" onclick={() => openEdit(e)}
+                    >{t('Bearbeiten', 'Edit')}</button
+                  >
                 {/if}
               </li>
             {/each}
@@ -362,17 +395,19 @@
 
 {#if formOpen}
   <Sheet
-    eyebrow={editId ? 'Eintrag bearbeiten' : 'Verfuegbarkeit eintragen'}
+    eyebrow={editId
+      ? t('Eintrag bearbeiten', 'Edit entry')
+      : t('Verfuegbarkeit eintragen', 'Add availability')}
     title={fmtLongDay(formDay)}
     onclose={closeForm}
   >
     <form onsubmit={handleSubmit} class="flex flex-col gap-4">
       <Segmented
-        label="Art der Verfuegbarkeit"
+        label={t('Art der Verfuegbarkeit', 'Type of availability')}
         full
         options={[
-          { value: 'all_day', label: 'Ganzer Tag' },
-          { value: 'window', label: 'Zeitfenster' },
+          { value: 'all_day', label: t('Ganzer Tag', 'All day') },
+          { value: 'window', label: t('Zeitfenster', 'Time window') },
         ]}
         bind:value={formKind}
       />
@@ -380,23 +415,25 @@
       {#if formKind === 'window'}
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="text-xs font-medium text-fg-muted">Von</span>
+            <span class="text-xs font-medium text-fg-muted">{t('Von', 'From')}</span>
             <input type="time" bind:value={formStart} required class="field mt-2" />
           </label>
           <label class="block">
-            <span class="text-xs font-medium text-fg-muted">Bis</span>
+            <span class="text-xs font-medium text-fg-muted">{t('Bis', 'To')}</span>
             <input type="time" bind:value={formEnd} required class="field mt-2" />
           </label>
         </div>
       {/if}
 
       <label class="block">
-        <span class="text-xs font-medium text-fg-muted">Notiz (optional)</span>
+        <span class="text-xs font-medium text-fg-muted"
+          >{t('Notiz (optional)', 'Note (optional)')}</span
+        >
         <input
           type="text"
           bind:value={formNote}
           maxlength="200"
-          placeholder="z.B. Aufbau Mainstage"
+          placeholder={t('z.B. Aufbau Mainstage', 'e.g. Mainstage setup')}
           class="field mt-2"
         />
       </label>
@@ -406,8 +443,12 @@
       {/if}
 
       <div class="flex flex-wrap gap-3 pt-1">
-        <Button type="submit" disabled={saving}>{saving ? 'Speichere …' : 'Speichern'}</Button>
-        <Button variant="ghost" onclick={closeForm} disabled={saving}>Abbrechen</Button>
+        <Button type="submit" disabled={saving}
+          >{saving ? t('Speichere …', 'Saving …') : t('Speichern', 'Save')}</Button
+        >
+        <Button variant="ghost" onclick={closeForm} disabled={saving}
+          >{t('Abbrechen', 'Cancel')}</Button
+        >
       </div>
     </form>
   </Sheet>

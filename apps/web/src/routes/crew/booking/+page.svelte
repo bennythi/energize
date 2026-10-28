@@ -21,6 +21,7 @@
   } from '$lib/booking';
   import CheckChips from '$lib/booking/CheckChips.svelte';
   import EditionForm from '$lib/booking/EditionForm.svelte';
+  import { t } from '$lib/i18n';
 
   const RES = CREW_RESOURCES.booking;
   const EDITION_KEY = 'platform.booking.edition';
@@ -108,7 +109,10 @@
       if (pick) await selectEdition(pick.id);
     } catch (err) {
       console.error('[booking] editions failed', err);
-      errorMsg = errorMessage(err, 'Editionen konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Editionen konnten nicht geladen werden.', 'Could not load editions.'),
+      );
     } finally {
       loading = false;
     }
@@ -141,7 +145,10 @@
       items = i as unknown as BookingItem[];
     } catch (err) {
       console.error('[booking] artists failed', err);
-      errorMsg = errorMessage(err, 'Artists konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Artists konnten nicht geladen werden.', 'Could not load artists.'),
+      );
     } finally {
       loadingArtists = false;
     }
@@ -179,20 +186,23 @@
       newArtistName = '';
       await goto(`/crew/booking/${rec.id}`);
     } catch (err) {
-      errorMsg = errorMessage(err, 'Artist konnte nicht angelegt werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Artist konnte nicht angelegt werden.', 'Could not create artist.'),
+      );
     } finally {
       creatingArtist = false;
     }
   }
 
   const FILTERS: { key: typeof filter; label: string }[] = [
-    { key: 'all', label: 'Alle' },
-    { key: 'open', label: 'Offene Punkte' },
-    { key: 'idee', label: 'Idee' },
-    { key: 'anfrage', label: 'Anfrage' },
-    { key: 'angebot', label: 'Angebot' },
-    { key: 'bestaetigt', label: 'Bestaetigt' },
-    { key: 'abgesagt', label: 'Abgesagt' },
+    { key: 'all', label: t('Alle', 'All') },
+    { key: 'open', label: t('Offene Punkte', 'Open items') },
+    { key: 'idee', label: t('Idee', 'Idea') },
+    { key: 'anfrage', label: t('Anfrage', 'Requested') },
+    { key: 'angebot', label: t('Angebot', 'Offer') },
+    { key: 'bestaetigt', label: t('Bestaetigt', 'Confirmed') },
+    { key: 'abgesagt', label: t('Abgesagt', 'Cancelled') },
   ];
 
   function slot(a: Artist): string {
@@ -203,19 +213,26 @@
 </script>
 
 <svelte:head>
-  <title>DJ-Planung</title>
+  <title>{t('DJ-Planung', 'DJ planning')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-6xl px-5 py-10 md:py-16">
-  <a href="/crew" class="text-sm text-fg-muted hover:text-fg">← Crew-Bereich</a>
+  <a href="/crew" class="text-sm text-fg-muted hover:text-fg">← {t('Crew-Bereich', 'Crew area')}</a>
   <div class="mt-3 flex flex-wrap items-end justify-between gap-4">
     <div>
-      <h1 class="text-3xl font-semibold tracking-tight text-fg md:text-4xl">DJ-Planung</h1>
-      <p class="mt-2 text-fg-muted">Gagen, Rider, Reise und Hotel pro Edition.</p>
+      <h1 class="text-3xl font-semibold tracking-tight text-fg md:text-4xl">
+        {t('DJ-Planung', 'DJ planning')}
+      </h1>
+      <p class="mt-2 text-fg-muted">
+        {t(
+          'Gagen, Rider, Reise und Hotel pro Edition.',
+          'Fees, riders, travel and hotel per edition.',
+        )}
+      </p>
     </div>
     {#if editions.length > 0}
       <div class="flex flex-wrap items-center gap-2">
-        <label class="sr-only" for="edition">Edition</label>
+        <label class="sr-only" for="edition">{t('Edition', 'Edition')}</label>
         <select
           id="edition"
           class="field w-auto"
@@ -223,7 +240,9 @@
           onchange={(e) => void selectEdition((e.currentTarget as HTMLSelectElement).value)}
         >
           {#each editions as e (e.id)}
-            <option value={e.id}>{e.name}{e.archived ? ' (archiviert)' : ''}</option>
+            <option value={e.id}
+              >{e.name}{e.archived ? t(' (archiviert)', ' (archived)') : ''}</option
+            >
           {/each}
         </select>
         {#if canWrite}
@@ -231,13 +250,13 @@
             variant="ghost"
             onclick={() => {
               openEditionForm(edition);
-            }}>Bearbeiten</Button
+            }}>{t('Bearbeiten', 'Edit')}</Button
           >
           <Button
             variant="ghost"
             onclick={() => {
               openEditionForm(null);
-            }}>Neue Edition</Button
+            }}>{t('Neue Edition', 'New edition')}</Button
           >
         {/if}
       </div>
@@ -250,11 +269,14 @@
 
   {#if !auth.canRead(RES)}
     <div class="card mt-8 p-6">
-      <p class="font-medium text-fg">Kein Zugriff</p>
+      <p class="font-medium text-fg">{t('Kein Zugriff', 'No access')}</p>
       <p class="mt-2 text-sm text-fg-muted">
-        Fuer die DJ-Planung brauchst du das Recht „DJ-Planung“. Ein Admin kann es dir geben.
+        {t(
+          'Fuer die DJ-Planung brauchst du das Recht „DJ-Planung“. Ein Admin kann es dir geben.',
+          'You need the “DJ planning” permission for DJ planning. An admin can grant it to you.',
+        )}
       </p>
-      <div class="mt-4"><Button href="/crew" variant="ghost">Zurueck</Button></div>
+      <div class="mt-4"><Button href="/crew" variant="ghost">{t('Zurueck', 'Back')}</Button></div>
     </div>
   {:else if loading}
     <div class="card mt-8 h-40 animate-pulse opacity-50"></div>
@@ -271,21 +293,29 @@
 
     {#if editions.length === 0}
       <div class="card mt-8 p-6">
-        <p class="font-medium text-fg">Noch keine Edition</p>
+        <p class="font-medium text-fg">{t('Noch keine Edition', 'No edition yet')}</p>
         <p class="mt-2 text-sm text-fg-muted">
-          Lege zuerst eine Edition an (z. B. „Energize 2027“). Darin planst du dann die Artists.
+          {t(
+            'Lege zuerst eine Edition an (z. B. „Energize 2027“). Darin planst du dann die Artists.',
+            'Create an edition first (e.g. “Energize 2027”). You then plan the artists within it.',
+          )}
         </p>
         {#if canWrite && !showEditionForm}
           <div class="mt-4">
-            <Button onclick={() => openEditionForm(null)}>Edition anlegen</Button>
+            <Button onclick={() => openEditionForm(null)}
+              >{t('Edition anlegen', 'Create edition')}</Button
+            >
           </div>
         {/if}
       </div>
     {:else}
       <!-- Kennzahlen -->
-      <section class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Kosten">
+      <section
+        class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        aria-label={t('Kosten', 'Costs')}
+      >
         <div class="card p-5">
-          <p class="text-xs font-medium text-fg-muted">Gesamtkosten</p>
+          <p class="text-xs font-medium text-fg-muted">{t('Gesamtkosten', 'Total costs')}</p>
           <p class="mt-1 text-2xl font-semibold text-fg tabular-nums">
             {formatMoney(totals.total, currency)}
           </p>
@@ -294,26 +324,33 @@
               <span style="width: {budgetPct}%" class:over={totals.total > edition.budget}></span>
             </div>
             <p class="mt-1 text-xs text-fg-muted">
-              von {formatMoney(edition.budget, currency)} Budget
+              {t('von', 'of')}
+              {formatMoney(edition.budget, currency)}
+              {t('Budget', 'budget')}
               {#if totals.total > edition.budget}
                 · <span class="text-danger"
-                  >{formatMoney(totals.total - edition.budget, currency)} drueber</span
+                  >{formatMoney(totals.total - edition.budget, currency)}
+                  {t('drueber', 'over')}</span
                 >
               {/if}
             </p>
           {/if}
         </div>
         <div class="card p-5">
-          <p class="text-xs font-medium text-fg-muted">Gagen</p>
+          <p class="text-xs font-medium text-fg-muted">{t('Gagen', 'Fees')}</p>
           <p class="mt-1 text-2xl font-semibold text-fg tabular-nums">
             {formatMoney(totals.fee, currency)}
           </p>
           <p class="mt-1 text-xs text-fg-muted">
-            {confirmedCount} bestaetigt · {artists.length} gesamt
+            {confirmedCount}
+            {t('bestaetigt', 'confirmed')} · {artists.length}
+            {t('gesamt', 'total')}
           </p>
         </div>
         <div class="card p-5">
-          <p class="text-xs font-medium text-fg-muted">Reise, Hotel, Transfer, Extras</p>
+          <p class="text-xs font-medium text-fg-muted">
+            {t('Reise, Hotel, Transfer, Extras', 'Travel, hotel, transfer, extras')}
+          </p>
           <p class="mt-1 text-2xl font-semibold text-fg tabular-nums">
             {formatMoney(
               totals.anreise + totals.hotel + totals.transfer + totals.zusatzkosten,
@@ -321,14 +358,13 @@
             )}
           </p>
           <p class="mt-1 text-xs text-fg-muted">
-            Hotel {formatMoney(totals.hotel, currency)} · Anreise {formatMoney(
-              totals.anreise,
-              currency,
-            )}
+            {t('Hotel', 'Hotel')}
+            {formatMoney(totals.hotel, currency)} · {t('Anreise', 'Travel')}
+            {formatMoney(totals.anreise, currency)}
           </p>
         </div>
         <div class="card p-5">
-          <p class="text-xs font-medium text-fg-muted">Offene Punkte</p>
+          <p class="text-xs font-medium text-fg-muted">{t('Offene Punkte', 'Open items')}</p>
           <p
             class="mt-1 text-2xl font-semibold tabular-nums"
             class:text-success={openTotal === 0}
@@ -337,14 +373,15 @@
             {openTotal}
           </p>
           <p class="mt-1 text-xs text-fg-muted">
-            bezahlt {formatMoney(totals.paid, currency)}
+            {t('bezahlt', 'paid')}
+            {formatMoney(totals.paid, currency)}
           </p>
         </div>
       </section>
 
       <!-- Filter + neuer Artist -->
       <div class="mt-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div class="seg" role="group" aria-label="Filter">
+        <div class="seg" role="group" aria-label={t('Filter', 'Filter')}>
           {#each FILTERS as f (f.key)}
             <button
               type="button"
@@ -357,7 +394,7 @@
         <input
           class="field lg:max-w-xs"
           type="search"
-          placeholder="Suchen (Name, Agentur, Stage)"
+          placeholder={t('Suchen (Name, Agentur, Stage)', 'Search (name, agency, stage)')}
           bind:value={search}
         />
       </div>
@@ -369,7 +406,7 @@
         >
           <input
             class="field"
-            placeholder="Neuer Artist, z. B. DJ Name"
+            placeholder={t('Neuer Artist, z. B. DJ Name', 'New artist, e.g. DJ name')}
             bind:value={newArtistName}
             maxlength="160"
             required
@@ -380,7 +417,7 @@
             {/each}
           </select>
           <Button type="submit" disabled={creatingArtist || !newArtistName.trim()}>
-            {creatingArtist ? 'Legt an …' : 'Anlegen'}
+            {creatingArtist ? t('Legt an …', 'Creating …') : t('Anlegen', 'Create')}
           </Button>
         </form>
       {/if}
@@ -390,7 +427,9 @@
         <div class="card mt-4 h-40 animate-pulse opacity-50"></div>
       {:else if rows.length === 0}
         <div class="card mt-4 p-6 text-sm text-fg-muted">
-          {artists.length === 0 ? 'Noch keine Artists in dieser Edition.' : 'Keine Treffer.'}
+          {artists.length === 0
+            ? t('Noch keine Artists in dieser Edition.', 'No artists in this edition yet.')
+            : t('Keine Treffer.', 'No matches.')}
         </div>
       {:else}
         <ul class="mt-4 flex flex-col gap-2">
@@ -425,7 +464,7 @@
                     >{formatMoney(row.costs.total, currency)}</span
                   >
                   <span class="text-xs text-fg-muted tabular-nums"
-                    >Gage {formatMoney(row.costs.fee, currency)}</span
+                    >{t('Gage', 'Fee')} {formatMoney(row.costs.fee, currency)}</span
                   >
                 </div>
               </a>

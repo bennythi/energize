@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import { auth } from '$lib/auth.svelte';
   import NewUserForm from '$lib/admin/NewUserForm.svelte';
+  import { t, locale } from '$lib/i18n';
   import {
     adminDeleteUser,
     adminListUsers,
@@ -31,7 +32,10 @@
       items = await adminListUsers();
     } catch (err) {
       console.error('[admin/users] load failed', err);
-      errorMsg = errorMessage(err, 'User konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('User konnten nicht geladen werden.', 'Users could not be loaded.'),
+      );
       items = [];
     } finally {
       loading = false;
@@ -56,10 +60,23 @@
 
   async function setRole(u: AdminUser, role: 'user' | 'admin') {
     const isMe = u.id === auth.user?.id;
-    const verb = role === 'admin' ? 'zum Admin machen' : 'die Admin-Rolle entziehen';
-    if (!confirm(`${label(u)}: wirklich ${verb}?`)) return;
+    const question =
+      role === 'admin'
+        ? t(`${label(u)}: wirklich zum Admin machen?`, `${label(u)}: really make admin?`)
+        : t(
+            `${label(u)}: wirklich die Admin-Rolle entziehen?`,
+            `${label(u)}: really revoke the admin role?`,
+          );
+    if (!confirm(question)) return;
     if (isMe && role !== 'admin') {
-      if (!confirm('Du entziehst dir SELBST die Admin-Rechte und verlierst den Zugang. Sicher?'))
+      if (
+        !confirm(
+          t(
+            'Du entziehst dir SELBST die Admin-Rechte und verlierst den Zugang. Sicher?',
+            'You are revoking your OWN admin rights and will lose access. Are you sure?',
+          ),
+        )
+      )
         return;
     }
     actingOn = u.id;
@@ -70,7 +87,10 @@
       if (isMe) await goto('/account', { replaceState: true });
     } catch (err) {
       console.error('[admin/users] setRole failed', err);
-      errorMsg = errorMessage(err, 'Rolle konnte nicht gesetzt werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Rolle konnte nicht gesetzt werden.', 'Role could not be set.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -84,7 +104,10 @@
       patchLocal(u.id, { is_crew: !u.is_crew });
     } catch (err) {
       console.error('[admin/users] toggleCrew failed', err);
-      errorMsg = errorMessage(err, 'Crew-Status konnte nicht geaendert werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Crew-Status konnte nicht geaendert werden.', 'Crew status could not be changed.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -94,15 +117,26 @@
     if (u.id === auth.user?.id) return;
     if (
       !confirm(
-        `${label(u)} ENDGUELTIG loeschen?\n\nProfil, Flags und alle verknuepften Daten werden mitgeloescht. Das kann nicht rueckgaengig gemacht werden.`,
+        t(
+          `${label(u)} ENDGUELTIG loeschen?\n\nProfil, Flags und alle verknuepften Daten werden mitgeloescht. Das kann nicht rueckgaengig gemacht werden.`,
+          `PERMANENTLY delete ${label(u)}?\n\nProfile, flags and all linked data will be deleted too. This cannot be undone.`,
+        ),
       )
     )
       return;
     const localPart = u.email.split('@')[0];
-    const typed = prompt(`Zur Sicherheit bitte "${localPart}" eintippen.`);
+    const typed = prompt(
+      t(
+        `Zur Sicherheit bitte "${localPart}" eintippen.`,
+        `To be safe, please type "${localPart}".`,
+      ),
+    );
     if (typed === null) return;
     if (typed.trim() !== localPart) {
-      errorMsg = 'Eingabe stimmt nicht ueberein, Loeschen abgebrochen.';
+      errorMsg = t(
+        'Eingabe stimmt nicht ueberein, Loeschen abgebrochen.',
+        'Input does not match, deletion cancelled.',
+      );
       return;
     }
     actingOn = u.id;
@@ -112,7 +146,10 @@
       items = items.filter((x) => x.id !== u.id);
     } catch (err) {
       console.error('[admin/users] delete failed', err);
-      errorMsg = errorMessage(err, 'User konnte nicht geloescht werden.');
+      errorMsg = errorMessage(
+        err,
+        t('User konnte nicht geloescht werden.', 'User could not be deleted.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -121,7 +158,10 @@
   async function setPassword(u: AdminUser) {
     if (
       !confirm(
-        `Neues Startpasswort fuer ${label(u)} erzeugen? Ein altes Passwort gilt danach nicht mehr.`,
+        t(
+          `Neues Startpasswort fuer ${label(u)} erzeugen? Ein altes Passwort gilt danach nicht mehr.`,
+          `Generate a new initial password for ${label(u)}? Any old password will stop working.`,
+        ),
       )
     )
       return;
@@ -134,7 +174,10 @@
       issued = { email: u.email, password };
     } catch (err) {
       console.error('[admin/users] setPassword failed', err);
-      errorMsg = errorMessage(err, 'Passwort konnte nicht gesetzt werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Passwort konnte nicht gesetzt werden.', 'Password could not be set.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -146,14 +189,18 @@
     await auth.enterViewAs(u.id);
     actingOn = null;
     if (auth.viewAs) await goto('/crew');
-    else errorMsg = 'Ansicht als dieser User konnte nicht gestartet werden.';
+    else
+      errorMsg = t(
+        'Ansicht als dieser User konnte nicht gestartet werden.',
+        'Could not start viewing as this user.',
+      );
   }
 
   function fmtDate(iso: string): string {
     if (!iso) return '—';
     const d = new Date(iso.replace(' ', 'T'));
     if (Number.isNaN(d.getTime())) return '—';
-    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 </script>
 
@@ -164,7 +211,7 @@
 {#snippet badges(u: AdminUser)}
   {#if u.role === 'admin'}<span class="badge badge-danger">Admin</span>{/if}
   {#if u.is_crew}<span class="badge badge-accent">Crew</span>{/if}
-  {#if u.id === auth.user?.id}<span class="text-xs text-fg-muted">(du)</span>{/if}
+  {#if u.id === auth.user?.id}<span class="text-xs text-fg-muted">{t('(du)', '(you)')}</span>{/if}
 {/snippet}
 
 {#snippet actions(u: AdminUser)}
@@ -173,30 +220,38 @@
   <div class="flex flex-wrap gap-2">
     {#if u.role === 'admin'}
       <button class="pill" disabled={busy} onclick={() => setRole(u, 'user')}>
-        Admin entziehen
+        {t('Admin entziehen', 'Revoke admin')}
       </button>
     {:else}
-      <button class="pill" disabled={busy} onclick={() => setRole(u, 'admin')}> Zum Admin </button>
+      <button class="pill" disabled={busy} onclick={() => setRole(u, 'admin')}>
+        {t('Zum Admin', 'Make admin')}
+      </button>
     {/if}
     <button class="pill" disabled={busy} onclick={() => toggleCrew(u)}>
-      {u.is_crew ? 'Crew entziehen' : 'Crew geben'}
+      {u.is_crew ? t('Crew entziehen', 'Revoke crew') : t('Crew geben', 'Grant crew')}
     </button>
-    <button class="pill" disabled={busy} onclick={() => setPassword(u)}>Startpasswort</button>
+    <button class="pill" disabled={busy} onclick={() => setPassword(u)}
+      >{t('Startpasswort', 'Initial password')}</button
+    >
     <button
       class="pill"
       disabled={busy || isMe}
-      title={isMe ? 'Das bist du selbst' : 'App aus Sicht dieses Users ansehen'}
+      title={isMe
+        ? t('Das bist du selbst', 'That is you')
+        : t('App aus Sicht dieses Users ansehen', 'View the app as this user')}
       onclick={() => viewAs(u)}
     >
-      Ansehen als
+      {t('Ansehen als', 'View as')}
     </button>
     <button
       class="pill pill-danger"
       disabled={busy || isMe}
-      title={isMe ? 'Du kannst dich nicht selbst loeschen' : 'User endgueltig loeschen'}
+      title={isMe
+        ? t('Du kannst dich nicht selbst loeschen', 'You cannot delete yourself')
+        : t('User endgueltig loeschen', 'Permanently delete user')}
       onclick={() => deleteUser(u)}
     >
-      Loeschen
+      {t('Loeschen', 'Delete')}
     </button>
   </div>
 {/snippet}
@@ -208,7 +263,9 @@
       {#if !loading}<span class="text-fg-muted">{items.length}</span>{/if}
     </h1>
     {#if !showNew}
-      <button class="pill pill-on" onclick={() => (showNew = true)}>+ Neuen User anlegen</button>
+      <button class="pill pill-on" onclick={() => (showNew = true)}
+        >+ {t('Neuen User anlegen', 'Create new user')}</button
+      >
     {/if}
   </div>
 
@@ -219,9 +276,12 @@
   <input
     type="search"
     bind:value={search}
-    placeholder="E-Mail, Name oder Handynummer suchen …"
+    placeholder={t(
+      'E-Mail, Name oder Handynummer suchen …',
+      'Search email, name or mobile number …',
+    )}
     class="field mt-6 sm:max-w-md"
-    aria-label="User suchen"
+    aria-label={t('User suchen', 'Search users')}
   />
 
   {#if errorMsg}
@@ -231,15 +291,18 @@
   {#if issued}
     <div class="card mt-4 flex flex-wrap items-center justify-between gap-3 p-4" role="status">
       <p class="text-sm text-fg">
-        Startpasswort fuer <strong>{issued.email}</strong>:
+        {t('Startpasswort fuer', 'Initial password for')} <strong>{issued.email}</strong>:
         <code class="ml-1 select-all rounded bg-black/30 px-2 py-0.5 font-mono text-accent"
           >{issued.password}</code
         >
         <span class="block text-xs text-fg-muted"
-          >Wird nur jetzt angezeigt. Weitergeben und unter Account aendern lassen.</span
+          >{t(
+            'Wird nur jetzt angezeigt. Weitergeben und unter Account aendern lassen.',
+            'Shown only now. Hand it over and have it changed under Account.',
+          )}</span
         >
       </p>
-      <button class="pill" onclick={() => (issued = null)}>Ausblenden</button>
+      <button class="pill" onclick={() => (issued = null)}>{t('Ausblenden', 'Dismiss')}</button>
     </div>
   {/if}
 
@@ -247,7 +310,9 @@
     <div class="card mt-6 h-40 animate-pulse opacity-50"></div>
   {:else if filtered.length === 0}
     <div class="card mt-6 p-6">
-      <p class="text-fg-muted">{search ? 'Keine Treffer.' : 'Noch keine User.'}</p>
+      <p class="text-fg-muted">
+        {search ? t('Keine Treffer.', 'No matches.') : t('Noch keine User.', 'No users yet.')}
+      </p>
     </div>
   {:else}
     <!-- Desktop: Tabelle -->
@@ -257,15 +322,15 @@
           <tr class="text-xs uppercase tracking-wider text-fg-muted">
             <th class="px-5 py-3 font-medium">User</th>
             <th class="px-5 py-3 font-medium">Status</th>
-            <th class="px-5 py-3 font-medium">Registriert</th>
-            <th class="px-5 py-3 font-medium">Aktionen</th>
+            <th class="px-5 py-3 font-medium">{t('Registriert', 'Registered')}</th>
+            <th class="px-5 py-3 font-medium">{t('Aktionen', 'Actions')}</th>
           </tr>
         </thead>
         <tbody>
           {#each filtered as u (u.id)}
             <tr class="row">
               <td class="px-5 py-3 align-top">
-                <p class="font-medium text-fg">{u.display_name || '(kein Name)'}</p>
+                <p class="font-medium text-fg">{u.display_name || t('(kein Name)', '(no name)')}</p>
                 <p class="text-xs text-fg-muted">
                   {u.email}{#if u.phone}
                     · {u.phone}{/if}
@@ -294,13 +359,16 @@
       {#each filtered as u (u.id)}
         <li class="card p-5">
           <div class="flex flex-wrap items-center gap-1.5">
-            <span class="font-medium text-fg">{u.display_name || '(kein Name)'}</span>
+            <span class="font-medium text-fg"
+              >{u.display_name || t('(kein Name)', '(no name)')}</span
+            >
             {@render badges(u)}
           </div>
           <p class="mt-1 break-all text-xs text-fg-muted">{u.email}</p>
           <p class="mt-1 text-xs text-fg-muted">
             {#if u.phone}{u.phone} ·
-            {/if}registriert {fmtDate(u.created)}
+            {/if}{t('registriert', 'registered')}
+            {fmtDate(u.created)}
           </p>
           <div class="mt-4">{@render actions(u)}</div>
         </li>

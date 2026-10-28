@@ -6,6 +6,7 @@
   import SupportSection from '$lib/SupportSection.svelte';
   import PasswordSection from '$lib/PasswordSection.svelte';
   import { homePath, isModuleEnabled } from '$lib/modules';
+  import { t } from '$lib/i18n';
 
   const locale = $derived(languageTag() as AvailableLanguageTag);
 
@@ -55,7 +56,10 @@
     profileSaved = false;
     const cleanPhone = phone.trim();
     if (cleanPhone && !phoneRegex.test(cleanPhone)) {
-      profileError = 'Bitte eine gueltige Handynummer eingeben, z. B. +49 170 1234567.';
+      profileError = t(
+        'Bitte eine gueltige Handynummer eingeben, z. B. +49 170 1234567.',
+        'Please enter a valid mobile number, e.g. +49 170 1234567.',
+      );
       return;
     }
     savingProfile = true;
@@ -134,7 +138,7 @@
               <span
                 class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
               >
-                Vorname
+                {t('Vorname', 'First name')}
               </span>
               <input
                 type="text"
@@ -149,7 +153,7 @@
               <span
                 class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
               >
-                Name
+                {t('Name', 'Last name')}
               </span>
               <input
                 type="text"
@@ -164,7 +168,7 @@
               <span
                 class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted"
               >
-                Handynummer
+                {t('Handynummer', 'Mobile number')}
               </span>
               <input
                 type="tel"
@@ -178,7 +182,10 @@
             </label>
           </div>
           <p class="text-xs text-fg-muted">
-            Name und Handynummer sehen nur eingeloggte Crew-Mitglieder und Admins.
+            {t(
+              'Name und Handynummer sehen nur eingeloggte Crew-Mitglieder und Admins.',
+              'Only signed-in crew members and admins can see your name and mobile number.',
+            )}
           </p>
 
           {#if profileError}

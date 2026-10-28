@@ -3,6 +3,7 @@
   import { auth } from '$lib/auth.svelte';
   import { adminListCrew, adminListUsers, errorMessage } from '$lib/crew-api';
   import { isModuleEnabled } from '$lib/modules';
+  import { t } from '$lib/i18n';
   import type { ModuleSlug } from '@platform/modules';
 
   let usersCount = $state<number | null>(null);
@@ -43,7 +44,10 @@
     const failed = results.find((r) => r.status === 'rejected');
     if (failed && failed.status === 'rejected') {
       console.error('[admin] stats failed', failed.reason);
-      errorMsg = errorMessage(failed.reason, 'Einige Zahlen konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        failed.reason,
+        t('Einige Zahlen konnten nicht geladen werden.', 'Some figures could not be loaded.'),
+      );
     }
   }
 
@@ -61,46 +65,46 @@
     [
       {
         label: 'User',
-        hint: 'Alle Accounts, Rollen und Loeschung',
+        hint: t('Alle Accounts, Rollen und Loeschung', 'All accounts, roles and deletion'),
         value: usersCount,
         href: '/admin/users',
       },
       {
         label: 'Crew',
-        hint: 'Crew-Mitglieder und ihre Rollen',
+        hint: t('Crew-Mitglieder und ihre Rollen', 'Crew members and their roles'),
         value: crewCount,
         href: '/admin/crew',
         module: 'crew-core' as ModuleSlug,
       },
       {
-        label: 'Rechte',
-        hint: 'Berechtigungen pro Rolle und Person',
+        label: t('Rechte', 'Permissions'),
+        hint: t('Berechtigungen pro Rolle und Person', 'Permissions per role and person'),
         href: '/admin/berechtigungen',
         module: 'crew-core' as ModuleSlug,
       },
       {
         label: 'Briefings',
-        hint: 'Dokumente pro Abteilung',
+        hint: t('Dokumente pro Abteilung', 'Documents per department'),
         value: briefingsCount,
         href: '/admin/briefings',
         module: 'crew-briefings' as ModuleSlug,
       },
       {
-        label: 'Offene Meilensteine',
-        hint: 'Deadlines, die noch nicht erledigt sind',
+        label: t('Offene Meilensteine', 'Open milestones'),
+        hint: t('Deadlines, die noch nicht erledigt sind', 'Deadlines not yet done'),
         value: openMilestonesCount,
         href: '/admin/meilensteine',
         module: 'crew-milestones' as ModuleSlug,
         accent: (openMilestonesCount ?? 0) > 0,
       },
       {
-        label: 'Cashless-Kassen',
-        hint: 'Stammdaten der Top-Up-Kassen',
+        label: t('Cashless-Kassen', 'Cashless registers'),
+        hint: t('Stammdaten der Top-Up-Kassen', 'Master data of the top-up registers'),
         value: registersCount,
         href: '/admin/cashless-kassen',
         module: 'cashless' as ModuleSlug,
       },
-    ].filter((t) => !t.module || isModuleEnabled(t.module)),
+    ].filter((x) => !x.module || isModuleEnabled(x.module)),
   );
 </script>
 
@@ -110,9 +114,12 @@
 
 <div class="mx-auto w-full max-w-6xl px-5 py-8 md:py-10">
   <p class="text-xs font-medium uppercase tracking-wider text-accent">Admin</p>
-  <h1 class="mt-2 text-3xl font-semibold tracking-tight text-fg">Uebersicht</h1>
+  <h1 class="mt-2 text-3xl font-semibold tracking-tight text-fg">{t('Uebersicht', 'Overview')}</h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
-    Verwaltung von Usern, Crew, Rechten und den Crew-Inhalten.
+    {t(
+      'Verwaltung von Usern, Crew, Rechten und den Crew-Inhalten.',
+      'Manage users, crew, permissions and crew content.',
+    )}
   </p>
 
   {#if errorMsg}
@@ -134,7 +141,7 @@
             </span>
           {/if}
           <span class="mt-3 text-sm text-fg-muted">{tile.hint}</span>
-          <span class="mt-auto pt-5 text-sm font-medium text-accent">Oeffnen →</span>
+          <span class="mt-auto pt-5 text-sm font-medium text-accent">{t('Oeffnen', 'Open')} →</span>
         </a>
       </li>
     {/each}

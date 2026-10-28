@@ -1,6 +1,7 @@
 <script lang="ts">
   // Monatsraster fuer den Crew-Kalender (neues Glas-Design).
   import { monthGrid, WEEKDAY_LABELS_DE, MONTH_LABELS_DE } from '$lib/festival';
+  import { t } from '$lib/i18n';
 
   interface Props {
     year: number;
@@ -43,9 +44,10 @@
           class:mine
           class:selected={selected === cell.iso}
           aria-pressed={selected === cell.iso}
-          aria-label="{cell.day}. {MONTH_LABELS_DE[month]}: {count} Eintraege{mine
-            ? ', inklusive dir'
-            : ''}"
+          aria-label={t(
+            `${cell.day}. ${MONTH_LABELS_DE[month]}: ${count} Eintraege${mine ? ', inklusive dir' : ''}`,
+            `${cell.day} ${MONTH_LABELS_DE[month]}: ${count} entries${mine ? ', including you' : ''}`,
+          )}
           onclick={() => onDayClick(cell.iso)}
         >
           <span class="num">{cell.day}</span>

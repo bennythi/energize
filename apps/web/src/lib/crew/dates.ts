@@ -1,4 +1,5 @@
 // Datums-Helfer fuer die Crew-Seiten.
+import { locale } from '$lib/i18n';
 
 /** PB-Datum ('2027-05-29 10:00:00.000Z') robust parsen (Safari mag kein Leerzeichen). */
 export function parsePbDate(value: string): Date {
@@ -20,11 +21,11 @@ export function localDateTimeIso(day: string, time: string): string {
 }
 
 export function fmtTime(d: Date): string {
-  return d.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
 }
 
 export function fmtLongDay(iso: string): string {
-  return parseDay(iso).toLocaleDateString('de-DE', {
+  return parseDay(iso).toLocaleDateString(locale, {
     weekday: 'long',
     day: '2-digit',
     month: '2-digit',

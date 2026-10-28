@@ -7,6 +7,7 @@
   import { parsePbDate } from '$lib/crew/dates';
   import BackLink from '$lib/crew/BackLink.svelte';
   import NoAccess from '$lib/crew/NoAccess.svelte';
+  import { t, locale } from '$lib/i18n';
 
   interface Briefing {
     id: string;
@@ -57,7 +58,10 @@
         notFound = true;
       } else {
         console.error('[crew/briefings/detail] load failed', err);
-        errorMsg = errorMessage(err, 'Konnte das Briefing nicht laden.');
+        errorMsg = errorMessage(
+          err,
+          t('Konnte das Briefing nicht laden.', 'Could not load the briefing.'),
+        );
       }
     } finally {
       loading = false;
@@ -65,7 +69,7 @@
   }
 
   function fmtDate(value: string): string {
-    return parsePbDate(value).toLocaleDateString('de-DE', {
+    return parsePbDate(value).toLocaleDateString(locale, {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -78,40 +82,49 @@
 </svelte:head>
 
 <div class="mx-auto w-full max-w-3xl px-5 py-10 md:py-16">
-  <BackLink href="/crew/briefings" label="Alle Briefings" />
+  <BackLink href="/crew/briefings" label={t('Alle Briefings', 'All briefings')} />
 
   {#if !canRead}
-    <NoAccess area="die Briefings" />
+    <NoAccess area={t('die Briefings', 'the briefings')} />
   {:else if loading}
     <div class="card mt-8 h-40 animate-pulse opacity-50"></div>
   {:else if errorMsg}
     <p class="card mt-8 p-4 text-sm text-danger" role="alert">{errorMsg}</p>
   {:else if notFound || !briefing}
     <div class="card mt-8 p-6">
-      <p class="font-medium text-fg">Briefing nicht gefunden</p>
-      <p class="mt-2 text-sm text-fg-muted">Vielleicht wurde es geloescht oder verschoben.</p>
+      <p class="font-medium text-fg">{t('Briefing nicht gefunden', 'Briefing not found')}</p>
+      <p class="mt-2 text-sm text-fg-muted">
+        {t('Vielleicht wurde es geloescht oder verschoben.', 'It may have been deleted or moved.')}
+      </p>
     </div>
   {:else}
     <p class="mt-6 text-xs font-medium uppercase tracking-wider text-accent">
-      {briefing.department}{briefing.pinned ? ' · angepinnt' : ''}
+      {briefing.department}{briefing.pinned ? t(' · angepinnt', ' · pinned') : ''}
     </p>
     <h1 class="mt-2 break-words text-3xl font-semibold tracking-tight text-fg md:text-4xl">
       {briefing.title}
     </h1>
-    <p class="mt-2 text-sm text-fg-muted">Aktualisiert {fmtDate(briefing.updated)}</p>
+    <p class="mt-2 text-sm text-fg-muted">
+      {t('Aktualisiert', 'Updated')}
+      {fmtDate(briefing.updated)}
+    </p>
 
     <article class="card mt-8 p-6 md:p-8">
       {#if briefing.body.trim()}
         <!-- prettier-ignore -->
         <div class="whitespace-pre-wrap break-words text-base leading-relaxed text-fg">{briefing.body.replace(/^\s*\n|\s+$/g, '')}</div>
       {:else}
-        <p class="text-fg-muted">Dieses Briefing hat noch keinen Inhalt.</p>
+        <p class="text-fg-muted">
+          {t('Dieses Briefing hat noch keinen Inhalt.', 'This briefing has no content yet.')}
+        </p>
       {/if}
     </article>
 
     {#if auth.isAdmin}
       <div class="mt-8">
-        <Button href="/admin/briefings" variant="ghost">Im Admin bearbeiten</Button>
+        <Button href="/admin/briefings" variant="ghost"
+          >{t('Im Admin bearbeiten', 'Edit in admin')}</Button
+        >
       </div>
     {/if}
   {/if}

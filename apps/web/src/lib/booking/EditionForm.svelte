@@ -4,6 +4,7 @@
   import { auth } from '$lib/auth.svelte';
   import { errorMessage } from '$lib/crew-api';
   import type { Edition } from '$lib/booking';
+  import { t } from '$lib/i18n';
 
   // Gemeinsames Formular fuer Editionen (DJ-Planung + Kostenplanung).
   interface Props {
@@ -32,7 +33,10 @@
     event.preventDefault();
     if (!auth.pb) return;
     if (start && end && end < start) {
-      errorMsg = 'Das Enddatum liegt vor dem Startdatum.';
+      errorMsg = t(
+        'Das Enddatum liegt vor dem Startdatum.',
+        'The end date is before the start date.',
+      );
       return;
     }
     saving = true;
@@ -54,7 +58,10 @@
         : await auth.pb.collection('booking_editions').create({ ...data, archived: false });
       onSaved(rec as unknown as Edition, !edition);
     } catch (err) {
-      errorMsg = errorMessage(err, 'Edition konnte nicht gespeichert werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Edition konnte nicht gespeichert werden.', 'Could not save edition.'),
+      );
     } finally {
       saving = false;
     }
@@ -67,39 +74,53 @@
     <input class="field mt-1" bind:value={name} required maxlength="120" />
   </label>
   <label class="block">
-    <span class="text-xs font-medium text-fg-muted">Jahr</span>
+    <span class="text-xs font-medium text-fg-muted">{t('Jahr', 'Year')}</span>
     <input class="field mt-1" type="number" min="2000" max="2100" bind:value={year} />
   </label>
   <div class="hidden lg:block"></div>
   <label class="block">
-    <span class="text-xs font-medium text-fg-muted">Erster Festivaltag</span>
+    <span class="text-xs font-medium text-fg-muted"
+      >{t('Erster Festivaltag', 'First festival day')}</span
+    >
     <input class="field mt-1" type="date" bind:value={start} />
   </label>
   <label class="block">
-    <span class="text-xs font-medium text-fg-muted">Letzter Festivaltag</span>
+    <span class="text-xs font-medium text-fg-muted"
+      >{t('Letzter Festivaltag', 'Last festival day')}</span
+    >
     <input class="field mt-1" type="date" bind:value={end} min={start || undefined} />
   </label>
   <label class="block">
-    <span class="text-xs font-medium text-fg-muted">Aufbautage davor</span>
+    <span class="text-xs font-medium text-fg-muted"
+      >{t('Aufbautage davor', 'Setup days before')}</span
+    >
     <input class="field mt-1" type="number" min="0" max="14" bind:value={setupDays} />
   </label>
   <label class="block">
-    <span class="text-xs font-medium text-fg-muted">Abbautage danach</span>
+    <span class="text-xs font-medium text-fg-muted"
+      >{t('Abbautage danach', 'Teardown days after')}</span
+    >
     <input class="field mt-1" type="number" min="0" max="14" bind:value={teardownDays} />
   </label>
   <label class="block sm:col-span-2">
-    <span class="text-xs font-medium text-fg-muted">Gesamtbudget Festival (EUR, optional)</span>
+    <span class="text-xs font-medium text-fg-muted"
+      >{t('Gesamtbudget Festival (EUR, optional)', 'Total festival budget (EUR, optional)')}</span
+    >
     <input class="field mt-1" type="number" min="0" step="100" bind:value={totalBudget} />
   </label>
   <label class="block sm:col-span-2">
-    <span class="text-xs font-medium text-fg-muted">Davon Budget Artists (EUR, optional)</span>
+    <span class="text-xs font-medium text-fg-muted"
+      >{t('Davon Budget Artists (EUR, optional)', 'Of which artist budget (EUR, optional)')}</span
+    >
     <input class="field mt-1" type="number" min="0" step="50" bind:value={artistBudget} />
   </label>
   {#if errorMsg}
     <p class="text-sm text-danger sm:col-span-2 lg:col-span-4" role="alert">{errorMsg}</p>
   {/if}
   <div class="flex gap-2 sm:col-span-2 lg:col-span-4 lg:justify-end">
-    <Button variant="ghost" onclick={onCancel}>Abbrechen</Button>
-    <Button type="submit" disabled={saving}>{saving ? 'Speichert …' : 'Speichern'}</Button>
+    <Button variant="ghost" onclick={onCancel}>{t('Abbrechen', 'Cancel')}</Button>
+    <Button type="submit" disabled={saving}
+      >{saving ? t('Speichert …', 'Saving …') : t('Speichern', 'Save')}</Button
+    >
   </div>
 </form>

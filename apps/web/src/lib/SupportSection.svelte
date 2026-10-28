@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { locale } from '$lib/i18n';
   import { onMount } from 'svelte';
   import { Button } from '@platform/ui';
   import { m } from '@platform/i18n';
@@ -117,7 +118,7 @@
 
   function fmtDate(iso: string): string {
     const d = new Date(iso);
-    return d.toLocaleString('de-DE', {
+    return d.toLocaleString(locale, {
       day: '2-digit',
       month: '2-digit',
       year: '2-digit',

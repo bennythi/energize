@@ -17,6 +17,7 @@
   } from '$lib/crewResources';
   import { isModuleEnabled, MODULE_REGISTRY } from '$lib/modules';
   import type { ModuleSlug } from '@platform/modules';
+  import { t, isEn } from '$lib/i18n';
 
   type Resource = PermissionsOverview['resources'][number];
 
@@ -35,9 +36,9 @@
 
   const LEVEL_OPTIONS: { value: '' | Level; label: string }[] = [
     { value: '', label: '—' },
-    { value: 'read', label: 'lesen' },
-    { value: 'write', label: '+ bearbeiten' },
-    { value: 'delete', label: '+ loeschen' },
+    { value: 'read', label: t('lesen', 'read') },
+    { value: 'write', label: t('+ bearbeiten', '+ write') },
+    { value: 'delete', label: t('+ loeschen', '+ delete') },
   ];
 
   onMount(() => void load());
@@ -57,14 +58,20 @@
       users = u;
     } catch (err) {
       console.error('[admin/berechtigungen] load failed', err);
-      errorMsg = errorMessage(err, 'Berechtigungen konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Berechtigungen konnten nicht geladen werden.', 'Permissions could not be loaded.'),
+      );
     } finally {
       loading = false;
     }
   }
 
   function resourceLabel(r: Resource): string {
-    return r.label || CREW_RESOURCE_LABELS[r.slug as CrewResource]?.label || r.slug;
+    // r.label kommt deutsch aus der DB; auf Englisch die uebersetzte Map bevorzugen.
+    const mapped = CREW_RESOURCE_LABELS[r.slug as CrewResource]?.label;
+    if (isEn && mapped) return mapped;
+    return r.label || mapped || r.slug;
   }
 
   const allRoles = $derived.by(() => {
@@ -94,7 +101,10 @@
     } catch (err) {
       console.error('[admin/berechtigungen] role perm failed', err);
       rolePerms = prev;
-      errorMsg = errorMessage(err, 'Recht konnte nicht gespeichert werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Recht konnte nicht gespeichert werden.', 'Permission could not be saved.'),
+      );
     } finally {
       if (savingKey === key) savingKey = null;
     }
@@ -114,7 +124,10 @@
     } catch (err) {
       console.error('[admin/berechtigungen] user perm failed', err);
       userPerms = prev;
-      errorMsg = errorMessage(err, 'Recht konnte nicht gespeichert werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Recht konnte nicht gespeichert werden.', 'Permission could not be saved.'),
+      );
     } finally {
       if (savingKey === key) savingKey = null;
     }
@@ -142,14 +155,18 @@
 </script>
 
 <svelte:head>
-  <title>Admin · Rechte</title>
+  <title>{t('Admin · Rechte', 'Admin · Permissions')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-6xl px-5 py-8 md:py-10">
-  <h1 class="text-3xl font-semibold tracking-tight text-fg">Berechtigungen</h1>
+  <h1 class="text-3xl font-semibold tracking-tight text-fg">
+    {t('Berechtigungen', 'Permissions')}
+  </h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
-    Pro Bereich bekommen Rollen oder einzelne Personen ein Level: lesen, bearbeiten oder zusaetzlich
-    loeschen. Admins haben automatisch alle Rechte. Aenderungen werden sofort gespeichert.
+    {t(
+      'Pro Bereich bekommen Rollen oder einzelne Personen ein Level: lesen, bearbeiten oder zusaetzlich loeschen. Admins haben automatisch alle Rechte. Aenderungen werden sofort gespeichert.',
+      'Per area, roles or individual people get a level: read, write or additionally delete. Admins automatically have all permissions. Changes are saved immediately.',
+    )}
   </p>
 
   {#if errorMsg}
@@ -161,17 +178,20 @@
   {:else}
     <!-- Rollen-Matrix -->
     <section class="mt-8">
-      <h2 class="text-lg font-semibold text-fg">Rollen</h2>
+      <h2 class="text-lg font-semibold text-fg">{t('Rollen', 'Roles')}</h2>
       <p class="mt-1 text-sm text-fg-muted">
-        Rollen werden unter <a href="/admin/crew" class="text-accent hover:underline">Crew</a> an Personen
-        vergeben.
+        {t('Rollen werden unter', 'Roles are assigned to people under')}
+        <a href="/admin/crew" class="text-accent hover:underline">Crew</a>{t(
+          ' an Personen vergeben.',
+          '.',
+        )}
       </p>
 
       <div class="card mt-4 overflow-x-auto">
         <table class="matrix w-full text-left text-sm">
           <thead>
             <tr class="text-xs uppercase tracking-wider text-fg-muted">
-              <th class="sticky-col px-4 py-3 font-medium">Rolle</th>
+              <th class="sticky-col px-4 py-3 font-medium">{t('Rolle', 'Role')}</th>
               {#each resources as r (r.slug)}
                 <th class="px-3 py-3 font-medium whitespace-nowrap">{resourceLabel(r)}</th>
               {/each}
@@ -208,38 +228,50 @@
         <input
           type="text"
           bind:value={newRole}
-          placeholder="Neue Rolle, z.B. buehne"
+          placeholder={t('Neue Rolle, z.B. buehne', 'New role, e.g. stage')}
           class="field"
           maxlength="40"
-          aria-label="Neue Rolle"
+          aria-label={t('Neue Rolle', 'New role')}
         />
-        <button type="submit" class="pill shrink-0" disabled={!newRole.trim()}>+ Rolle</button>
+        <button type="submit" class="pill shrink-0" disabled={!newRole.trim()}
+          >+ {t('Rolle', 'Role')}</button
+        >
       </form>
       <p class="mt-2 text-xs text-fg-muted">
-        Eine neue Rolle bleibt nur erhalten, wenn mindestens ein Recht gesetzt ist.
+        {t(
+          'Eine neue Rolle bleibt nur erhalten, wenn mindestens ein Recht gesetzt ist.',
+          'A new role is only kept if at least one permission is set.',
+        )}
       </p>
     </section>
 
     <!-- Einzelpersonen -->
     <section class="mt-12">
-      <h2 class="text-lg font-semibold text-fg">Einzelpersonen</h2>
+      <h2 class="text-lg font-semibold text-fg">{t('Einzelpersonen', 'Individuals')}</h2>
       <p class="mt-1 text-sm text-fg-muted">
-        Direkte Rechte fuer einzelne User, unabhaengig von ihren Rollen. Es gilt jeweils das hoehere
-        Level.
+        {t(
+          'Direkte Rechte fuer einzelne User, unabhaengig von ihren Rollen. Es gilt jeweils das hoehere Level.',
+          'Direct permissions for individual users, independent of their roles. The higher level applies.',
+        )}
       </p>
 
       <input
         type="search"
         bind:value={userSearch}
-        placeholder="User suchen, leer = alle mit Einzelrechten"
+        placeholder={t(
+          'User suchen, leer = alle mit Einzelrechten',
+          'Search users, empty = all with individual permissions',
+        )}
         class="field mt-4 sm:max-w-md"
-        aria-label="User suchen"
+        aria-label={t('User suchen', 'Search users')}
       />
 
       {#if visibleUsers.length === 0}
         <div class="card mt-4 p-6">
           <p class="text-fg-muted">
-            {userSearch.trim() ? 'Niemand gefunden.' : 'Noch keine Einzelrechte vergeben.'}
+            {userSearch.trim()
+              ? t('Niemand gefunden.', 'Nobody found.')
+              : t('Noch keine Einzelrechte vergeben.', 'No individual permissions granted yet.')}
           </p>
         </div>
       {:else}

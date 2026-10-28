@@ -8,6 +8,7 @@
   import BackLink from '$lib/crew/BackLink.svelte';
   import NoAccess from '$lib/crew/NoAccess.svelte';
   import Segmented from '$lib/crew/Segmented.svelte';
+  import { t, locale } from '$lib/i18n';
 
   type Filter = 'open' | 'done' | 'all';
 
@@ -71,7 +72,10 @@
       members = new Map(people.map((m) => [m.id, m]));
     } catch (err) {
       console.error('[crew/meilensteine] load failed', err);
-      errorMsg = errorMessage(err, 'Konnte die Meilensteine nicht laden.');
+      errorMsg = errorMessage(
+        err,
+        t('Konnte die Meilensteine nicht laden.', 'Could not load the milestones.'),
+      );
     } finally {
       loading = false;
     }
@@ -90,7 +94,10 @@
       milestones = milestones.map((x) => (x.id === m.id ? toMilestone(updated) : x));
     } catch (err) {
       console.error('[crew/meilensteine] toggle failed', err);
-      errorMsg = errorMessage(err, 'Konnte den Status nicht aendern.');
+      errorMsg = errorMessage(
+        err,
+        t('Konnte den Status nicht aendern.', 'Could not change the status.'),
+      );
     } finally {
       acting = null;
     }
@@ -122,62 +129,74 @@
   });
 
   function fmtMonth(key: string): string {
-    return parseDay(`${key}-01`).toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
+    return parseDay(`${key}-01`).toLocaleDateString(locale, { month: 'long', year: 'numeric' });
   }
   function fmtDate(iso: string): string {
-    return parseDay(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+    return parseDay(iso).toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
   }
   function fmtDoneAt(value: string): string {
-    return parsePbDate(value).toLocaleDateString('de-DE', {
+    return parsePbDate(value).toLocaleDateString(locale, {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
     });
   }
   function dueLabel(days: number): string {
-    if (days < -1) return `${-days} Tage ueberfaellig`;
-    if (days === -1) return 'seit gestern ueberfaellig';
-    if (days === 0) return 'heute faellig';
-    if (days === 1) return 'morgen faellig';
-    return `in ${days} Tagen`;
+    if (days < -1) return t(`${-days} Tage ueberfaellig`, `${-days} days overdue`);
+    if (days === -1) return t('seit gestern ueberfaellig', 'overdue since yesterday');
+    if (days === 0) return t('heute faellig', 'due today');
+    if (days === 1) return t('morgen faellig', 'due tomorrow');
+    return t(`in ${days} Tagen`, `in ${days} days`);
   }
 </script>
 
 <svelte:head>
-  <title>Meilensteine · Crew</title>
+  <title>{t('Meilensteine · Crew', 'Milestones · Crew')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-5xl px-5 py-10 md:py-16">
   <BackLink />
-  <h1 class="mt-4 text-3xl font-semibold tracking-tight text-fg md:text-4xl">Meilensteine</h1>
+  <h1 class="mt-4 text-3xl font-semibold tracking-tight text-fg md:text-4xl">
+    {t('Meilensteine', 'Milestones')}
+  </h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
-    Bestellungen, Genehmigungen, Vertraege: alle Jahres-Deadlines auf einen Blick.{canWrite
-      ? ' Haken setzen, sobald etwas erledigt ist.'
+    {t(
+      'Bestellungen, Genehmigungen, Vertraege: alle Jahres-Deadlines auf einen Blick.',
+      "Orders, permits, contracts: all of the year's deadlines at a glance.",
+    )}{canWrite
+      ? t(' Haken setzen, sobald etwas erledigt ist.', ' Tick things off as soon as they are done.')
       : ''}
   </p>
 
   {#if !canRead}
-    <NoAccess area="die Meilensteine" />
+    <NoAccess area={t('die Meilensteine', 'the milestones')} />
   {:else}
     <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
       <Segmented
-        label="Filter"
+        label={t('Filter', 'Filter')}
         options={[
-          { value: 'open', label: `Offen (${counts.open})` },
-          { value: 'done', label: `Erledigt (${counts.done})` },
-          { value: 'all', label: 'Alle' },
+          { value: 'open', label: t(`Offen (${counts.open})`, `Open (${counts.open})`) },
+          { value: 'done', label: t(`Erledigt (${counts.done})`, `Done (${counts.done})`) },
+          { value: 'all', label: t('Alle', 'All') },
         ]}
         bind:value={filter}
       />
       {#if auth.isAdmin}
-        <Button href="/admin/meilensteine" variant="ghost">Verwalten</Button>
+        <Button href="/admin/meilensteine" variant="ghost">{t('Verwalten', 'Manage')}</Button>
       {/if}
     </div>
 
     {#if !loading && counts.overdue > 0 && filter !== 'done'}
       <p class="mt-4 text-sm font-medium text-danger">
-        {counts.overdue}
-        {counts.overdue === 1 ? 'Meilenstein ist' : 'Meilensteine sind'} ueberfaellig.
+        {counts.overdue === 1
+          ? t(
+              `${counts.overdue} Meilenstein ist ueberfaellig.`,
+              `${counts.overdue} milestone is overdue.`,
+            )
+          : t(
+              `${counts.overdue} Meilensteine sind ueberfaellig.`,
+              `${counts.overdue} milestones are overdue.`,
+            )}
       </p>
     {/if}
 
@@ -191,10 +210,10 @@
       <div class="card mt-8 p-6">
         <p class="text-fg-muted">
           {filter === 'open'
-            ? 'Nichts mehr offen.'
+            ? t('Nichts mehr offen.', 'Nothing left open.')
             : filter === 'done'
-              ? 'Noch nichts erledigt.'
-              : 'Noch keine Meilensteine.'}
+              ? t('Noch nichts erledigt.', 'Nothing done yet.')
+              : t('Noch keine Meilensteine.', 'No milestones yet.')}
         </p>
       </div>
     {:else}
@@ -219,8 +238,8 @@
                       disabled={acting === m.id}
                       aria-pressed={done}
                       aria-label={done
-                        ? `${m.title} wieder oeffnen`
-                        : `${m.title} als erledigt markieren`}
+                        ? t(`${m.title} wieder oeffnen`, `Reopen ${m.title}`)
+                        : t(`${m.title} als erledigt markieren`, `Mark ${m.title} as done`)}
                       onclick={() => toggle(m)}
                     >
                       {#if acting === m.id}…{:else if done}✓{/if}
@@ -245,8 +264,12 @@
                       {/if}
                       {#if done}
                         <span class="text-success">
-                          Erledigt am {fmtDoneAt(m.completed_at)}{m.completed_by
-                            ? ` von ${memberName(members.get(m.completed_by))}`
+                          {t('Erledigt am', 'Done on')}
+                          {fmtDoneAt(m.completed_at)}{m.completed_by
+                            ? t(
+                                ` von ${memberName(members.get(m.completed_by))}`,
+                                ` by ${memberName(members.get(m.completed_by))}`,
+                              )
                             : ''}
                         </span>
                       {/if}

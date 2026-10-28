@@ -1,6 +1,7 @@
 <script lang="ts">
   import { adminInvite, errorMessage, generatePassword } from '$lib/crew-api';
   import { DEFAULT_CREW_ROLES } from '$lib/crewResources';
+  import { t } from '$lib/i18n';
 
   // Neuen User anlegen (Selbstregistrierung ist gesperrt). Wird unter
   // Admin -> User und Admin -> Crew verwendet.
@@ -53,12 +54,17 @@
     errorMsg = null;
     result = null;
     if (!withPassword && !sendMail) {
-      errorMsg =
-        'Ohne Willkommensmail braucht der User ein Startpasswort, sonst erfaehrt er nichts.';
+      errorMsg = t(
+        'Ohne Willkommensmail braucht der User ein Startpasswort, sonst erfaehrt er nichts.',
+        'Without a welcome email the user needs an initial password, otherwise they will never know.',
+      );
       return;
     }
     if (withPassword && password.length < 10) {
-      errorMsg = 'Das Startpasswort braucht mindestens 10 Zeichen.';
+      errorMsg = t(
+        'Das Startpasswort braucht mindestens 10 Zeichen.',
+        'The initial password needs at least 10 characters.',
+      );
       return;
     }
     saving = true;
@@ -84,7 +90,10 @@
       await onCreated?.();
     } catch (err) {
       console.error('[admin] create user failed', err);
-      errorMsg = errorMessage(err, 'User konnte nicht angelegt werden.');
+      errorMsg = errorMessage(
+        err,
+        t('User konnte nicht angelegt werden.', 'User could not be created.'),
+      );
     } finally {
       saving = false;
     }
@@ -93,23 +102,33 @@
 
 {#if result}
   <div class="card mt-4 flex flex-col gap-2 p-5" role="status">
-    <p class="font-medium text-success">✓ {result.email} ist angelegt.</p>
+    <p class="font-medium text-success">
+      ✓ {result.email}
+      {t('ist angelegt.', 'has been created.')}
+    </p>
     {#if result.mailSent}
-      <p class="text-sm text-fg-muted">Die Willkommensmail ist unterwegs.</p>
+      <p class="text-sm text-fg-muted">
+        {t('Die Willkommensmail ist unterwegs.', 'The welcome email is on its way.')}
+      </p>
     {:else if result.mailRequested}
       <p class="text-sm text-danger">
-        Die Willkommensmail konnte nicht gesendet werden. Unter Admin → Crew kannst du sie erneut
-        senden.
+        {t(
+          'Die Willkommensmail konnte nicht gesendet werden. Unter Admin → Crew kannst du sie erneut senden.',
+          'The welcome email could not be sent. You can resend it under Admin → Crew.',
+        )}
       </p>
     {/if}
     {#if result.password}
       <p class="text-sm text-fg">
-        Startpasswort:
+        {t('Startpasswort:', 'Initial password:')}
         <code class="ml-1 select-all rounded bg-black/30 px-2 py-0.5 font-mono text-accent"
           >{result.password}</code
         >
         <span class="block text-xs text-fg-muted">
-          Wird nur jetzt angezeigt. Persoenlich weitergeben, nicht per Mail.
+          {t(
+            'Wird nur jetzt angezeigt. Persoenlich weitergeben, nicht per Mail.',
+            'Shown only now. Hand it over in person, not by email.',
+          )}
         </span>
       </p>
     {/if}
@@ -119,24 +138,26 @@
 
 <form onsubmit={submit} class="card mt-4 flex flex-col gap-5 p-6">
   <div>
-    <h2 class="text-lg font-semibold text-fg">Neuen User anlegen</h2>
+    <h2 class="text-lg font-semibold text-fg">{t('Neuen User anlegen', 'Create new user')}</h2>
     <p class="mt-1 text-sm text-fg-muted">
-      Selbst registrieren kann sich niemand. Die Person meldet sich per Login-Link aus der Mail an
-      oder mit einem Startpasswort, das du ihr gibst.
+      {t(
+        'Selbst registrieren kann sich niemand. Die Person meldet sich per Login-Link aus der Mail an oder mit einem Startpasswort, das du ihr gibst.',
+        'Nobody can sign up on their own. The person logs in via the login link in the email or with an initial password you give them.',
+      )}
     </p>
   </div>
 
   <div class="grid gap-3 sm:grid-cols-2">
     <label class="block">
-      <span class="text-xs font-medium text-fg-muted">Vorname</span>
+      <span class="text-xs font-medium text-fg-muted">{t('Vorname', 'First name')}</span>
       <input type="text" maxlength="80" bind:value={firstName} class="field mt-1" />
     </label>
     <label class="block">
-      <span class="text-xs font-medium text-fg-muted">Name</span>
+      <span class="text-xs font-medium text-fg-muted">{t('Name', 'Last name')}</span>
       <input type="text" maxlength="80" bind:value={lastName} class="field mt-1" />
     </label>
     <label class="block">
-      <span class="text-xs font-medium text-fg-muted">E-Mail *</span>
+      <span class="text-xs font-medium text-fg-muted">{t('E-Mail', 'Email')} *</span>
       <input
         type="email"
         required
@@ -147,7 +168,9 @@
       />
     </label>
     <label class="block">
-      <span class="text-xs font-medium text-fg-muted">Handynummer (optional)</span>
+      <span class="text-xs font-medium text-fg-muted"
+        >{t('Handynummer (optional)', 'Mobile number (optional)')}</span
+      >
       <input
         type="tel"
         maxlength="30"
@@ -160,16 +183,23 @@
 
   <div class="flex flex-col gap-2">
     <label class="flex items-center gap-2 text-sm text-fg">
-      <input type="checkbox" bind:checked={isCrew} /> Crew-Mitglied (Zugang zum Crew-Bereich)
+      <input type="checkbox" bind:checked={isCrew} />
+      {t('Crew-Mitglied (Zugang zum Crew-Bereich)', 'Crew member (access to the crew area)')}
     </label>
     <label class="flex items-center gap-2 text-sm text-fg">
-      <input type="checkbox" bind:checked={isAdmin} /> Admin (darf alles, auch User und Rechte verwalten)
+      <input type="checkbox" bind:checked={isAdmin} />
+      {t(
+        'Admin (darf alles, auch User und Rechte verwalten)',
+        'Admin (can do everything, including managing users and permissions)',
+      )}
     </label>
   </div>
 
   {#if isCrew}
     <div>
-      <span class="text-xs font-medium text-fg-muted">Rollen (optional)</span>
+      <span class="text-xs font-medium text-fg-muted"
+        >{t('Rollen (optional)', 'Roles (optional)')}</span
+      >
       <div class="mt-2 flex flex-wrap gap-2">
         {#each DEFAULT_CREW_ROLES as role (role)}
           {@const on = roles.includes(role)}
@@ -183,20 +213,24 @@
         {/each}
       </div>
       <p class="mt-1 text-xs text-fg-muted">
-        Was eine Rolle darf, legst du unter <a href="/admin/berechtigungen" class="text-accent"
-          >Rechte</a
-        > fest.
+        {t('Was eine Rolle darf, legst du unter', 'You define what a role may do under')}
+        <a href="/admin/berechtigungen" class="text-accent">{t('Rechte', 'Permissions')}</a>{t(
+          ' fest.',
+          '.',
+        )}
       </p>
     </div>
   {/if}
 
   <div class="flex flex-col gap-2 border-t border-[color:var(--glass-border)] pt-4">
-    <span class="text-xs font-medium text-fg-muted">Zugang</span>
+    <span class="text-xs font-medium text-fg-muted">{t('Zugang', 'Access')}</span>
     <label class="flex items-center gap-2 text-sm text-fg">
-      <input type="checkbox" bind:checked={sendMail} /> Willkommensmail senden
+      <input type="checkbox" bind:checked={sendMail} />
+      {t('Willkommensmail senden', 'Send welcome email')}
     </label>
     <label class="flex items-center gap-2 text-sm text-fg">
-      <input type="checkbox" checked={withPassword} onchange={togglePassword} /> Startpasswort festlegen
+      <input type="checkbox" checked={withPassword} onchange={togglePassword} />
+      {t('Startpasswort festlegen', 'Set initial password')}
     </label>
     {#if withPassword}
       <div class="flex flex-wrap items-center gap-2 pl-6">
@@ -206,11 +240,11 @@
           maxlength="72"
           bind:value={password}
           class="field max-w-xs font-mono"
-          aria-label="Startpasswort"
+          aria-label={t('Startpasswort', 'Initial password')}
           autocomplete="off"
         />
         <button type="button" class="pill" onclick={() => (password = generatePassword())}>
-          Neu erzeugen
+          {t('Neu erzeugen', 'Generate new')}
         </button>
       </div>
     {/if}
@@ -220,10 +254,12 @@
 
   <div class="flex flex-wrap gap-2">
     <button class="pill pill-on" type="submit" disabled={saving || !email.trim()}>
-      {saving ? 'Legt an …' : 'User anlegen'}
+      {saving ? t('Legt an …', 'Creating …') : t('User anlegen', 'Create user')}
     </button>
     {#if onCancel}
-      <button type="button" class="pill" onclick={onCancel} disabled={saving}>Abbrechen</button>
+      <button type="button" class="pill" onclick={onCancel} disabled={saving}
+        >{t('Abbrechen', 'Cancel')}</button
+      >
     {/if}
   </div>
 </form>

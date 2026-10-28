@@ -25,6 +25,7 @@ if (browser) {
     const stored = localStorage.getItem('energize.lang');
     if (stored && isAvailableLanguageTag(stored)) {
       setLanguageTag(stored);
+      document.documentElement.lang = stored;
     }
   } catch {
     // iOS Safari Private Mode wirft auf localStorage-Zugriffe

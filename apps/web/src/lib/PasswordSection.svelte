@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Button } from '@platform/ui';
   import { auth } from '$lib/auth.svelte';
+  import { t } from '$lib/i18n';
 
   // Passwort aendern. Pocketbase verlangt dafuer das aktuelle Passwort.
   // Wer es nicht kennt (z. B. Konto vom Admin angelegt), setzt es per Mail zurueck.
@@ -20,11 +21,17 @@
     errorMsg = null;
     saved = false;
     if (password.length < 10) {
-      errorMsg = 'Das neue Passwort braucht mindestens 10 Zeichen.';
+      errorMsg = t(
+        'Das neue Passwort braucht mindestens 10 Zeichen.',
+        'The new password needs at least 10 characters.',
+      );
       return;
     }
     if (password !== confirm) {
-      errorMsg = 'Die beiden neuen Passwoerter stimmen nicht ueberein.';
+      errorMsg = t(
+        'Die beiden neuen Passwoerter stimmen nicht ueberein.',
+        'The two new passwords do not match.',
+      );
       return;
     }
     saving = true;
@@ -34,7 +41,10 @@
       saved = true;
     } catch (err) {
       console.error('[account] password change failed', err);
-      errorMsg = 'Aendern fehlgeschlagen. Stimmt das aktuelle Passwort?';
+      errorMsg = t(
+        'Aendern fehlgeschlagen. Stimmt das aktuelle Passwort?',
+        'Change failed. Is your current password correct?',
+      );
     } finally {
       saving = false;
     }
@@ -53,8 +63,11 @@
       const status = (err as { status?: number }).status;
       resetError =
         status === 429
-          ? 'Zu viele Versuche. Bitte warte eine Minute.'
-          : 'Die Mail konnte nicht verschickt werden.';
+          ? t(
+              'Zu viele Versuche. Bitte warte eine Minute.',
+              'Too many attempts. Please wait a minute.',
+            )
+          : t('Die Mail konnte nicht verschickt werden.', 'The email could not be sent.');
     } finally {
       sendingReset = false;
     }
@@ -68,36 +81,50 @@
   <h2
     class="font-display text-2xl font-black uppercase tracking-[var(--tracking-claim)] text-accent"
   >
-    Passwort
+    {t('Passwort', 'Password')}
   </h2>
 
   <div class="mt-4 border-2 border-border p-4">
-    <p class="text-sm text-fg">Passwort vergessen oder nie eins gesetzt?</p>
+    <p class="text-sm text-fg">
+      {t('Passwort vergessen oder nie eins gesetzt?', 'Forgot your password or never set one?')}
+    </p>
     <p class="mt-1 text-sm text-fg-muted">
-      Wir schicken dir einen Link an {auth.user?.email ?? 'deine E-Mail'}, damit legst du ein neues
-      fest.
+      {t(
+        `Wir schicken dir einen Link an ${auth.user?.email ?? 'deine E-Mail'}, damit legst du ein neues fest.`,
+        `We will send a link to ${auth.user?.email ?? 'your email'} so you can set a new one.`,
+      )}
     </p>
     <div class="mt-3">
       {#if resetSent}
         <p class="text-sm text-success" aria-live="polite">
-          ✓ Mail ist unterwegs. Schau in dein Postfach (auch in den Spam-Ordner).
+          ✓ {t(
+            'Mail ist unterwegs. Schau in dein Postfach (auch in den Spam-Ordner).',
+            'Email is on its way. Check your inbox (and your spam folder).',
+          )}
         </p>
       {:else}
         <Button variant="ghost" onclick={() => void sendReset()} disabled={sendingReset}>
-          {sendingReset ? 'Sendet …' : 'Passwort zuruecksetzen'}
+          {sendingReset
+            ? t('Sendet …', 'Sending …')
+            : t('Passwort zuruecksetzen', 'Reset password')}
         </Button>
       {/if}
       {#if resetError}<p class="mt-2 text-sm text-danger" role="alert">{resetError}</p>{/if}
     </div>
   </div>
 
-  <p class="mt-8 text-sm text-fg-muted">Oder direkt aendern, wenn du dein aktuelles kennst:</p>
+  <p class="mt-8 text-sm text-fg-muted">
+    {t(
+      'Oder direkt aendern, wenn du dein aktuelles kennst:',
+      'Or change it directly if you know your current one:',
+    )}
+  </p>
 
   <form onsubmit={save} class="mt-4 space-y-4">
     <input type="email" class="hidden" autocomplete="username" value={auth.user?.email ?? ''} />
     <label class="block">
       <span class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-        Aktuelles Passwort
+        {t('Aktuelles Passwort', 'Current password')}
       </span>
       <input
         type="password"
@@ -109,7 +136,7 @@
     </label>
     <label class="block">
       <span class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-        Neues Passwort
+        {t('Neues Passwort', 'New password')}
       </span>
       <input
         type="password"
@@ -122,7 +149,7 @@
     </label>
     <label class="block">
       <span class="font-mono text-xs uppercase tracking-[var(--tracking-claim)] text-fg-muted">
-        Neues Passwort wiederholen
+        {t('Neues Passwort wiederholen', 'Repeat new password')}
       </span>
       <input
         type="password"
@@ -133,7 +160,11 @@
       />
     </label>
     {#if errorMsg}<p class="text-sm text-danger" role="alert">{errorMsg}</p>{/if}
-    {#if saved}<p class="text-sm text-success" aria-live="polite">✓ Passwort gespeichert</p>{/if}
-    <Button type="submit">{saving ? 'Speichert …' : 'Passwort speichern'}</Button>
+    {#if saved}<p class="text-sm text-success" aria-live="polite">
+        ✓ {t('Passwort gespeichert', 'Password saved')}
+      </p>{/if}
+    <Button type="submit"
+      >{saving ? t('Speichert …', 'Saving …') : t('Passwort speichern', 'Save password')}</Button
+    >
   </form>
 </section>

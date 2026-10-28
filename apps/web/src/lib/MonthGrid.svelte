@@ -1,5 +1,6 @@
 <script lang="ts">
   import { monthGrid, WEEKDAY_LABELS_DE, MONTH_LABELS_DE } from '$lib/festival';
+  import { t } from '$lib/i18n';
 
   interface Props {
     year: number;
@@ -67,7 +68,7 @@
               class:text-accent={!cell.isFestival && mine}
               class:text-fg-muted={!cell.isFestival && !mine}
             >
-              {count}× {mine ? 'inkl. du' : 'Crew'}
+              {count}× {mine ? t('inkl. du', 'incl. you') : 'Crew'}
             </span>
           {/if}
         </button>

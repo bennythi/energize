@@ -53,7 +53,6 @@ export const MODULE_REGISTRY: Record<ModuleSlug, ModuleConfig> = {
     slug: 'cashless',
     routeBase: '/crew/kasse',
     dependsOn: ['accounts', 'crew-core'],
-    germanOnly: true,
     pbCollections: [
       'cashless_registers',
       'cashless_shifts',
@@ -65,35 +64,30 @@ export const MODULE_REGISTRY: Record<ModuleSlug, ModuleConfig> = {
     slug: 'crew-core',
     routeBase: '/crew',
     dependsOn: ['accounts'],
-    germanOnly: true,
     pbCollections: ['crew_availability', 'crew_equipment_requests'],
   },
   'crew-briefings': {
     slug: 'crew-briefings',
     routeBase: '/crew/briefings',
     dependsOn: ['crew-core'],
-    germanOnly: true,
     pbCollections: ['crew_briefings'],
   },
   'crew-milestones': {
     slug: 'crew-milestones',
     routeBase: '/crew/meilensteine',
     dependsOn: ['crew-core'],
-    germanOnly: true,
     pbCollections: ['crew_milestones'],
   },
   'artist-booking': {
     slug: 'artist-booking',
     routeBase: '/crew/booking',
     dependsOn: ['crew-core'],
-    germanOnly: true,
     pbCollections: ['booking_editions', 'booking_artists', 'booking_items'],
   },
   'cost-planning': {
     slug: 'cost-planning',
     routeBase: '/crew/kosten',
     dependsOn: ['crew-core'],
-    germanOnly: true,
     pbCollections: ['cost_items', 'cost_offers'],
   },
   support: {

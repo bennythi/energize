@@ -20,6 +20,7 @@
   } from '$lib/booking';
   import CheckChips from '$lib/booking/CheckChips.svelte';
   import ItemSection from '$lib/booking/ItemSection.svelte';
+  import { t } from '$lib/i18n';
 
   let { data }: { data: { id: string } } = $props();
 
@@ -80,7 +81,11 @@
     } catch (err) {
       const status = (err as { status?: number }).status;
       if (status === 404) notFound = true;
-      else errorMsg = errorMessage(err, 'Artist konnte nicht geladen werden.');
+      else
+        errorMsg = errorMessage(
+          err,
+          t('Artist konnte nicht geladen werden.', 'Could not load artist.'),
+        );
     } finally {
       loading = false;
     }
@@ -148,7 +153,7 @@
       setArtist(rec);
       savedAt = Date.now();
     } catch (err) {
-      errorMsg = errorMessage(err, 'Speichern fehlgeschlagen.');
+      errorMsg = errorMessage(err, t('Speichern fehlgeschlagen.', 'Saving failed.'));
     } finally {
       saving = false;
     }
@@ -156,7 +161,8 @@
 
   /** Aenderungen verwerfen und zurueck zur Uebersicht. */
   async function cancel() {
-    if (dirty && !confirm('Ungespeicherte Aenderungen verwerfen?')) return;
+    if (dirty && !confirm(t('Ungespeicherte Aenderungen verwerfen?', 'Discard unsaved changes?')))
+      return;
     if (artist) setArtist(artist);
     await goto('/crew/booking');
   }
@@ -168,7 +174,15 @@
       nav.cancel();
       return;
     }
-    if (!confirm('Du hast ungespeicherte Aenderungen. Seite trotzdem verlassen?')) nav.cancel();
+    if (
+      !confirm(
+        t(
+          'Du hast ungespeicherte Aenderungen. Seite trotzdem verlassen?',
+          'You have unsaved changes. Leave the page anyway?',
+        ),
+      )
+    )
+      nav.cancel();
     else if (artist) setArtist(artist);
   });
 
@@ -180,18 +194,26 @@
       await auth.pb.collection('booking_artists').update(artist.id, { not_needed: next });
       artist = { ...artist, not_needed: next };
     } catch (err) {
-      errorMsg = errorMessage(err, 'Aendern fehlgeschlagen.');
+      errorMsg = errorMessage(err, t('Aendern fehlgeschlagen.', 'Update failed.'));
     }
   }
 
   async function removeArtist() {
     if (!auth.pb || !artist || !canDelete) return;
-    if (!confirm(`${artist.name} mit allen Buchungen wirklich loeschen?`)) return;
+    if (
+      !confirm(
+        t(
+          `${artist.name} mit allen Buchungen wirklich loeschen?`,
+          `Really delete ${artist.name} including all bookings?`,
+        ),
+      )
+    )
+      return;
     try {
       await auth.pb.collection('booking_artists').delete(artist.id);
       await goto('/crew/booking');
     } catch (err) {
-      errorMsg = errorMessage(err, 'Loeschen fehlgeschlagen.');
+      errorMsg = errorMessage(err, t('Loeschen fehlgeschlagen.', 'Deleting failed.'));
     }
   }
 
@@ -209,7 +231,13 @@
         .update(artist.id, fd)) as unknown as Artist;
       artist = { ...artist, rider_files: rec.rider_files };
     } catch (err) {
-      errorMsg = errorMessage(err, 'Upload fehlgeschlagen (max. 20 MB, PDF/Bild/Word).');
+      errorMsg = errorMessage(
+        err,
+        t(
+          'Upload fehlgeschlagen (max. 20 MB, PDF/Bild/Word).',
+          'Upload failed (max. 20 MB, PDF/image/Word).',
+        ),
+      );
     } finally {
       uploading = false;
       input.value = '';
@@ -218,14 +246,14 @@
 
   async function removeFile(name: string) {
     if (!auth.pb || !artist || !canWrite) return;
-    if (!confirm('Datei wirklich entfernen?')) return;
+    if (!confirm(t('Datei wirklich entfernen?', 'Really remove file?'))) return;
     try {
       const rec = (await auth.pb
         .collection('booking_artists')
         .update(artist.id, { 'rider_files-': [name] })) as unknown as Artist;
       artist = { ...artist, rider_files: rec.rider_files };
     } catch (err) {
-      errorMsg = errorMessage(err, 'Entfernen fehlgeschlagen.');
+      errorMsg = errorMessage(err, t('Entfernen fehlgeschlagen.', 'Removing failed.'));
     }
   }
 
@@ -240,7 +268,10 @@
       // Datei-Tokens sind kurzlebig, beim naechsten Klick neu holen.
       setTimeout(() => (fileToken = ''), 60_000);
     } catch (err) {
-      errorMsg = errorMessage(err, 'Datei konnte nicht geoeffnet werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Datei konnte nicht geoeffnet werden.', 'Could not open file.'),
+      );
     }
   }
 
@@ -255,23 +286,34 @@
 </script>
 
 <svelte:head>
-  <title>{artist?.name ?? 'Artist'} · DJ-Planung</title>
+  <title>{artist?.name ?? t('Artist', 'Artist')} · {t('DJ-Planung', 'DJ planning')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-5xl px-5 py-10 md:py-16">
-  <a href="/crew/booking" class="text-sm text-fg-muted hover:text-fg">← DJ-Planung</a>
+  <a href="/crew/booking" class="text-sm text-fg-muted hover:text-fg"
+    >← {t('DJ-Planung', 'DJ planning')}</a
+  >
 
   {#if !auth.canRead(RES)}
     <div class="card mt-6 p-6">
-      <p class="font-medium text-fg">Kein Zugriff</p>
-      <p class="mt-2 text-sm text-fg-muted">Dafuer brauchst du das Recht „DJ-Planung“.</p>
+      <p class="font-medium text-fg">{t('Kein Zugriff', 'No access')}</p>
+      <p class="mt-2 text-sm text-fg-muted">
+        {t(
+          'Dafuer brauchst du das Recht „DJ-Planung“.',
+          'You need the “DJ planning” permission for this.',
+        )}
+      </p>
     </div>
   {:else if loading}
     <div class="card mt-6 h-56 animate-pulse opacity-50"></div>
   {:else if notFound}
     <div class="card mt-6 p-6">
-      <p class="font-medium text-fg">Artist nicht gefunden</p>
-      <div class="mt-4"><Button href="/crew/booking" variant="ghost">Zur Uebersicht</Button></div>
+      <p class="font-medium text-fg">{t('Artist nicht gefunden', 'Artist not found')}</p>
+      <div class="mt-4">
+        <Button href="/crew/booking" variant="ghost"
+          >{t('Zur Uebersicht', 'Back to overview')}</Button
+        >
+      </div>
     </div>
   {:else if artist && form}
     <!-- Kopf -->
@@ -285,12 +327,13 @@
       </div>
       {#if costs}
         <div class="card p-4 text-right">
-          <p class="text-xs font-medium text-fg-muted">Gesamtkosten</p>
+          <p class="text-xs font-medium text-fg-muted">{t('Gesamtkosten', 'Total costs')}</p>
           <p class="text-2xl font-semibold text-fg tabular-nums">
             {formatMoney(costs.total, currency)}
           </p>
           <p class="text-xs text-fg-muted tabular-nums">
-            bezahlt {formatMoney(costs.paid, currency)}
+            {t('bezahlt', 'paid')}
+            {formatMoney(costs.paid, currency)}
           </p>
         </div>
       {/if}
@@ -304,14 +347,14 @@
       <fieldset disabled={!canWrite} class="contents">
         <!-- Basis & Kontakt -->
         <section class="card p-5 md:p-6">
-          <h2 class="text-lg font-semibold text-fg">Basis & Kontakt</h2>
+          <h2 class="text-lg font-semibold text-fg">{t('Basis & Kontakt', 'Basics & contact')}</h2>
           <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block sm:col-span-2">
               <span class="text-xs font-medium text-fg-muted">Name</span>
               <input class="field mt-1" bind:value={form.name} required maxlength="160" />
             </label>
             <label class="block">
-              <span class="text-xs font-medium text-fg-muted">Status</span>
+              <span class="text-xs font-medium text-fg-muted">{t('Status', 'Status')}</span>
               <select class="field mt-1" bind:value={form.status}>
                 {#each Object.entries(STATUS_LABELS) as [key, label] (key)}
                   <option value={key}>{label}</option>
@@ -319,21 +362,28 @@
               </select>
             </label>
             <label class="block">
-              <span class="text-xs font-medium text-fg-muted">Stage / Floor</span>
+              <span class="text-xs font-medium text-fg-muted"
+                >{t('Stage / Floor', 'Stage / floor')}</span
+              >
               <input class="field mt-1" bind:value={form.stage} maxlength="80" />
             </label>
             <label class="block">
-              <span class="text-xs font-medium text-fg-muted">Tag</span>
+              <span class="text-xs font-medium text-fg-muted">{t('Tag', 'Day')}</span>
               {#if days.length === 1}
-                <p class="field mt-1 cursor-default opacity-80" title="Eintaegiges Event">
+                <p
+                  class="field mt-1 cursor-default opacity-80"
+                  title={t('Eintaegiges Event', 'Single-day event')}
+                >
                   {formatDay(days[0])}
                 </p>
               {:else if days.length > 1}
                 <select class="field mt-1" bind:value={form.day}>
-                  <option value="">– noch offen –</option>
+                  <option value="">{t('– noch offen –', '– not set yet –')}</option>
                   {#each dayOptions as d (d)}
                     <option value={d}
-                      >{formatDay(d)}{days.includes(d) ? '' : ' (ausserhalb)'}</option
+                      >{formatDay(d)}{days.includes(d)
+                        ? ''
+                        : t(' (ausserhalb)', ' (outside)')}</option
                     >
                   {/each}
                 </select>
@@ -342,32 +392,38 @@
               {/if}
             </label>
             <label class="block">
-              <span class="text-xs font-medium text-fg-muted">Slot von</span>
+              <span class="text-xs font-medium text-fg-muted">{t('Slot von', 'Slot from')}</span>
               <input class="field mt-1" type="time" bind:value={form.slot_start} />
             </label>
             <label class="block">
-              <span class="text-xs font-medium text-fg-muted">Slot bis</span>
+              <span class="text-xs font-medium text-fg-muted">{t('Slot bis', 'Slot to')}</span>
               <input class="field mt-1" type="time" bind:value={form.slot_end} />
             </label>
             <label class="block">
-              <span class="text-xs font-medium text-fg-muted">Lineup-Slug (optional)</span>
+              <span class="text-xs font-medium text-fg-muted"
+                >{t('Lineup-Slug (optional)', 'Lineup slug (optional)')}</span
+              >
               <input
                 class="field mt-1"
                 bind:value={form.sanity_slug}
                 maxlength="160"
-                placeholder="z. B. brennan-heart"
+                placeholder={t('z. B. brennan-heart', 'e.g. brennan-heart')}
               />
             </label>
             <label class="block sm:col-span-2">
-              <span class="text-xs font-medium text-fg-muted">Agentur / Management</span>
+              <span class="text-xs font-medium text-fg-muted"
+                >{t('Agentur / Management', 'Agency / management')}</span
+              >
               <input class="field mt-1" bind:value={form.agency} maxlength="160" />
             </label>
             <label class="block sm:col-span-2">
-              <span class="text-xs font-medium text-fg-muted">Ansprechpartner</span>
+              <span class="text-xs font-medium text-fg-muted"
+                >{t('Ansprechpartner', 'Contact person')}</span
+              >
               <input class="field mt-1" bind:value={form.contact_name} maxlength="160" />
             </label>
             <label class="block sm:col-span-2">
-              <span class="text-xs font-medium text-fg-muted">E-Mail</span>
+              <span class="text-xs font-medium text-fg-muted">{t('E-Mail', 'Email')}</span>
               <input
                 class="field mt-1"
                 type="email"
@@ -376,7 +432,7 @@
               />
             </label>
             <label class="block sm:col-span-2">
-              <span class="text-xs font-medium text-fg-muted">Telefon</span>
+              <span class="text-xs font-medium text-fg-muted">{t('Telefon', 'Phone')}</span>
               <input class="field mt-1" type="tel" bind:value={form.contact_phone} maxlength="60" />
             </label>
           </div>
@@ -386,75 +442,91 @@
         <section class="card p-5 md:p-6">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-              <h2 class="text-lg font-semibold text-fg">Gage & Vertrag</h2>
+              <h2 class="text-lg font-semibold text-fg">{t('Gage & Vertrag', 'Fee & contract')}</h2>
               {#if checkState(artist, items, 'vertrag') === 'done'}
-                <span class="pill pill-done">unterschrieben</span>
+                <span class="pill pill-done">{t('unterschrieben', 'signed')}</span>
               {:else if checkState(artist, items, 'vertrag') === 'na'}
-                <span class="pill">nicht noetig</span>
+                <span class="pill">{t('nicht noetig', 'not needed')}</span>
               {:else}
-                <span class="pill">offen</span>
+                <span class="pill">{t('offen', 'open')}</span>
               {/if}
             </div>
             {#if canWrite}
               <button type="button" class="link" onclick={() => void toggleNotNeeded('vertrag')}>
                 {artist.not_needed?.includes('vertrag')
-                  ? 'Vertrag doch noetig'
-                  : 'Kein Vertrag noetig'}
+                  ? t('Vertrag doch noetig', 'Contract needed after all')
+                  : t('Kein Vertrag noetig', 'No contract needed')}
               </button>
             {/if}
           </div>
           <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <label class="block">
-              <span class="text-xs font-medium text-fg-muted">Gage ({currency})</span>
+              <span class="text-xs font-medium text-fg-muted">{t('Gage', 'Fee')} ({currency})</span>
               <input class="field mt-1" type="number" min="0" step="0.01" bind:value={form.fee} />
             </label>
             <label class="block sm:col-span-1 lg:col-span-3">
               <span class="text-xs font-medium text-fg-muted"
-                >Hinweis zur Gage (netto/brutto, Steuer, Auslaendersteuer …)</span
+                >{t(
+                  'Hinweis zur Gage (netto/brutto, Steuer, Auslaendersteuer …)',
+                  'Fee note (net/gross, tax, foreign artist tax …)',
+                )}</span
               >
               <input class="field mt-1" bind:value={form.fee_note} maxlength="500" />
             </label>
           </div>
           <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2">
             <label class="flex items-center gap-2 text-sm text-fg">
-              <input type="checkbox" bind:checked={form.contract_signed} /> Vertrag unterschrieben
+              <input type="checkbox" bind:checked={form.contract_signed} />
+              {t('Vertrag unterschrieben', 'Contract signed')}
             </label>
             <label class="flex items-center gap-2 text-sm text-fg">
-              <input type="checkbox" bind:checked={form.invoice_received} /> Rechnung erhalten
+              <input type="checkbox" bind:checked={form.invoice_received} />
+              {t('Rechnung erhalten', 'Invoice received')}
             </label>
             <label class="flex items-center gap-2 text-sm text-fg">
-              <input type="checkbox" bind:checked={form.fee_paid} /> Gage bezahlt
+              <input type="checkbox" bind:checked={form.fee_paid} />
+              {t('Gage bezahlt', 'Fee paid')}
             </label>
           </div>
         </section>
 
         <!-- Rider -->
         <section class="card p-5 md:p-6">
-          <h2 class="text-lg font-semibold text-fg">Rider</h2>
+          <h2 class="text-lg font-semibold text-fg">{t('Rider', 'Rider')}</h2>
           <div class="mt-4 grid gap-3 md:grid-cols-2">
             <label class="block">
-              <span class="text-xs font-medium text-fg-muted">Technik-Rider</span>
+              <span class="text-xs font-medium text-fg-muted"
+                >{t('Technik-Rider', 'Technical rider')}</span
+              >
               <textarea
                 class="field mt-1"
                 rows="6"
                 bind:value={form.rider_tech}
                 maxlength="20000"
-                placeholder="z. B. 3x CDJ-3000, DJM-V10, 2 Monitore"
+                placeholder={t(
+                  'z. B. 3x CDJ-3000, DJM-V10, 2 Monitore',
+                  'e.g. 3x CDJ-3000, DJM-V10, 2 monitors',
+                )}
               ></textarea>
             </label>
             <label class="block">
-              <span class="text-xs font-medium text-fg-muted">Hospitality-Rider</span>
+              <span class="text-xs font-medium text-fg-muted"
+                >{t('Hospitality-Rider', 'Hospitality rider')}</span
+              >
               <textarea
                 class="field mt-1"
                 rows="6"
                 bind:value={form.rider_hospitality}
                 maxlength="20000"
-                placeholder="z. B. Getraenke, Essen, Gaesteliste"
+                placeholder={t(
+                  'z. B. Getraenke, Essen, Gaesteliste',
+                  'e.g. drinks, food, guest list',
+                )}
               ></textarea>
             </label>
           </div>
           <div class="mt-4">
-            <p class="text-xs font-medium text-fg-muted">Dateien</p>
+            <p class="text-xs font-medium text-fg-muted">{t('Dateien', 'Files')}</p>
             {#if artist.rider_files?.length}
               <ul class="mt-2 flex flex-col gap-1.5">
                 {#each artist.rider_files as name (name)}
@@ -466,14 +538,14 @@
                       <button
                         type="button"
                         class="link link-danger"
-                        onclick={() => void removeFile(name)}>Entfernen</button
+                        onclick={() => void removeFile(name)}>{t('Entfernen', 'Remove')}</button
                       >
                     {/if}
                   </li>
                 {/each}
               </ul>
             {:else}
-              <p class="mt-1 text-sm text-fg-muted">Noch keine Dateien.</p>
+              <p class="mt-1 text-sm text-fg-muted">{t('Noch keine Dateien.', 'No files yet.')}</p>
             {/if}
             {#if canWrite}
               <label class="upload mt-3">
@@ -484,7 +556,14 @@
                   onchange={upload}
                   disabled={uploading}
                 />
-                <span>{uploading ? 'Laedt hoch …' : 'Rider hochladen (PDF, Bild, Word)'}</span>
+                <span
+                  >{uploading
+                    ? t('Laedt hoch …', 'Uploading …')
+                    : t(
+                        'Rider hochladen (PDF, Bild, Word)',
+                        'Upload rider (PDF, image, Word)',
+                      )}</span
+                >
               </label>
             {/if}
           </div>
@@ -514,22 +593,25 @@
     <!-- Notizen + Kosten -->
     <div class="mt-5 grid gap-5 md:grid-cols-[1fr_18rem]">
       <section class="card p-5 md:p-6">
-        <h2 class="text-lg font-semibold text-fg">Notizen</h2>
+        <h2 class="text-lg font-semibold text-fg">{t('Notizen', 'Notes')}</h2>
         <textarea
           class="field mt-3"
           rows="5"
           bind:value={form.notes}
           maxlength="20000"
           disabled={!canWrite}
-          placeholder="Absprachen, Gaesteliste, Besonderheiten …"
+          placeholder={t(
+            'Absprachen, Gaesteliste, Besonderheiten …',
+            'Agreements, guest list, special notes …',
+          )}
         ></textarea>
       </section>
       {#if costs}
-        <section class="card p-5 md:p-6" aria-label="Kosten">
-          <h2 class="text-lg font-semibold text-fg">Kosten</h2>
+        <section class="card p-5 md:p-6" aria-label={t('Kosten', 'Costs')}>
+          <h2 class="text-lg font-semibold text-fg">{t('Kosten', 'Costs')}</h2>
           <dl class="mt-3 flex flex-col gap-1.5 text-sm">
             <div class="flex justify-between">
-              <dt class="text-fg-muted">Gage</dt>
+              <dt class="text-fg-muted">{t('Gage', 'Fee')}</dt>
               <dd class="tabular-nums text-fg">{formatMoney(costs.fee, currency)}</dd>
             </div>
             {#each ITEM_KINDS as kind (kind)}
@@ -539,13 +621,13 @@
               </div>
             {/each}
             <div class="mt-2 flex justify-between border-t border-[color:var(--glass-border)] pt-2">
-              <dt class="font-semibold text-fg">Gesamt</dt>
+              <dt class="font-semibold text-fg">{t('Gesamt', 'Total')}</dt>
               <dd class="font-semibold tabular-nums text-fg">
                 {formatMoney(costs.total, currency)}
               </dd>
             </div>
             <div class="flex justify-between">
-              <dt class="text-fg-muted">davon bezahlt</dt>
+              <dt class="text-fg-muted">{t('davon bezahlt', 'of which paid')}</dt>
               <dd class="tabular-nums text-success">{formatMoney(costs.paid, currency)}</dd>
             </div>
           </dl>
@@ -556,12 +638,21 @@
     {#if canWrite}
       <div class="savebar glass-strong" class:savebar-dirty={dirty}>
         <span class="text-sm" class:text-fg-muted={!dirty} class:text-fg={dirty}>
-          {#if saving}Speichert …{:else if dirty}Ungespeicherte Aenderungen{:else if savedAt}✓
-            Gespeichert{:else}Alles gespeichert{/if}
+          {#if saving}{t('Speichert …', 'Saving …')}{:else if dirty}{t(
+              'Ungespeicherte Aenderungen',
+              'Unsaved changes',
+            )}{:else if savedAt}✓ {t('Gespeichert', 'Saved')}{:else}{t(
+              'Alles gespeichert',
+              'All saved',
+            )}{/if}
         </span>
         <div class="flex gap-2">
-          <Button variant="ghost" onclick={() => void cancel()} disabled={saving}>Abbrechen</Button>
-          <Button onclick={() => void save()} disabled={saving || !dirty}>Speichern</Button>
+          <Button variant="ghost" onclick={() => void cancel()} disabled={saving}
+            >{t('Abbrechen', 'Cancel')}</Button
+          >
+          <Button onclick={() => void save()} disabled={saving || !dirty}
+            >{t('Speichern', 'Save')}</Button
+          >
         </div>
       </div>
     {/if}
@@ -569,7 +660,7 @@
     {#if canDelete}
       <div class="mt-10">
         <button type="button" class="link link-danger" onclick={() => void removeArtist()}>
-          Artist loeschen
+          {t('Artist loeschen', 'Delete artist')}
         </button>
       </div>
     {/if}

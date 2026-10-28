@@ -5,10 +5,14 @@
   import { FESTIVAL_DAY, CREW_WINDOW_START, CREW_WINDOW_END } from '$lib/festival';
   import { CREW_RESOURCES, CREW_RESOURCE_LABELS, type CrewResource } from '$lib/crewResources';
   import type { ModuleSlug } from '@platform/modules';
+  import { t, locale } from '$lib/i18n';
 
   const fmt = (d: Date) =>
-    d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  const windowLabel = `${fmt(CREW_WINDOW_START)} bis ${fmt(CREW_WINDOW_END)}`;
+    d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const windowLabel = t(
+    `${fmt(CREW_WINDOW_START)} bis ${fmt(CREW_WINDOW_END)}`,
+    `${fmt(CREW_WINDOW_START)} to ${fmt(CREW_WINDOW_END)}`,
+  );
   const festivalLabel = fmt(new Date(FESTIVAL_DAY));
 
   interface Tile {
@@ -32,7 +36,7 @@
   ];
 
   const visibleTiles = $derived(
-    allTiles.filter((t) => isModuleEnabled(t.module) && auth.canRead(t.resource)),
+    allTiles.filter((tile) => isModuleEnabled(tile.module) && auth.canRead(tile.resource)),
   );
 </script>
 
@@ -41,18 +45,31 @@
 </svelte:head>
 
 <div class="mx-auto w-full max-w-5xl px-5 py-10 md:py-16">
-  <p class="text-xs font-medium uppercase tracking-wider text-accent">Crew-Bereich</p>
+  <p class="text-xs font-medium uppercase tracking-wider text-accent">
+    {t('Crew-Bereich', 'Crew area')}
+  </p>
   <h1 class="mt-2 text-3xl font-semibold tracking-tight text-fg md:text-4xl">
-    {auth.greetingName ? `Hallo ${auth.greetingName}, schoen dass du da bist!` : 'Hallo, Crew.'}
+    {auth.greetingName
+      ? t(
+          `Hallo ${auth.greetingName}, schoen dass du da bist!`,
+          `Hi ${auth.greetingName}, great to have you here!`,
+        )
+      : t('Hallo, Crew.', 'Hello, crew.')}
   </h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
-    Alles, was wir intern fuer die Organisation brauchen. Festival-Tag {festivalLabel}, Crew-Fenster
-    {windowLabel}.
+    {t(
+      `Alles, was wir intern fuer die Organisation brauchen. Festival-Tag ${festivalLabel}, Crew-Fenster ${windowLabel}.`,
+      `Everything we need internally to run the organisation. Festival day ${festivalLabel}, crew window ${windowLabel}.`,
+    )}
   </p>
   {#if auth.profile && !auth.profile.first_name}
     <p class="mt-3 text-sm text-fg-muted">
-      Trag unter <a href="/account" class="text-accent underline">Account</a> deinen Namen und deine Handynummer
-      ein, dann wissen alle, wie sie dich erreichen.
+      {t('Trag unter', 'Add your name and mobile number under')}
+      <a href="/account" class="text-accent underline">Account</a>
+      {t(
+        'deinen Namen und deine Handynummer ein, dann wissen alle, wie sie dich erreichen.',
+        'so everyone knows how to reach you.',
+      )}
     </p>
   {/if}
 
@@ -65,7 +82,9 @@
             <span class="text-lg font-semibold text-fg">{meta.label}</span>
             <span class="mt-2 text-sm text-fg-muted">{meta.description}</span>
             <span class="mt-auto pt-5 text-sm font-medium text-accent">
-              {auth.canWrite(tile.resource) ? 'Oeffnen und bearbeiten' : 'Ansehen'} →
+              {auth.canWrite(tile.resource)
+                ? t('Oeffnen und bearbeiten', 'Open and edit')
+                : t('Ansehen', 'View')} →
             </span>
           </a>
         </li>
@@ -73,18 +92,22 @@
     </ul>
   {:else}
     <div class="card mt-10 p-6">
-      <p class="font-medium text-fg">Noch keine Berechtigungen</p>
+      <p class="font-medium text-fg">{t('Noch keine Berechtigungen', 'No permissions yet')}</p>
       <p class="mt-2 text-sm text-fg-muted">
-        Du bist als Crew markiert, hast aber noch keinen Zugriff auf einzelne Bereiche. Ein Admin
-        kann dich unter Admin → Rechte freischalten.
+        {t(
+          'Du bist als Crew markiert, hast aber noch keinen Zugriff auf einzelne Bereiche. Ein Admin kann dich unter Admin → Rechte freischalten.',
+          "You're marked as crew but don't have access to any areas yet. An admin can grant it under Admin → Permissions.",
+        )}
       </p>
     </div>
   {/if}
 
   {#if auth.isAdmin}
     <div class="mt-10 flex flex-wrap gap-3">
-      <Button href="/admin/crew" variant="ghost">Crew verwalten</Button>
-      <Button href="/admin/berechtigungen" variant="ghost">Rechte vergeben</Button>
+      <Button href="/admin/crew" variant="ghost">{t('Crew verwalten', 'Manage crew')}</Button>
+      <Button href="/admin/berechtigungen" variant="ghost"
+        >{t('Rechte vergeben', 'Assign permissions')}</Button
+      >
     </div>
   {/if}
 </div>

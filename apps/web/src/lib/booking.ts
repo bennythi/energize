@@ -1,6 +1,8 @@
 // DJ-/Artist-Planung: Typen, Checklisten- und Kostenlogik.
 // Bewusst ohne Svelte-/PB-Imports, damit die Rechenlogik isoliert testbar ist.
 
+import { t, locale } from '$lib/i18n';
+
 export type ArtistStatus = 'idee' | 'anfrage' | 'angebot' | 'bestaetigt' | 'abgesagt';
 export type ItemKind = 'anreise' | 'hotel' | 'transfer' | 'zusatzkosten';
 /** Die vier Checkpunkte pro Artist. */
@@ -69,25 +71,25 @@ export interface BookingItem {
 }
 
 export const STATUS_LABELS: Record<ArtistStatus, string> = {
-  idee: 'Idee, Anfrage offen',
-  anfrage: 'Anfrage',
-  angebot: 'Angebot',
-  bestaetigt: 'Bestaetigt',
-  abgesagt: 'Abgesagt',
+  idee: t('Idee, Anfrage offen', 'Idea, not yet requested'),
+  anfrage: t('Anfrage', 'Requested'),
+  angebot: t('Angebot', 'Offer'),
+  bestaetigt: t('Bestaetigt', 'Confirmed'),
+  abgesagt: t('Abgesagt', 'Cancelled'),
 };
 
 export const KIND_LABELS: Record<ItemKind, string> = {
-  anreise: 'Anreise',
-  hotel: 'Hotel',
-  transfer: 'Transfer',
-  zusatzkosten: 'Zusatzkosten',
+  anreise: t('Anreise', 'Travel'),
+  hotel: t('Hotel', 'Hotel'),
+  transfer: t('Transfer', 'Transfer'),
+  zusatzkosten: t('Zusatzkosten', 'Extra costs'),
 };
 
 export const CHECK_LABELS: Record<CheckKey, string> = {
-  vertrag: 'Vertrag',
-  anreise: 'Anreise',
-  hotel: 'Hotel',
-  transfer: 'Transfer',
+  vertrag: t('Vertrag', 'Contract'),
+  anreise: t('Anreise', 'Travel'),
+  hotel: t('Hotel', 'Hotel'),
+  transfer: t('Transfer', 'Transfer'),
 };
 
 export const CHECK_KEYS: CheckKey[] = ['vertrag', 'anreise', 'hotel', 'transfer'];
@@ -99,32 +101,32 @@ export const KIND_FIELDS: Record<
   { provider: string; start: string; end: string; location: string; placeholder: string }
 > = {
   anreise: {
-    provider: 'Airline / Bahn',
-    start: 'Abfahrt',
-    end: 'Ankunft',
-    location: 'Strecke',
-    placeholder: 'z. B. Flug AMS → HAM',
+    provider: t('Airline / Bahn', 'Airline / rail'),
+    start: t('Abfahrt', 'Departure'),
+    end: t('Ankunft', 'Arrival'),
+    location: t('Strecke', 'Route'),
+    placeholder: t('z. B. Flug AMS → HAM', 'e.g. flight AMS → HAM'),
   },
   hotel: {
-    provider: 'Hotel',
-    start: 'Check-in',
-    end: 'Check-out',
-    location: 'Adresse',
-    placeholder: 'z. B. Doppelzimmer, 2 Naechte',
+    provider: t('Hotel', 'Hotel'),
+    start: t('Check-in', 'Check-in'),
+    end: t('Check-out', 'Check-out'),
+    location: t('Adresse', 'Address'),
+    placeholder: t('z. B. Doppelzimmer, 2 Naechte', 'e.g. double room, 2 nights'),
   },
   transfer: {
-    provider: 'Fahrer / Firma',
-    start: 'Abholung',
-    end: 'Ankunft',
-    location: 'Von → Nach',
-    placeholder: 'z. B. Flughafen → Hotel',
+    provider: t('Fahrer / Firma', 'Driver / company'),
+    start: t('Abholung', 'Pickup'),
+    end: t('Ankunft', 'Arrival'),
+    location: t('Von → Nach', 'From → To'),
+    placeholder: t('z. B. Flughafen → Hotel', 'e.g. airport → hotel'),
   },
   zusatzkosten: {
-    provider: 'Anbieter',
-    start: 'Datum',
-    end: 'Bis',
-    location: 'Ort',
-    placeholder: 'z. B. Catering, Backline-Miete',
+    provider: t('Anbieter', 'Provider'),
+    start: t('Datum', 'Date'),
+    end: t('Bis', 'Until'),
+    location: t('Ort', 'Location'),
+    placeholder: t('z. B. Catering, Backline-Miete', 'e.g. catering, backline rental'),
   },
 };
 
@@ -210,7 +212,7 @@ export function editionCosts(
 
 export function formatMoney(value: number, currency = 'EUR'): string {
   try {
-    return new Intl.NumberFormat('de-DE', {
+    return new Intl.NumberFormat(locale, {
       style: 'currency',
       currency: currency || 'EUR',
       maximumFractionDigits: value % 1 === 0 ? 0 : 2,
@@ -224,7 +226,7 @@ export function formatMoney(value: number, currency = 'EUR'): string {
 export function formatDay(day: string): string {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return '';
   const d = new Date(`${day}T12:00:00`);
-  return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+  return d.toLocaleDateString(locale, { weekday: 'short', day: '2-digit', month: '2-digit' });
 }
 
 /**
@@ -251,7 +253,8 @@ export function editionDays(edition: Pick<Edition, 'start_date' | 'end_date'> | 
 export function formatDateTime(v: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2}))?/.exec(v);
   if (!m) return '';
-  return `${m[3]}.${m[2]}.${m[4] ? ` ${m[4]}:${m[5]}` : ''}`;
+  const date = t(`${m[3]}.${m[2]}.`, `${m[3]}/${m[2]}`);
+  return `${date}${m[4] ? ` ${m[4]}:${m[5]}` : ''}`;
 }
 
 /** Sortierung fuer die Uebersicht: Tag, dann Slot-Beginn, dann Name. */

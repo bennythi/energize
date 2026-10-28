@@ -10,6 +10,7 @@
   import NoAccess from '$lib/crew/NoAccess.svelte';
   import Sheet from '$lib/crew/Sheet.svelte';
   import Segmented from '$lib/crew/Segmented.svelte';
+  import { t, locale } from '$lib/i18n';
 
   type Equipment = 'razor' | 'headphones' | 'inear';
 
@@ -22,8 +23,8 @@
   }
 
   const EQUIPMENT_LABEL: Record<Equipment, string> = {
-    razor: 'Rasierer',
-    headphones: 'Kopfhoerer',
+    razor: t('Rasierer', 'Razor'),
+    headphones: t('Kopfhoerer', 'Headphones'),
     inear: 'InEar',
   };
   const EQUIPMENT_VALUES: Equipment[] = ['razor', 'headphones', 'inear'];
@@ -137,17 +138,17 @@
       members = new Map(people.map((m) => [m.id, m]));
     } catch (err) {
       console.error('[crew/fungeraete] load failed', err);
-      errorMsg = errorMessage(err, 'Konnte die Liste nicht laden.');
+      errorMsg = errorMessage(err, t('Konnte die Liste nicht laden.', 'Could not load the list.'));
     } finally {
       loading = false;
     }
   }
 
   function fmtDay(d: Date): string {
-    return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' });
+    return d.toLocaleDateString(locale, { day: '2-digit', month: '2-digit' });
   }
   function fmtWeekday(d: Date): string {
-    return d.toLocaleDateString('de-DE', { weekday: 'short' });
+    return d.toLocaleDateString(locale, { weekday: 'short' });
   }
 
   function openForm(iso: string) {
@@ -183,7 +184,10 @@
       await load();
     } catch (err) {
       console.error('[crew/fungeraete] save failed', err);
-      formError = errorMessage(err, 'Konnte den Eintrag nicht speichern.');
+      formError = errorMessage(
+        err,
+        t('Konnte den Eintrag nicht speichern.', 'Could not save the entry.'),
+      );
     } finally {
       saving = false;
     }
@@ -194,8 +198,11 @@
     if (!pb) return;
     const question =
       r.user === myId
-        ? 'Anforderung wirklich loeschen?'
-        : `Anforderung von ${memberName(members.get(r.user))} wirklich loeschen?`;
+        ? t('Anforderung wirklich loeschen?', 'Really delete this request?')
+        : t(
+            `Anforderung von ${memberName(members.get(r.user))} wirklich loeschen?`,
+            `Really delete the request by ${memberName(members.get(r.user))}?`,
+          );
     if (!confirm(question)) return;
     deleting = r.id;
     errorMsg = null;
@@ -205,7 +212,10 @@
       if (formDay === r.event_day && r.user === myId) formDay = '';
     } catch (err) {
       console.error('[crew/fungeraete] delete failed', err);
-      errorMsg = errorMessage(err, 'Konnte die Anforderung nicht loeschen.');
+      errorMsg = errorMessage(
+        err,
+        t('Konnte die Anforderung nicht loeschen.', 'Could not delete the request.'),
+      );
     } finally {
       deleting = null;
     }
@@ -213,18 +223,23 @@
 </script>
 
 <svelte:head>
-  <title>Funkgeraete · Crew</title>
+  <title>{t('Funkgeraete · Crew', 'Radios · Crew')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-5xl px-5 py-10 md:py-16">
   <BackLink />
-  <h1 class="mt-4 text-3xl font-semibold tracking-tight text-fg md:text-4xl">Funkgeraete</h1>
+  <h1 class="mt-4 text-3xl font-semibold tracking-tight text-fg md:text-4xl">
+    {t('Funkgeraete', 'Radios')}
+  </h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
-    Welches Headset brauchst du an welchem Tag? Pro Tag eine Wahl: Rasierer, Kopfhoerer oder InEar.
+    {t(
+      'Welches Headset brauchst du an welchem Tag? Pro Tag eine Wahl: Rasierer, Kopfhoerer oder InEar.',
+      'Which headset do you need on which day? One choice per day: razor, headphones or in-ear.',
+    )}
   </p>
 
   {#if !canRead}
-    <NoAccess area="die Funkgeraete-Planung" />
+    <NoAccess area={t('die Funkgeraete-Planung', 'radio planning')} />
   {:else}
     {#if errorMsg}
       <p class="card mt-6 p-4 text-sm text-danger" role="alert">{errorMsg}</p>
@@ -237,16 +252,21 @@
       <!-- Bestellempfehlung -->
       <section class="card mt-8 p-6">
         <div class="flex flex-wrap items-baseline justify-between gap-2">
-          <p class="text-xs font-medium uppercase tracking-wider text-accent">Bestellempfehlung</p>
-          <p class="text-xs text-fg-muted">Peak-Tag × {(1 + reserveBuffer / 100).toFixed(2)}</p>
+          <p class="text-xs font-medium uppercase tracking-wider text-accent">
+            {t('Bestellempfehlung', 'Order recommendation')}
+          </p>
+          <p class="text-xs text-fg-muted">
+            {t('Peak-Tag', 'Peak day')} × {(1 + reserveBuffer / 100).toFixed(2)}
+          </p>
         </div>
         <h2 class="mt-2 text-2xl font-semibold tracking-tight text-fg md:text-3xl">
-          {totalOrder} Geraete insgesamt bestellen
+          {t(`${totalOrder} Geraete insgesamt bestellen`, `Order ${totalOrder} devices in total`)}
         </h2>
         <p class="mt-2 max-w-2xl text-sm text-fg-muted">
-          Wir mieten die Geraete fuer das ganze Crew-Fenster auf einmal. Die Menge richtet sich nach
-          dem Tag mit dem hoechsten Bedarf, weil die Geraete nicht von Tag zu Tag weitergegeben
-          werden koennen.
+          {t(
+            'Wir mieten die Geraete fuer das ganze Crew-Fenster auf einmal. Die Menge richtet sich nach dem Tag mit dem hoechsten Bedarf, weil die Geraete nicht von Tag zu Tag weitergegeben werden koennen.',
+            "We rent the devices for the whole crew window at once. The quantity is based on the day with the highest demand, because devices can't be passed on from day to day.",
+          )}
         </p>
 
         <div class="mt-5 grid grid-cols-3 gap-3">
@@ -262,7 +282,9 @@
         </div>
 
         <div class="mt-5 flex items-center gap-3">
-          <label for="reserve" class="shrink-0 text-xs font-medium text-fg-muted">Reserve</label>
+          <label for="reserve" class="shrink-0 text-xs font-medium text-fg-muted">
+            {t('Reserve', 'Buffer')}
+          </label>
           <input
             id="reserve"
             type="range"
@@ -279,7 +301,10 @@
 
         {#if totalOrder === 0}
           <p class="mt-4 text-sm text-fg-muted">
-            Noch keine Anforderungen. Sobald die Crew sich eintraegt, fuellt sich der Bedarf hier.
+            {t(
+              'Noch keine Anforderungen. Sobald die Crew sich eintraegt, fuellt sich der Bedarf hier.',
+              'No requests yet. Demand will show up here as soon as the crew signs up.',
+            )}
           </p>
         {/if}
       </section>
@@ -304,13 +329,15 @@
                   class="shrink-0 !px-4 !py-2 !text-sm"
                   onclick={() => openForm(day.iso)}
                 >
-                  {mineReq ? 'Aendern' : 'Anfordern'}
+                  {mineReq ? t('Aendern', 'Change') : t('Anfordern', 'Request')}
                 </Button>
               {/if}
             </div>
 
             {#if dayReqs.length === 0}
-              <p class="mt-2 text-sm text-fg-muted">Niemand braucht hier was.</p>
+              <p class="mt-2 text-sm text-fg-muted">
+                {t('Niemand braucht hier was.', 'Nobody needs anything here.')}
+              </p>
             {:else}
               <div class="mt-2 flex flex-wrap gap-2">
                 {#each EQUIPMENT_VALUES as eq (eq)}
@@ -328,7 +355,7 @@
                   <li class="flex items-start justify-between gap-3 text-sm">
                     <div class="min-w-0">
                       <span class="font-medium" class:text-accent={mine} class:text-fg={!mine}>
-                        {memberName(members.get(r.user))}{mine ? ' (du)' : ''}
+                        {memberName(members.get(r.user))}{mine ? t(' (du)', ' (you)') : ''}
                       </span>
                       <span class="text-fg-muted"> · {EQUIPMENT_LABEL[r.equipment]}</span>
                       {#if r.note}
@@ -342,7 +369,7 @@
                         disabled={deleting === r.id}
                         onclick={() => deleteRequest(r)}
                       >
-                        {deleting === r.id ? '…' : 'Loeschen'}
+                        {deleting === r.id ? '…' : t('Loeschen', 'Delete')}
                       </button>
                     {/if}
                   </li>
@@ -358,25 +385,29 @@
 
 {#if formDay}
   <Sheet
-    eyebrow={myByDay.has(formDay) ? 'Anforderung aendern' : 'Funkgeraet anfordern'}
+    eyebrow={myByDay.has(formDay)
+      ? t('Anforderung aendern', 'Change request')
+      : t('Funkgeraet anfordern', 'Request a radio')}
     title={fmtLongDay(formDay)}
     onclose={closeForm}
   >
     <form onsubmit={handleSubmit} class="flex flex-col gap-4">
       <Segmented
-        label="Geraet"
+        label={t('Geraet', 'Device')}
         full
         options={EQUIPMENT_VALUES.map((eq) => ({ value: eq, label: EQUIPMENT_LABEL[eq] }))}
         bind:value={formEquipment}
       />
 
       <label class="block">
-        <span class="text-xs font-medium text-fg-muted">Notiz (optional)</span>
+        <span class="text-xs font-medium text-fg-muted"
+          >{t('Notiz (optional)', 'Note (optional)')}</span
+        >
         <input
           type="text"
           bind:value={formNote}
           maxlength="200"
-          placeholder="z.B. Allergie, Wunschmarke"
+          placeholder={t('z.B. Allergie, Wunschmarke', 'e.g. allergy, preferred brand')}
           class="field mt-2"
         />
       </label>
@@ -386,8 +417,12 @@
       {/if}
 
       <div class="flex flex-wrap gap-3 pt-1">
-        <Button type="submit" disabled={saving}>{saving ? 'Speichere …' : 'Speichern'}</Button>
-        <Button variant="ghost" onclick={closeForm} disabled={saving}>Abbrechen</Button>
+        <Button type="submit" disabled={saving}
+          >{saving ? t('Speichere …', 'Saving …') : t('Speichern', 'Save')}</Button
+        >
+        <Button variant="ghost" onclick={closeForm} disabled={saving}
+          >{t('Abbrechen', 'Cancel')}</Button
+        >
       </div>
     </form>
   </Sheet>

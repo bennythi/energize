@@ -1,6 +1,7 @@
 <script lang="ts">
   import { DENOMINATIONS } from '$lib/denominations';
   import { countsTotal, formatEur } from './summary';
+  import { t } from '$lib/i18n';
 
   interface Props {
     counts: Record<number, number>;
@@ -12,7 +13,9 @@
 </script>
 
 {#if rows.length === 0}
-  <p class="text-sm text-fg-muted">Keine Stueckelung erfasst.</p>
+  <p class="text-sm text-fg-muted">
+    {t('Keine Stueckelung erfasst.', 'No denominations recorded.')}
+  </p>
 {:else}
   <ul class="divide-y divide-[var(--glass-border)] text-sm">
     {#each rows as d (d.cents)}
@@ -22,7 +25,7 @@
       </li>
     {/each}
     <li class="flex items-baseline justify-between gap-3 py-1.5 font-medium">
-      <span class="text-fg">Summe</span>
+      <span class="text-fg">{t('Summe', 'Total')}</span>
       <span class="tabular-nums text-fg">{formatEur(countsTotal(counts))}</span>
     </li>
   </ul>

@@ -3,6 +3,7 @@
   import { Button } from '@platform/ui';
   import { auth } from '$lib/auth.svelte';
   import { errorMessage } from '$lib/crew-api';
+  import { t } from '$lib/i18n';
 
   interface Milestone {
     id: string;
@@ -51,8 +52,8 @@
   onMount(() => void load());
 
   function todayIso(): string {
-    const t = new Date();
-    return `${t.getFullYear()}-${String(t.getMonth() + 1).padStart(2, '0')}-${String(t.getDate()).padStart(2, '0')}`;
+    const now = new Date();
+    return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   }
 
   async function load(showSkeleton = true) {
@@ -65,7 +66,10 @@
         .getFullList({ sort: 'due_date,title' });
     } catch (err) {
       console.error('[admin/meilensteine] load failed', err);
-      errorMsg = errorMessage(err, 'Meilensteine konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Meilensteine konnten nicht geladen werden.', 'Milestones could not be loaded.'),
+      );
     } finally {
       loading = false;
     }
@@ -108,7 +112,10 @@
       due_date: editing.due_date,
     };
     if (!data.title || !data.category || !/^\d{4}-\d{2}-\d{2}$/.test(data.due_date)) {
-      formError = 'Titel, Kategorie und Faelligkeitsdatum sind Pflicht.';
+      formError = t(
+        'Titel, Kategorie und Faelligkeitsdatum sind Pflicht.',
+        'Title, category and due date are required.',
+      );
       return;
     }
     saving = true;
@@ -121,7 +128,10 @@
       await load(false);
     } catch (err) {
       console.error('[admin/meilensteine] save failed', err);
-      formError = errorMessage(err, 'Meilenstein konnte nicht gespeichert werden.');
+      formError = errorMessage(
+        err,
+        t('Meilenstein konnte nicht gespeichert werden.', 'Milestone could not be saved.'),
+      );
     } finally {
       saving = false;
     }
@@ -138,7 +148,10 @@
       milestones = milestones.map((x) => (x.id === m.id ? updated : x));
     } catch (err) {
       console.error('[admin/meilensteine] toggle failed', err);
-      errorMsg = errorMessage(err, 'Status konnte nicht geaendert werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Status konnte nicht geaendert werden.', 'Status could not be changed.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -146,7 +159,12 @@
 
   async function remove(m: Milestone) {
     if (!auth.pb) return;
-    if (!confirm(`Meilenstein "${m.title}" wirklich loeschen?`)) return;
+    if (
+      !confirm(
+        t(`Meilenstein "${m.title}" wirklich loeschen?`, `Really delete milestone "${m.title}"?`),
+      )
+    )
+      return;
     actingOn = m.id;
     errorMsg = null;
     try {
@@ -155,7 +173,10 @@
       if (editing?.id === m.id) editing = null;
     } catch (err) {
       console.error('[admin/meilensteine] delete failed', err);
-      errorMsg = errorMessage(err, 'Meilenstein konnte nicht geloescht werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Meilenstein konnte nicht geloescht werden.', 'Milestone could not be deleted.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -171,7 +192,7 @@
 
   function fmtDate(isoDate: string): string {
     const [y, mo, d] = isoDate.slice(0, 10).split('-');
-    return y && mo && d ? `${d}.${mo}.${y}` : '—';
+    return y && mo && d ? t(`${d}.${mo}.${y}`, `${d}/${mo}/${y}`) : '—';
   }
 
   function isOverdue(m: Milestone): boolean {
@@ -179,27 +200,31 @@
   }
 
   const FILTERS: { value: Filter; label: string }[] = [
-    { value: 'open', label: 'Offen' },
-    { value: 'done', label: 'Erledigt' },
-    { value: 'all', label: 'Alle' },
+    { value: 'open', label: t('Offen', 'Open') },
+    { value: 'done', label: t('Erledigt', 'Done') },
+    { value: 'all', label: t('Alle', 'All') },
   ];
 </script>
 
 <svelte:head>
-  <title>Admin · Meilensteine</title>
+  <title>{t('Admin · Meilensteine', 'Admin · Milestones')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-6xl px-5 py-8 md:py-10">
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
-      <h1 class="text-3xl font-semibold tracking-tight text-fg">Meilensteine</h1>
+      <h1 class="text-3xl font-semibold tracking-tight text-fg">
+        {t('Meilensteine', 'Milestones')}
+      </h1>
       <p class="mt-3 max-w-2xl text-fg-muted">
-        Termine fuer Bestellungen, Genehmigungen und Vertraege. Crew mit Leserecht sieht den
-        Jahreskalender und kann erledigte Punkte abhaken.
+        {t(
+          'Termine fuer Bestellungen, Genehmigungen und Vertraege. Crew mit Leserecht sieht den Jahreskalender und kann erledigte Punkte abhaken.',
+          'Dates for orders, permits and contracts. Crew with read permission see the annual calendar and can tick off completed items.',
+        )}
       </p>
     </div>
     {#if !editing}
-      <Button onclick={openNew}>+ Neuer Meilenstein</Button>
+      <Button onclick={openNew}>+ {t('Neuer Meilenstein', 'New milestone')}</Button>
     {/if}
   </div>
 
@@ -210,15 +235,17 @@
   {#if editing}
     <form bind:this={editorEl} class="card mt-8 scroll-mt-6 p-6" onsubmit={save}>
       <h2 class="text-lg font-semibold text-fg">
-        {editing.id ? 'Meilenstein bearbeiten' : 'Neuer Meilenstein'}
+        {editing.id
+          ? t('Meilenstein bearbeiten', 'Edit milestone')
+          : t('Neuer Meilenstein', 'New milestone')}
       </h2>
       <label class="mt-5 block">
-        <span class="text-sm text-fg-muted">Titel</span>
+        <span class="text-sm text-fg-muted">{t('Titel', 'Title')}</span>
         <input type="text" bind:value={editing.title} maxlength="200" required class="field mt-1" />
       </label>
       <div class="mt-4 grid gap-4 sm:grid-cols-2">
         <label class="block">
-          <span class="text-sm text-fg-muted">Kategorie</span>
+          <span class="text-sm text-fg-muted">{t('Kategorie', 'Category')}</span>
           <input
             type="text"
             bind:value={editing.category}
@@ -234,12 +261,14 @@
           </datalist>
         </label>
         <label class="block">
-          <span class="text-sm text-fg-muted">Faellig am</span>
+          <span class="text-sm text-fg-muted">{t('Faellig am', 'Due on')}</span>
           <input type="date" bind:value={editing.due_date} required class="field mt-1" />
         </label>
       </div>
       <label class="mt-4 block">
-        <span class="text-sm text-fg-muted">Beschreibung (optional)</span>
+        <span class="text-sm text-fg-muted"
+          >{t('Beschreibung (optional)', 'Description (optional)')}</span
+        >
         <textarea bind:value={editing.description} rows="5" maxlength="4000" class="field mt-1"
         ></textarea>
       </label>
@@ -247,15 +276,17 @@
         <p class="mt-4 text-sm text-danger">{formError}</p>
       {/if}
       <div class="mt-6 flex flex-wrap gap-3">
-        <Button type="submit" disabled={saving}>{saving ? 'Speichere …' : 'Speichern'}</Button>
+        <Button type="submit" disabled={saving}
+          >{saving ? t('Speichere …', 'Saving …') : t('Speichern', 'Save')}</Button
+        >
         <Button variant="ghost" onclick={() => (editing = null)} disabled={saving}>
-          Abbrechen
+          {t('Abbrechen', 'Cancel')}
         </Button>
       </div>
     </form>
   {/if}
 
-  <div class="segment mt-8" role="group" aria-label="Filter">
+  <div class="segment mt-8" role="group" aria-label={t('Filter', 'Filter')}>
     {#each FILTERS as f (f.value)}
       <button
         class="seg"
@@ -275,10 +306,10 @@
     <div class="card mt-4 p-6">
       <p class="text-fg-muted">
         {milestones.length === 0
-          ? 'Noch keine Meilensteine angelegt.'
+          ? t('Noch keine Meilensteine angelegt.', 'No milestones created yet.')
           : filter === 'open'
-            ? 'Alles erledigt.'
-            : 'Keine Eintraege.'}
+            ? t('Alles erledigt.', 'All done.')
+            : t('Keine Eintraege.', 'No entries.')}
       </p>
     </div>
   {:else}
@@ -295,11 +326,11 @@
                 class:text-fg-muted={!isOverdue(m)}
               >
                 {fmtDate(m.due_date)}{#if isOverdue(m)}
-                  · ueberfaellig{/if}
+                  · {t('ueberfaellig', 'overdue')}{/if}
               </span>
               <span class="text-fg-muted"> · {m.category}</span>
               {#if m.completed_at}
-                <span class="text-success"> · erledigt</span>
+                <span class="text-success"> · {t('erledigt', 'done')}</span>
               {/if}
             </p>
             {#if m.description}
@@ -311,16 +342,18 @@
           <div class="flex shrink-0 flex-wrap gap-2">
             {#if m.completed_at}
               <button class="pill" disabled={busy} onclick={() => setDone(m, false)}>
-                Wieder oeffnen
+                {t('Wieder oeffnen', 'Reopen')}
               </button>
             {:else}
               <button class="pill pill-success" disabled={busy} onclick={() => setDone(m, true)}>
-                Erledigt
+                {t('Erledigt', 'Done')}
               </button>
             {/if}
-            <button class="pill" disabled={busy} onclick={() => openEdit(m)}>Bearbeiten</button>
+            <button class="pill" disabled={busy} onclick={() => openEdit(m)}
+              >{t('Bearbeiten', 'Edit')}</button
+            >
             <button class="pill pill-danger" disabled={busy} onclick={() => remove(m)}>
-              Loeschen
+              {t('Loeschen', 'Delete')}
             </button>
           </div>
         </li>

@@ -3,6 +3,7 @@
   import { page } from '$app/state';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
   import { isModuleEnabled } from '$lib/modules';
+  import { t } from '$lib/i18n';
 
   interface Props {
     children?: import('svelte').Snippet;
@@ -21,17 +22,25 @@
 
   const links = $derived(
     [
-      { href: '/admin', label: 'Uebersicht', show: true },
+      { href: '/admin', label: t('Uebersicht', 'Overview'), show: true },
       { href: '/admin/users', label: 'User', show: true },
       { href: '/admin/crew', label: 'Crew', show: isModuleEnabled('crew-core') },
-      { href: '/admin/berechtigungen', label: 'Rechte', show: isModuleEnabled('crew-core') },
+      {
+        href: '/admin/berechtigungen',
+        label: t('Rechte', 'Permissions'),
+        show: isModuleEnabled('crew-core'),
+      },
       { href: '/admin/briefings', label: 'Briefings', show: isModuleEnabled('crew-briefings') },
       {
         href: '/admin/meilensteine',
-        label: 'Meilensteine',
+        label: t('Meilensteine', 'Milestones'),
         show: isModuleEnabled('crew-milestones'),
       },
-      { href: '/admin/cashless-kassen', label: 'Kassen', show: isModuleEnabled('cashless') },
+      {
+        href: '/admin/cashless-kassen',
+        label: t('Kassen', 'Cash registers'),
+        show: isModuleEnabled('cashless'),
+      },
     ].filter((l) => l.show),
   );
 </script>
@@ -46,7 +55,7 @@
   </div>
 {:else if auth.user && auth.isAdmin}
   <div class="mx-auto w-full max-w-6xl px-5 pt-8 md:pt-12">
-    <nav class="tabs" aria-label="Admin-Bereiche">
+    <nav class="tabs" aria-label={t('Admin-Bereiche', 'Admin sections')}>
       {#each links as link (link.href)}
         <a
           href={link.href}

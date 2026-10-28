@@ -2,6 +2,7 @@
 // Bewusst ohne Svelte-/PB-Imports, damit die Rechnung isoliert testbar ist.
 
 import type { Edition } from './booking';
+import { t } from '$lib/i18n';
 
 export type Pricing = 'pauschal' | 'stueck' | 'pro_tag' | 'stunden';
 export type CostStatus = 'offen' | 'angefragt' | 'angebot' | 'beauftragt' | 'abgesagt';
@@ -36,18 +37,18 @@ export interface CostOffer {
 }
 
 export const PRICING_LABELS: Record<Pricing, string> = {
-  pauschal: 'Pauschal',
-  stueck: 'Pro Stück',
-  pro_tag: 'Pro Stück und Tag',
-  stunden: 'Personal (Stunden)',
+  pauschal: t('Pauschal', 'Flat rate'),
+  stueck: t('Pro Stück', 'Per unit'),
+  pro_tag: t('Pro Stück und Tag', 'Per unit and day'),
+  stunden: t('Personal (Stunden)', 'Staff (hours)'),
 };
 
 export const STATUS_LABELS: Record<CostStatus, string> = {
-  offen: 'Offen',
-  angefragt: 'Angefragt',
-  angebot: 'Angebot liegt vor',
-  beauftragt: 'Beauftragt',
-  abgesagt: 'Gestrichen',
+  offen: t('Offen', 'Open'),
+  angefragt: t('Angefragt', 'Requested'),
+  angebot: t('Angebot liegt vor', 'Quote received'),
+  beauftragt: t('Beauftragt', 'Commissioned'),
+  abgesagt: t('Gestrichen', 'Cancelled'),
 };
 
 export const COST_STATUSES: CostStatus[] = [
@@ -60,26 +61,26 @@ export const COST_STATUSES: CostStatus[] = [
 
 /** Kategorien in Anzeige-Reihenfolge (Schluessel bleiben stabil in der DB). */
 export const CATEGORIES: { key: string; label: string }[] = [
-  { key: 'gelaende', label: 'Gelände & Genehmigungen' },
-  { key: 'security', label: 'Security' },
-  { key: 'sanitaet', label: 'Sanität & Brandschutz' },
-  { key: 'awareness', label: 'Awareness' },
-  { key: 'buehne', label: 'Bühne & Produktion' },
-  { key: 'technik', label: 'Ton, Licht & Video' },
-  { key: 'sfx', label: 'Special Effects' },
-  { key: 'strom', label: 'Strom & Wasser' },
-  { key: 'toiletten', label: 'Toiletten & Hygiene' },
-  { key: 'zaeune', label: 'Zäune & Absperrungen' },
-  { key: 'verkehr', label: 'Verkehr, Beschilderung & Parken' },
-  { key: 'einlass', label: 'Einlass & Ticketing' },
-  { key: 'gastro', label: 'Gastro & Bars' },
-  { key: 'zelte', label: 'Zelte, Mobiliar & Beleuchtung' },
-  { key: 'backstage', label: 'Backstage & Artist-Care' },
-  { key: 'crew', label: 'Crew & Personal' },
-  { key: 'muell', label: 'Müll & Reinigung' },
-  { key: 'marketing', label: 'Marketing & Medien' },
-  { key: 'abgaben', label: 'Abgaben & Versicherungen' },
-  { key: 'sonstiges', label: 'Sonstiges & Puffer' },
+  { key: 'gelaende', label: t('Gelände & Genehmigungen', 'Site & permits') },
+  { key: 'security', label: t('Security', 'Security') },
+  { key: 'sanitaet', label: t('Sanität & Brandschutz', 'First aid & fire safety') },
+  { key: 'awareness', label: t('Awareness', 'Awareness') },
+  { key: 'buehne', label: t('Bühne & Produktion', 'Stage & production') },
+  { key: 'technik', label: t('Ton, Licht & Video', 'Sound, lighting & video') },
+  { key: 'sfx', label: t('Special Effects', 'Special effects') },
+  { key: 'strom', label: t('Strom & Wasser', 'Power & water') },
+  { key: 'toiletten', label: t('Toiletten & Hygiene', 'Toilets & hygiene') },
+  { key: 'zaeune', label: t('Zäune & Absperrungen', 'Fences & barriers') },
+  { key: 'verkehr', label: t('Verkehr, Beschilderung & Parken', 'Traffic, signage & parking') },
+  { key: 'einlass', label: t('Einlass & Ticketing', 'Entry & ticketing') },
+  { key: 'gastro', label: t('Gastro & Bars', 'Food & bars') },
+  { key: 'zelte', label: t('Zelte, Mobiliar & Beleuchtung', 'Tents, furniture & lighting') },
+  { key: 'backstage', label: t('Backstage & Artist-Care', 'Backstage & artist care') },
+  { key: 'crew', label: t('Crew & Personal', 'Crew & staff') },
+  { key: 'muell', label: t('Müll & Reinigung', 'Waste & cleaning') },
+  { key: 'marketing', label: t('Marketing & Medien', 'Marketing & media') },
+  { key: 'abgaben', label: t('Abgaben & Versicherungen', 'Fees & insurance') },
+  { key: 'sonstiges', label: t('Sonstiges & Puffer', 'Miscellaneous & buffer') },
 ];
 
 export function categoryLabel(key: string): string {
@@ -106,16 +107,23 @@ export interface TemplatePosition {
  */
 export const HARDSTYLE_TEMPLATE: TemplatePosition[] = [
   // Gelaende & Genehmigungen
-  { category: 'gelaende', title: 'Geländemiete', pricing: 'pauschal' },
+  { category: 'gelaende', title: t('Geländemiete', 'Site rental'), pricing: 'pauschal' },
   {
     category: 'gelaende',
-    title: 'Genehmigungen (Ordnungsamt, Bauamt, Sondernutzung)',
+    title: t(
+      'Genehmigungen (Ordnungsamt, Bauamt, Sondernutzung)',
+      'Permits (public order office, building authority, special use)',
+    ),
     pricing: 'pauschal',
   },
-  { category: 'gelaende', title: 'Sicherheits- und Brandschutzkonzept', pricing: 'pauschal' },
   {
     category: 'gelaende',
-    title: 'Bodenschutz / Fahrplatten',
+    title: t('Sicherheits- und Brandschutzkonzept', 'Safety and fire protection concept'),
+    pricing: 'pauschal',
+  },
+  {
+    category: 'gelaende',
+    title: t('Bodenschutz / Fahrplatten', 'Ground protection / track panels'),
     pricing: 'pro_tag',
     quantity: 50,
     days: 'alle',
@@ -123,7 +131,7 @@ export const HARDSTYLE_TEMPLATE: TemplatePosition[] = [
   // Security
   {
     category: 'security',
-    title: 'Security Ordnungsdienst',
+    title: t('Security Ordnungsdienst', 'Security stewards'),
     pricing: 'stunden',
     quantity: 20,
     hours: 10,
@@ -131,7 +139,7 @@ export const HARDSTYLE_TEMPLATE: TemplatePosition[] = [
   },
   {
     category: 'security',
-    title: 'Security Einlasskontrolle',
+    title: t('Security Einlasskontrolle', 'Security entrance control'),
     pricing: 'stunden',
     quantity: 10,
     hours: 8,
@@ -139,7 +147,7 @@ export const HARDSTYLE_TEMPLATE: TemplatePosition[] = [
   },
   {
     category: 'security',
-    title: 'Security Bühnengraben / Wellenbrecher',
+    title: t('Security Bühnengraben / Wellenbrecher', 'Security stage pit / crowd barrier'),
     pricing: 'stunden',
     quantity: 6,
     hours: 10,
@@ -147,7 +155,7 @@ export const HARDSTYLE_TEMPLATE: TemplatePosition[] = [
   },
   {
     category: 'security',
-    title: 'Nachtwache Gelände (Auf-/Abbau)',
+    title: t('Nachtwache Gelände (Auf-/Abbau)', 'Night watch on site (setup/teardown)'),
     pricing: 'stunden',
     quantity: 2,
     hours: 12,
@@ -156,16 +164,21 @@ export const HARDSTYLE_TEMPLATE: TemplatePosition[] = [
   // Sanitaet & Brandschutz
   {
     category: 'sanitaet',
-    title: 'Sanitätsdienst',
+    title: t('Sanitätsdienst', 'First aid service'),
     pricing: 'stunden',
     quantity: 6,
     hours: 10,
     days: 'festival',
   },
-  { category: 'sanitaet', title: 'Notarzt', pricing: 'pauschal', days: 'festival' },
   {
     category: 'sanitaet',
-    title: 'Brandsicherheitswache Feuerwehr',
+    title: t('Notarzt', 'Emergency doctor'),
+    pricing: 'pauschal',
+    days: 'festival',
+  },
+  {
+    category: 'sanitaet',
+    title: t('Brandsicherheitswache Feuerwehr', 'Fire safety watch (fire brigade)'),
     pricing: 'stunden',
     quantity: 2,
     hours: 10,
@@ -174,90 +187,132 @@ export const HARDSTYLE_TEMPLATE: TemplatePosition[] = [
   // Awareness
   {
     category: 'awareness',
-    title: 'Awareness-Team',
+    title: t('Awareness-Team', 'Awareness team'),
     pricing: 'stunden',
     quantity: 4,
     hours: 10,
     days: 'festival',
   },
-  { category: 'awareness', title: 'Awareness-Zelt / Ruhezone', pricing: 'pauschal' },
+  {
+    category: 'awareness',
+    title: t('Awareness-Zelt / Ruhezone', 'Awareness tent / quiet zone'),
+    pricing: 'pauschal',
+  },
   // Buehne & Produktion
-  { category: 'buehne', title: 'Bühne inkl. Dach', pricing: 'pauschal' },
+  { category: 'buehne', title: t('Bühne inkl. Dach', 'Stage incl. roof'), pricing: 'pauschal' },
   {
     category: 'buehne',
-    title: 'Stage-Hands',
+    title: t('Stage-Hands', 'Stagehands'),
     pricing: 'stunden',
     quantity: 8,
     hours: 10,
     days: 'alle',
   },
-  { category: 'buehne', title: 'Rigging', pricing: 'pauschal' },
+  { category: 'buehne', title: t('Rigging', 'Rigging'), pricing: 'pauschal' },
   {
     category: 'buehne',
-    title: 'Teleskoplader / Stapler',
+    title: t('Teleskoplader / Stapler', 'Telehandler / forklift'),
     pricing: 'pro_tag',
     quantity: 1,
     days: 'aufbau_abbau',
   },
-  { category: 'buehne', title: 'Produktionsleitung', pricing: 'pauschal' },
+  {
+    category: 'buehne',
+    title: t('Produktionsleitung', 'Production management'),
+    pricing: 'pauschal',
+  },
   // Technik
-  { category: 'technik', title: 'PA / Beschallung', pricing: 'pauschal' },
-  { category: 'technik', title: 'Lichttechnik', pricing: 'pauschal' },
-  { category: 'technik', title: 'LED-Wände / Video', pricing: 'pauschal' },
-  { category: 'technik', title: 'DJ-Equipment (CDJs, Mixer)', pricing: 'pauschal' },
+  { category: 'technik', title: t('PA / Beschallung', 'PA / sound system'), pricing: 'pauschal' },
+  { category: 'technik', title: t('Lichttechnik', 'Lighting'), pricing: 'pauschal' },
+  { category: 'technik', title: t('LED-Wände / Video', 'LED walls / video'), pricing: 'pauschal' },
   {
     category: 'technik',
-    title: 'Techniker vor Ort',
+    title: t('DJ-Equipment (CDJs, Mixer)', 'DJ equipment (CDJs, mixer)'),
+    pricing: 'pauschal',
+  },
+  {
+    category: 'technik',
+    title: t('Techniker vor Ort', 'On-site technicians'),
     pricing: 'stunden',
     quantity: 4,
     hours: 12,
     days: 'festival',
   },
   // Special Effects
-  { category: 'sfx', title: 'CO2-Jets inkl. Flaschen', pricing: 'pauschal' },
-  { category: 'sfx', title: 'Flammenprojektoren', pricing: 'pauschal' },
-  { category: 'sfx', title: 'Pyrotechnik / Feuerwerk', pricing: 'pauschal' },
-  { category: 'sfx', title: 'Konfetti / Streamer', pricing: 'pauschal' },
-  { category: 'sfx', title: 'Pyrotechniker mit Befähigungsschein', pricing: 'pauschal' },
-  { category: 'sfx', title: 'Nebel / Hazer', pricing: 'pauschal' },
+  {
+    category: 'sfx',
+    title: t('CO2-Jets inkl. Flaschen', 'CO2 jets incl. bottles'),
+    pricing: 'pauschal',
+  },
+  { category: 'sfx', title: t('Flammenprojektoren', 'Flame projectors'), pricing: 'pauschal' },
+  {
+    category: 'sfx',
+    title: t('Pyrotechnik / Feuerwerk', 'Pyrotechnics / fireworks'),
+    pricing: 'pauschal',
+  },
+  { category: 'sfx', title: t('Konfetti / Streamer', 'Confetti / streamers'), pricing: 'pauschal' },
+  {
+    category: 'sfx',
+    title: t('Pyrotechniker mit Befähigungsschein', 'Licensed pyrotechnician'),
+    pricing: 'pauschal',
+  },
+  { category: 'sfx', title: t('Nebel / Hazer', 'Fog / hazer'), pricing: 'pauschal' },
   // Strom & Wasser
   {
     category: 'strom',
-    title: 'Generatoren / Aggregate',
+    title: t('Generatoren / Aggregate', 'Generators'),
     pricing: 'pro_tag',
     quantity: 2,
     days: 'alle',
   },
   {
     category: 'strom',
-    title: 'Diesel',
+    title: t('Diesel', 'Diesel'),
     pricing: 'stueck',
     quantity: 1000,
-    notes: 'Menge in Litern',
+    notes: t('Menge in Litern', 'Quantity in litres'),
   },
-  { category: 'strom', title: 'Stromverteilung / Elektriker', pricing: 'pauschal' },
-  { category: 'strom', title: 'Wasseranschluss / Abwasser', pricing: 'pauschal' },
+  {
+    category: 'strom',
+    title: t('Stromverteilung / Elektriker', 'Power distribution / electrician'),
+    pricing: 'pauschal',
+  },
+  {
+    category: 'strom',
+    title: t('Wasseranschluss / Abwasser', 'Water supply / wastewater'),
+    pricing: 'pauschal',
+  },
   // Toiletten (bewusst mehrere Lieferanten)
   {
     category: 'toiletten',
-    title: 'Mobile Toiletten (Dixi)',
+    title: t('Mobile Toiletten (Dixi)', 'Portable toilets'),
     pricing: 'stueck',
     quantity: 40,
-    supplier: 'Lieferant A',
+    supplier: t('Lieferant A', 'Supplier A'),
   },
   {
     category: 'toiletten',
-    title: 'Toilettenwagen',
+    title: t('Toilettenwagen', 'Toilet trailer'),
     pricing: 'pro_tag',
     quantity: 2,
-    supplier: 'Lieferant B',
+    supplier: t('Lieferant B', 'Supplier B'),
     days: 'festival',
   },
-  { category: 'toiletten', title: 'Urinalrinnen', pricing: 'stueck', quantity: 6 },
-  { category: 'toiletten', title: 'Handwaschstationen', pricing: 'stueck', quantity: 10 },
   {
     category: 'toiletten',
-    title: 'Reinigungsservice Toiletten',
+    title: t('Urinalrinnen', 'Urinal troughs'),
+    pricing: 'stueck',
+    quantity: 6,
+  },
+  {
+    category: 'toiletten',
+    title: t('Handwaschstationen', 'Hand-washing stations'),
+    pricing: 'stueck',
+    quantity: 10,
+  },
+  {
+    category: 'toiletten',
+    title: t('Reinigungsservice Toiletten', 'Toilet cleaning service'),
     pricing: 'pro_tag',
     quantity: 1,
     days: 'festival',
@@ -265,85 +320,171 @@ export const HARDSTYLE_TEMPLATE: TemplatePosition[] = [
   // Zaeune
   {
     category: 'zaeune',
-    title: 'Bauzaun',
+    title: t('Bauzaun', 'Construction fence'),
     pricing: 'stueck',
     quantity: 300,
-    notes: 'Anzahl Elemente',
+    notes: t('Anzahl Elemente', 'Number of panels'),
   },
-  { category: 'zaeune', title: 'Sichtschutz / Bannerplanen', pricing: 'stueck', quantity: 100 },
-  { category: 'zaeune', title: 'Wellenbrecher / Bühnengraben-Absperrung', pricing: 'pauschal' },
   {
     category: 'zaeune',
-    title: 'Absperrgitter (Hamburger Gitter)',
+    title: t('Sichtschutz / Bannerplanen', 'Privacy screens / banner tarps'),
+    pricing: 'stueck',
+    quantity: 100,
+  },
+  {
+    category: 'zaeune',
+    title: t('Wellenbrecher / Bühnengraben-Absperrung', 'Crowd barrier / stage pit barrier'),
+    pricing: 'pauschal',
+  },
+  {
+    category: 'zaeune',
+    title: t('Absperrgitter (Hamburger Gitter)', 'Crowd control barriers'),
     pricing: 'stueck',
     quantity: 100,
   },
   // Verkehr
-  { category: 'verkehr', title: 'Verkehrsrechtliche Anordnung', pricing: 'pauschal' },
   {
     category: 'verkehr',
-    title: 'Verkehrsschilder / Beschilderung (Auf- und Abbau)',
+    title: t('Verkehrsrechtliche Anordnung', 'Traffic management order'),
     pricing: 'pauschal',
   },
   {
     category: 'verkehr',
-    title: 'Parkplatz-Einweiser',
+    title: t(
+      'Verkehrsschilder / Beschilderung (Auf- und Abbau)',
+      'Traffic signs / signage (setup and teardown)',
+    ),
+    pricing: 'pauschal',
+  },
+  {
+    category: 'verkehr',
+    title: t('Parkplatz-Einweiser', 'Parking marshals'),
     pricing: 'stunden',
     quantity: 4,
     hours: 8,
     days: 'festival',
   },
-  { category: 'verkehr', title: 'Shuttlebusse', pricing: 'pauschal' },
+  { category: 'verkehr', title: t('Shuttlebusse', 'Shuttle buses'), pricing: 'pauschal' },
   // Einlass & Ticketing
-  { category: 'einlass', title: 'Ticketing-Gebühren', pricing: 'pauschal' },
-  { category: 'einlass', title: 'Einlassbändchen', pricing: 'stueck', quantity: 3000 },
-  { category: 'einlass', title: 'Scanner / Einlass-Hardware', pricing: 'pauschal' },
+  { category: 'einlass', title: t('Ticketing-Gebühren', 'Ticketing fees'), pricing: 'pauschal' },
+  {
+    category: 'einlass',
+    title: t('Einlassbändchen', 'Entry wristbands'),
+    pricing: 'stueck',
+    quantity: 3000,
+  },
+  {
+    category: 'einlass',
+    title: t('Scanner / Einlass-Hardware', 'Scanners / entry hardware'),
+    pricing: 'pauschal',
+  },
   // Gastro & Bars
-  { category: 'gastro', title: 'Barzelte / Theken', pricing: 'pauschal' },
-  { category: 'gastro', title: 'Kühlwagen', pricing: 'pro_tag', quantity: 1, days: 'festival' },
-  { category: 'gastro', title: 'Getränkeeinkauf', pricing: 'pauschal' },
   {
     category: 'gastro',
-    title: 'Barpersonal',
+    title: t('Barzelte / Theken', 'Bar tents / counters'),
+    pricing: 'pauschal',
+  },
+  {
+    category: 'gastro',
+    title: t('Kühlwagen', 'Refrigerated trailer'),
+    pricing: 'pro_tag',
+    quantity: 1,
+    days: 'festival',
+  },
+  { category: 'gastro', title: t('Getränkeeinkauf', 'Beverage purchasing'), pricing: 'pauschal' },
+  {
+    category: 'gastro',
+    title: t('Barpersonal', 'Bar staff'),
     pricing: 'stunden',
     quantity: 12,
     hours: 10,
     days: 'festival',
   },
-  { category: 'gastro', title: 'Cashless-System', pricing: 'pauschal' },
+  { category: 'gastro', title: t('Cashless-System', 'Cashless system'), pricing: 'pauschal' },
   // Zelte & Mobiliar
-  { category: 'zelte', title: 'Zelte (Backstage, Crew, Lager)', pricing: 'pauschal' },
-  { category: 'zelte', title: 'Biertischgarnituren', pricing: 'stueck', quantity: 30 },
-  { category: 'zelte', title: 'Geländebeleuchtung / Notbeleuchtung', pricing: 'pauschal' },
+  {
+    category: 'zelte',
+    title: t('Zelte (Backstage, Crew, Lager)', 'Tents (backstage, crew, storage)'),
+    pricing: 'pauschal',
+  },
+  {
+    category: 'zelte',
+    title: t('Biertischgarnituren', 'Beer table sets'),
+    pricing: 'stueck',
+    quantity: 30,
+  },
+  {
+    category: 'zelte',
+    title: t('Geländebeleuchtung / Notbeleuchtung', 'Site lighting / emergency lighting'),
+    pricing: 'pauschal',
+  },
   // Backstage
-  { category: 'backstage', title: 'Artist-Catering', pricing: 'pauschal' },
-  { category: 'backstage', title: 'Backstage-Ausstattung', pricing: 'pauschal' },
+  { category: 'backstage', title: t('Artist-Catering', 'Artist catering'), pricing: 'pauschal' },
+  {
+    category: 'backstage',
+    title: t('Backstage-Ausstattung', 'Backstage furnishings'),
+    pricing: 'pauschal',
+  },
   // Crew & Personal
   {
     category: 'crew',
-    title: 'Crew-Verpflegung',
+    title: t('Crew-Verpflegung', 'Crew catering'),
     pricing: 'pro_tag',
     quantity: 40,
     days: 'alle',
-    notes: 'Personen pro Tag',
+    notes: t('Personen pro Tag', 'People per day'),
   },
-  { category: 'crew', title: 'Funkgeräte-Miete', pricing: 'stueck', quantity: 30 },
-  { category: 'crew', title: 'Crew-Shirts', pricing: 'stueck', quantity: 60 },
+  {
+    category: 'crew',
+    title: t('Funkgeräte-Miete', 'Radio rental'),
+    pricing: 'stueck',
+    quantity: 30,
+  },
+  { category: 'crew', title: t('Crew-Shirts', 'Crew shirts'), pricing: 'stueck', quantity: 60 },
   // Muell
-  { category: 'muell', title: 'Müllcontainer', pricing: 'stueck', quantity: 4 },
-  { category: 'muell', title: 'Geländereinigung nach dem Event', pricing: 'pauschal' },
+  {
+    category: 'muell',
+    title: t('Müllcontainer', 'Waste containers'),
+    pricing: 'stueck',
+    quantity: 4,
+  },
+  {
+    category: 'muell',
+    title: t('Geländereinigung nach dem Event', 'Site cleanup after the event'),
+    pricing: 'pauschal',
+  },
   // Marketing
-  { category: 'marketing', title: 'Social-Media-Ads', pricing: 'pauschal' },
-  { category: 'marketing', title: 'Plakate / Flyer', pricing: 'pauschal' },
-  { category: 'marketing', title: 'Fotograf / Aftermovie', pricing: 'pauschal' },
-  { category: 'marketing', title: 'Grafikdesign', pricing: 'pauschal' },
+  { category: 'marketing', title: t('Social-Media-Ads', 'Social media ads'), pricing: 'pauschal' },
+  { category: 'marketing', title: t('Plakate / Flyer', 'Posters / flyers'), pricing: 'pauschal' },
+  {
+    category: 'marketing',
+    title: t('Fotograf / Aftermovie', 'Photographer / aftermovie'),
+    pricing: 'pauschal',
+  },
+  { category: 'marketing', title: t('Grafikdesign', 'Graphic design'), pricing: 'pauschal' },
   // Abgaben & Versicherungen
-  { category: 'abgaben', title: 'GEMA', pricing: 'pauschal' },
-  { category: 'abgaben', title: 'Künstlersozialabgabe (KSK)', pricing: 'pauschal' },
-  { category: 'abgaben', title: 'Veranstalterhaftpflicht', pricing: 'pauschal' },
-  { category: 'abgaben', title: 'Ausfallversicherung (Wetter)', pricing: 'pauschal' },
+  { category: 'abgaben', title: t('GEMA', 'GEMA (music royalties)'), pricing: 'pauschal' },
+  {
+    category: 'abgaben',
+    title: t('Künstlersozialabgabe (KSK)', 'Artist social security levy (KSK)'),
+    pricing: 'pauschal',
+  },
+  {
+    category: 'abgaben',
+    title: t('Veranstalterhaftpflicht', 'Event liability insurance'),
+    pricing: 'pauschal',
+  },
+  {
+    category: 'abgaben',
+    title: t('Ausfallversicherung (Wetter)', 'Cancellation insurance (weather)'),
+    pricing: 'pauschal',
+  },
   // Puffer
-  { category: 'sonstiges', title: 'Puffer für Unvorhergesehenes (ca. 10 %)', pricing: 'pauschal' },
+  {
+    category: 'sonstiges',
+    title: t('Puffer für Unvorhergesehenes (ca. 10 %)', 'Contingency buffer (approx. 10 %)'),
+    pricing: 'pauschal',
+  },
 ];
 
 export interface PlanDay {
@@ -416,16 +557,19 @@ export function formula(
   money: (v: number) => string,
 ): string {
   const days = dayCount(item);
-  const t = days === 1 ? '1 Tag' : `${days} Tage`;
+  const dayText = days === 1 ? t('1 Tag', '1 day') : t(`${days} Tage`, `${days} days`);
   switch (item.pricing) {
     case 'pauschal':
-      return 'pauschal';
+      return t('pauschal', 'flat rate');
     case 'stueck':
       return `${n(item.quantity)} × ${money(n(item.unit_price))}`;
     case 'pro_tag':
-      return `${n(item.quantity)} × ${money(n(item.unit_price))} × ${t}`;
+      return `${n(item.quantity)} × ${money(n(item.unit_price))} × ${dayText}`;
     case 'stunden':
-      return `${n(item.quantity)} Pers. × ${n(item.hours)} h × ${money(n(item.unit_price))} × ${t}`;
+      return t(
+        `${n(item.quantity)} Pers. × ${n(item.hours)} h × ${money(n(item.unit_price))} × ${dayText}`,
+        `${n(item.quantity)} ppl × ${n(item.hours)} h × ${money(n(item.unit_price))} × ${dayText}`,
+      );
     default:
       return '';
   }

@@ -5,6 +5,7 @@
   import { m } from '@platform/i18n';
   import { auth, isAuthConfigured } from '$lib/auth.svelte';
   import { afterLoginPath, isModuleEnabled } from '$lib/modules';
+  import { t } from '$lib/i18n';
 
   // Ohne Ticketshop ist die Instanz ein interner Orga-Bereich: dort ist der
   // Passwort-Login Standard (unabhaengig von Mail-Zustellung), Code per Mail
@@ -42,7 +43,7 @@
       return;
     }
     if (!password) {
-      errorMsg = 'Bitte gib dein Passwort ein.';
+      errorMsg = t('Bitte gib dein Passwort ein.', 'Please enter your password.');
       return;
     }
     submitting = true;
@@ -51,7 +52,7 @@
       await goto(afterLoginPath(auth.isCrew), { replaceState: true });
     } catch (err) {
       console.error('[login] password failed', err);
-      errorMsg = 'E-Mail oder Passwort stimmt nicht.';
+      errorMsg = t('E-Mail oder Passwort stimmt nicht.', 'Email or password is incorrect.');
     } finally {
       submitting = false;
     }
@@ -99,18 +100,29 @@
     errorMsg = null;
     resetInfo = null;
     if (!emailRegex.test(email)) {
-      errorMsg = 'Trag oben deine E-Mail-Adresse ein, dann schicken wir dir einen Link.';
+      errorMsg = t(
+        'Trag oben deine E-Mail-Adresse ein, dann schicken wir dir einen Link.',
+        'Enter your email address above and we will send you a link.',
+      );
       return;
     }
     submitting = true;
     try {
       await auth.requestPasswordReset(email);
-      resetInfo = `Wenn ${email.trim()} bei uns angelegt ist, kommt gleich eine Mail mit einem Link.`;
+      resetInfo = t(
+        `Wenn ${email.trim()} bei uns angelegt ist, kommt gleich eine Mail mit einem Link.`,
+        `If ${email.trim()} has an account, an email with a link is on its way.`,
+      );
     } catch (err) {
       console.error('[login] password reset failed', err);
       const status = (err as { status?: number }).status;
       errorMsg =
-        status === 429 ? 'Zu viele Versuche. Bitte warte eine Minute.' : m.login_error_generic();
+        status === 429
+          ? t(
+              'Zu viele Versuche. Bitte warte eine Minute.',
+              'Too many attempts. Please wait a minute.',
+            )
+          : m.login_error_generic();
     } finally {
       submitting = false;
     }
@@ -144,20 +156,23 @@
     </div>
   {:else}
     <p class="mt-3 text-sm text-fg-muted">
-      Zugang nur fuer die Crew. Konten legt ein Admin an, du bekommst dann eine Willkommensmail.
+      {t(
+        'Zugang nur fuer die Crew. Konten legt ein Admin an, du bekommst dann eine Willkommensmail.',
+        'Crew access only. An admin creates your account and you will receive a welcome email.',
+      )}
     </p>
-    <div class="seg mt-6" role="group" aria-label="Anmeldeart">
+    <div class="seg mt-6" role="group" aria-label={t('Anmeldeart', 'Sign-in method')}>
       <button
         type="button"
         class:on={mode === 'password'}
         aria-pressed={mode === 'password'}
-        onclick={() => switchMode('password')}>Passwort</button
+        onclick={() => switchMode('password')}>{t('Passwort', 'Password')}</button
       >
       <button
         type="button"
         class:on={mode === 'code'}
         aria-pressed={mode === 'code'}
-        onclick={() => switchMode('code')}>Code per E-Mail</button
+        onclick={() => switchMode('code')}>{t('Code per E-Mail', 'Code by email')}</button
       >
     </div>
 
@@ -176,7 +191,7 @@
           />
         </label>
         <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Passwort</span>
+          <span class="text-xs font-medium text-fg-muted">{t('Passwort', 'Password')}</span>
           <input
             type="password"
             required
@@ -188,16 +203,19 @@
         </label>
         {#if errorMsg}<p class="text-sm text-danger" role="alert">{errorMsg}</p>{/if}
         <div>
-          <Button type="submit">{submitting ? 'Pruefe …' : 'Einloggen'}</Button>
+          <Button type="submit"
+            >{submitting ? t('Pruefe …', 'Checking …') : t('Einloggen', 'Sign in')}</Button
+          >
         </div>
         {#if resetInfo}<p class="text-sm text-success" aria-live="polite">{resetInfo}</p>{/if}
         <p class="text-xs text-fg-muted">
-          Noch kein Passwort oder vergessen?
+          {t('Noch kein Passwort oder vergessen?', 'No password yet or forgot it?')}
           <button
             type="button"
             class="text-accent underline"
             disabled={submitting}
-            onclick={() => void forgotPassword()}>Link zum Zuruecksetzen schicken</button
+            onclick={() => void forgotPassword()}
+            >{t('Link zum Zuruecksetzen schicken', 'Send me a reset link')}</button
           >
         </p>
       </form>
@@ -240,7 +258,9 @@
         </label>
         {#if errorMsg}<p class="text-sm text-danger" role="alert">{errorMsg}</p>{/if}
         <div>
-          <Button type="submit">{submitting ? m.login_submitting() : 'Code senden'}</Button>
+          <Button type="submit"
+            >{submitting ? m.login_submitting() : t('Code senden', 'Send code')}</Button
+          >
         </div>
       </form>
     {/if}

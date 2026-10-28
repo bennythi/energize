@@ -11,6 +11,7 @@
     type CheckState,
     type ItemKind,
   } from '$lib/booking';
+  import { t } from '$lib/i18n';
 
   interface Props {
     artistId: string;
@@ -98,7 +99,7 @@
       editingId = null;
       onChange();
     } catch (err) {
-      errorMsg = errorMessage(err, 'Speichern fehlgeschlagen.');
+      errorMsg = errorMessage(err, t('Speichern fehlgeschlagen.', 'Saving failed.'));
     } finally {
       saving = false;
     }
@@ -110,18 +111,18 @@
       await auth.pb.collection('booking_items').update(i.id, { [field]: !i[field] });
       onChange();
     } catch (err) {
-      errorMsg = errorMessage(err, 'Aendern fehlgeschlagen.');
+      errorMsg = errorMessage(err, t('Aendern fehlgeschlagen.', 'Update failed.'));
     }
   }
 
   async function remove(i: BookingItem) {
     if (!auth.pb || !canDelete) return;
-    if (!confirm(`„${i.title}“ wirklich loeschen?`)) return;
+    if (!confirm(t(`„${i.title}“ wirklich loeschen?`, `Really delete “${i.title}”?`))) return;
     try {
       await auth.pb.collection('booking_items').delete(i.id);
       onChange();
     } catch (err) {
-      errorMsg = errorMessage(err, 'Loeschen fehlgeschlagen.');
+      errorMsg = errorMessage(err, t('Loeschen fehlgeschlagen.', 'Deleting failed.'));
     }
   }
 
@@ -138,11 +139,11 @@
     <div class="flex items-center gap-3">
       <h2 id="sec-{kind}" class="text-lg font-semibold text-fg">{KIND_LABELS[kind]}</h2>
       {#if check === 'done'}
-        <span class="pill pill-done">gebucht</span>
+        <span class="pill pill-done">{t('gebucht', 'booked')}</span>
       {:else if check === 'open'}
-        <span class="pill">offen</span>
+        <span class="pill">{t('offen', 'open')}</span>
       {:else if check === 'na'}
-        <span class="pill pill-na">nicht noetig</span>
+        <span class="pill pill-na">{t('nicht noetig', 'not needed')}</span>
       {/if}
     </div>
     <div class="flex items-center gap-3">
@@ -151,7 +152,7 @@
       {/if}
       {#if canWrite && onToggleNotNeeded}
         <button type="button" class="link" onclick={onToggleNotNeeded}>
-          {check === 'na' ? 'Doch noetig' : 'Nicht noetig'}
+          {check === 'na' ? t('Doch noetig', 'Needed after all') : t('Nicht noetig', 'Not needed')}
         </button>
       {/if}
     </div>
@@ -171,8 +172,8 @@
                 {[
                   when(i),
                   i.location,
-                  i.reference ? `Nr. ${i.reference}` : '',
-                  i.persons > 1 ? `${i.persons} Pers.` : '',
+                  i.reference ? `${t('Nr.', 'No.')} ${i.reference}` : '',
+                  i.persons > 1 ? `${i.persons} ${t('Pers.', 'pers.')}` : '',
                 ]
                   .filter(Boolean)
                   .join(' · ') || '–'}
@@ -192,7 +193,7 @@
                 disabled={!canWrite}
                 aria-pressed={i.booked}
                 onclick={() => void toggle(i, 'booked')}
-                >{i.booked ? 'Gebucht' : 'Nicht gebucht'}</button
+                >{i.booked ? t('Gebucht', 'Booked') : t('Nicht gebucht', 'Not booked')}</button
               >
               <button
                 type="button"
@@ -200,14 +201,17 @@
                 class:tog-on={i.paid}
                 disabled={!canWrite}
                 aria-pressed={i.paid}
-                onclick={() => void toggle(i, 'paid')}>{i.paid ? 'Bezahlt' : 'Offen'}</button
+                onclick={() => void toggle(i, 'paid')}
+                >{i.paid ? t('Bezahlt', 'Paid') : t('Offen', 'Unpaid')}</button
               >
               {#if canWrite}
-                <button type="button" class="link" onclick={() => startEdit(i)}>Bearbeiten</button>
+                <button type="button" class="link" onclick={() => startEdit(i)}
+                  >{t('Bearbeiten', 'Edit')}</button
+                >
               {/if}
               {#if canDelete}
                 <button type="button" class="link link-danger" onclick={() => void remove(i)}
-                  >Loeschen</button
+                  >{t('Loeschen', 'Delete')}</button
                 >
               {/if}
             </div>
@@ -215,13 +219,15 @@
         {/each}
       </ul>
     {:else if editingId !== 'new'}
-      <p class="mt-3 text-sm text-fg-muted">Noch nichts eingetragen.</p>
+      <p class="mt-3 text-sm text-fg-muted">
+        {t('Noch nichts eingetragen.', 'Nothing added yet.')}
+      </p>
     {/if}
 
     {#if editingId}
       <form onsubmit={save} class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <label class="block sm:col-span-2">
-          <span class="text-xs font-medium text-fg-muted">Bezeichnung</span>
+          <span class="text-xs font-medium text-fg-muted">{t('Bezeichnung', 'Description')}</span>
           <input
             class="field mt-1"
             bind:value={draft.title}
@@ -247,38 +253,51 @@
           <input class="field mt-1" bind:value={draft.location} maxlength="300" />
         </label>
         <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Buchungsnummer</span>
+          <span class="text-xs font-medium text-fg-muted"
+            >{t('Buchungsnummer', 'Booking reference')}</span
+          >
           <input class="field mt-1" bind:value={draft.reference} maxlength="120" />
         </label>
         <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Personen</span>
+          <span class="text-xs font-medium text-fg-muted">{t('Personen', 'Persons')}</span>
           <input class="field mt-1" type="number" min="0" bind:value={draft.persons} />
         </label>
         <label class="block">
-          <span class="text-xs font-medium text-fg-muted">Kosten ({currency})</span>
+          <span class="text-xs font-medium text-fg-muted">{t('Kosten', 'Cost')} ({currency})</span>
           <input class="field mt-1" type="number" min="0" step="0.01" bind:value={draft.cost} />
         </label>
         <div class="flex items-end gap-4 pb-2">
           <label class="flex items-center gap-2 text-sm text-fg">
-            <input type="checkbox" bind:checked={draft.booked} /> Gebucht
+            <input type="checkbox" bind:checked={draft.booked} />
+            {t('Gebucht', 'Booked')}
           </label>
           <label class="flex items-center gap-2 text-sm text-fg">
-            <input type="checkbox" bind:checked={draft.paid} /> Bezahlt
+            <input type="checkbox" bind:checked={draft.paid} />
+            {t('Bezahlt', 'Paid')}
           </label>
         </div>
         <label class="block sm:col-span-2 lg:col-span-4">
-          <span class="text-xs font-medium text-fg-muted">Notizen</span>
+          <span class="text-xs font-medium text-fg-muted">{t('Notizen', 'Notes')}</span>
           <textarea class="field mt-1" rows="2" bind:value={draft.notes} maxlength="4000"
           ></textarea>
         </label>
         <div class="flex gap-2 sm:col-span-2 lg:col-span-4">
-          <Button type="submit" disabled={saving}>{saving ? 'Speichert …' : 'Speichern'}</Button>
-          <Button variant="ghost" onclick={() => (editingId = null)}>Abbrechen</Button>
+          <Button type="submit" disabled={saving}
+            >{saving ? t('Speichert …', 'Saving …') : t('Speichern', 'Save')}</Button
+          >
+          <Button variant="ghost" onclick={() => (editingId = null)}
+            >{t('Abbrechen', 'Cancel')}</Button
+          >
         </div>
       </form>
     {:else if canWrite}
       <div class="mt-4">
-        <Button variant="ghost" onclick={startNew}>+ {KIND_LABELS[kind]} hinzufuegen</Button>
+        <Button variant="ghost" onclick={startNew}
+          >+ {t(
+            `${KIND_LABELS[kind]} hinzufuegen`,
+            `Add ${KIND_LABELS[kind].toLowerCase()}`,
+          )}</Button
+        >
       </div>
     {/if}
   {/if}

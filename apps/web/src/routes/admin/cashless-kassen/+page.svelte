@@ -3,6 +3,7 @@
   import { Button } from '@platform/ui';
   import { auth } from '$lib/auth.svelte';
   import { errorMessage } from '$lib/crew-api';
+  import { t } from '$lib/i18n';
 
   interface Register {
     id: string;
@@ -32,7 +33,10 @@
         .getFullList({ sort: '-is_active,name' });
     } catch (err) {
       console.error('[admin/cashless-kassen] load failed', err);
-      errorMsg = errorMessage(err, 'Kassen konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Kassen konnten nicht geladen werden.', 'Cash registers could not be loaded.'),
+      );
     } finally {
       loading = false;
     }
@@ -54,7 +58,10 @@
       is_active: editing.is_active,
     };
     if (data.name.length < 2 || data.name.length > 80) {
-      formError = 'Der Name muss 2 bis 80 Zeichen lang sein.';
+      formError = t(
+        'Der Name muss 2 bis 80 Zeichen lang sein.',
+        'The name must be 2 to 80 characters long.',
+      );
       return;
     }
     saving = true;
@@ -67,7 +74,10 @@
       await load(false);
     } catch (err) {
       console.error('[admin/cashless-kassen] save failed', err);
-      formError = errorMessage(err, 'Kasse konnte nicht gespeichert werden.');
+      formError = errorMessage(
+        err,
+        t('Kasse konnte nicht gespeichert werden.', 'Cash register could not be saved.'),
+      );
     } finally {
       saving = false;
     }
@@ -82,7 +92,10 @@
       registers = registers.map((x) => (x.id === r.id ? { ...x, is_active: active } : x));
     } catch (err) {
       console.error('[admin/cashless-kassen] toggle failed', err);
-      errorMsg = errorMessage(err, 'Status konnte nicht geaendert werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Status konnte nicht geaendert werden.', 'Status could not be changed.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -90,23 +103,30 @@
 </script>
 
 <svelte:head>
-  <title>Admin · Cashless-Kassen</title>
+  <title>{t('Admin · Cashless-Kassen', 'Admin · Cashless registers')}</title>
 </svelte:head>
 
 <div class="mx-auto w-full max-w-6xl px-5 py-8 md:py-10">
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
-      <h1 class="text-3xl font-semibold tracking-tight text-fg">Cashless-Kassen</h1>
+      <h1 class="text-3xl font-semibold tracking-tight text-fg">
+        {t('Cashless-Kassen', 'Cashless registers')}
+      </h1>
       <p class="mt-3 max-w-2xl text-fg-muted">
-        Stammdaten der Top-Up-Kassen. Schichten werden im Crew-Bereich unter
-        <a href="/crew/kasse" class="text-accent hover:underline">Kasse</a> gefuehrt. Inaktive Kassen
-        tauchen dort nicht mehr auf. Kassen werden nicht geloescht, damit die Schicht-Historie erhalten
-        bleibt.
+        {t(
+          'Stammdaten der Top-Up-Kassen. Schichten werden im Crew-Bereich unter',
+          'Master data of the top-up registers. Shifts are managed in the crew area under',
+        )}
+        <a href="/crew/kasse" class="text-accent hover:underline">{t('Kasse', 'Cash register')}</a
+        >{t(
+          ' gefuehrt. Inaktive Kassen tauchen dort nicht mehr auf. Kassen werden nicht geloescht, damit die Schicht-Historie erhalten bleibt.',
+          '. Inactive registers no longer show up there. Registers are not deleted so the shift history is preserved.',
+        )}
       </p>
     </div>
     {#if !editing}
       <Button onclick={() => openEditor({ id: '', name: '', location: '', is_active: true })}>
-        + Neue Kasse
+        + {t('Neue Kasse', 'New cash register')}
       </Button>
     {/if}
   </div>
@@ -118,7 +138,9 @@
   {#if editing}
     <form bind:this={editorEl} class="card mt-8 max-w-xl scroll-mt-6 p-6" onsubmit={save}>
       <h2 class="text-lg font-semibold text-fg">
-        {editing.id ? 'Kasse bearbeiten' : 'Neue Kasse'}
+        {editing.id
+          ? t('Kasse bearbeiten', 'Edit cash register')
+          : t('Neue Kasse', 'New cash register')}
       </h2>
       <label class="mt-5 block">
         <span class="text-sm text-fg-muted">Name</span>
@@ -128,17 +150,17 @@
           minlength="2"
           maxlength="80"
           required
-          placeholder="z.B. Kasse Eingang"
+          placeholder={t('z.B. Kasse Eingang', 'e.g. Entrance register')}
           class="field mt-1"
         />
       </label>
       <label class="mt-4 block">
-        <span class="text-sm text-fg-muted">Standort (optional)</span>
+        <span class="text-sm text-fg-muted">{t('Standort (optional)', 'Location (optional)')}</span>
         <input
           type="text"
           bind:value={editing.location}
           maxlength="120"
-          placeholder="z.B. Haupteingang, Stage Right"
+          placeholder={t('z.B. Haupteingang, Stage Right', 'e.g. main entrance, stage right')}
           class="field mt-1"
         />
       </label>
@@ -148,15 +170,17 @@
           bind:checked={editing.is_active}
           class="accent-[var(--color-accent)]"
         />
-        Aktiv
+        {t('Aktiv', 'Active')}
       </label>
       {#if formError}
         <p class="mt-4 text-sm text-danger">{formError}</p>
       {/if}
       <div class="mt-6 flex flex-wrap gap-3">
-        <Button type="submit" disabled={saving}>{saving ? 'Speichere …' : 'Speichern'}</Button>
+        <Button type="submit" disabled={saving}
+          >{saving ? t('Speichere …', 'Saving …') : t('Speichern', 'Save')}</Button
+        >
         <Button variant="ghost" onclick={() => (editing = null)} disabled={saving}>
-          Abbrechen
+          {t('Abbrechen', 'Cancel')}
         </Button>
       </div>
     </form>
@@ -166,7 +190,9 @@
     <div class="card mt-8 h-40 animate-pulse opacity-50"></div>
   {:else if registers.length === 0}
     <div class="card mt-8 p-6">
-      <p class="text-fg-muted">Noch keine Kassen angelegt.</p>
+      <p class="text-fg-muted">
+        {t('Noch keine Kassen angelegt.', 'No cash registers created yet.')}
+      </p>
     </div>
   {:else}
     <ul class="card mt-8 overflow-hidden">
@@ -183,7 +209,7 @@
                 class:text-success={r.is_active}
                 class:text-fg-muted={!r.is_active}
               >
-                ● {r.is_active ? 'aktiv' : 'inaktiv'}
+                ● {r.is_active ? t('aktiv', 'active') : t('inaktiv', 'inactive')}
               </span>
             </p>
             {#if r.location}
@@ -192,10 +218,10 @@
           </div>
           <div class="flex shrink-0 flex-wrap gap-2">
             <button class="pill" disabled={busy} onclick={() => setActive(r, !r.is_active)}>
-              {r.is_active ? 'Deaktivieren' : 'Aktivieren'}
+              {r.is_active ? t('Deaktivieren', 'Deactivate') : t('Aktivieren', 'Activate')}
             </button>
             <button class="pill" disabled={busy} onclick={() => openEditor({ ...r })}>
-              Bearbeiten
+              {t('Bearbeiten', 'Edit')}
             </button>
           </div>
         </li>

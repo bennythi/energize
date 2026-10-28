@@ -11,6 +11,7 @@
   } from '$lib/crew-api';
   import { DEFAULT_CREW_ROLES } from '$lib/crewResources';
   import NewUserForm from '$lib/admin/NewUserForm.svelte';
+  import { t } from '$lib/i18n';
 
   let crew = $state<AdminUser[]>([]);
   let allUsers = $state<AdminUser[]>([]);
@@ -23,15 +24,23 @@
   let notice = $state<string | null>(null);
 
   async function resendWelcome(u: AdminUser) {
-    if (!confirm(`Willkommensmail erneut an ${u.email} senden?`)) return;
+    if (
+      !confirm(
+        t(`Willkommensmail erneut an ${u.email} senden?`, `Resend welcome email to ${u.email}?`),
+      )
+    )
+      return;
     actingOn = u.id;
     errorMsg = null;
     notice = null;
     try {
       await adminResendWelcome(u.id);
-      notice = `Willkommensmail an ${u.email} gesendet.`;
+      notice = t(`Willkommensmail an ${u.email} gesendet.`, `Welcome email sent to ${u.email}.`);
     } catch (err) {
-      errorMsg = errorMessage(err, 'Mail konnte nicht gesendet werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Mail konnte nicht gesendet werden.', 'Email could not be sent.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -47,7 +56,10 @@
       allUsers = u;
     } catch (err) {
       console.error('[admin/crew] load failed', err);
-      errorMsg = errorMessage(err, 'Crew-Daten konnten nicht geladen werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Crew-Daten konnten nicht geladen werden.', 'Crew data could not be loaded.'),
+      );
     } finally {
       loading = false;
     }
@@ -62,7 +74,11 @@
   }
 
   async function setCrewFlag(u: AdminUser, makeCrew: boolean) {
-    if (!makeCrew && !confirm(`${label(u)} das Crew-Recht entziehen?`)) return;
+    if (
+      !makeCrew &&
+      !confirm(t(`${label(u)} das Crew-Recht entziehen?`, `Revoke crew access from ${label(u)}?`))
+    )
+      return;
     actingOn = u.id;
     errorMsg = null;
     try {
@@ -70,7 +86,10 @@
       await load(false);
     } catch (err) {
       console.error('[admin/crew] toggle failed', err);
-      errorMsg = errorMessage(err, 'Crew-Recht konnte nicht geaendert werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Crew-Recht konnte nicht geaendert werden.', 'Crew access could not be changed.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -87,7 +106,10 @@
     } catch (err) {
       console.error('[admin/crew] roles failed', err);
       crew = crew.map((m) => (m.id === u.id ? { ...m, crew_roles: prev } : m));
-      errorMsg = errorMessage(err, 'Rollen konnten nicht gespeichert werden.');
+      errorMsg = errorMessage(
+        err,
+        t('Rollen konnten nicht gespeichert werden.', 'Roles could not be saved.'),
+      );
     } finally {
       actingOn = null;
     }
@@ -127,11 +149,17 @@
 </svelte:head>
 
 <div class="mx-auto w-full max-w-6xl px-5 py-8 md:py-10">
-  <h1 class="text-3xl font-semibold tracking-tight text-fg">Crew verwalten</h1>
+  <h1 class="text-3xl font-semibold tracking-tight text-fg">
+    {t('Crew verwalten', 'Manage crew')}
+  </h1>
   <p class="mt-3 max-w-2xl text-fg-muted">
-    Admin und Crew sind getrennte Rechte. Admins sind hier immer sichtbar und koennen das Crew-Recht
-    zusaetzlich bekommen. Was eine Rolle darf, legst du unter
-    <a href="/admin/berechtigungen" class="text-accent hover:underline">Rechte</a> fest.
+    {t(
+      'Admin und Crew sind getrennte Rechte. Admins sind hier immer sichtbar und koennen das Crew-Recht zusaetzlich bekommen. Was eine Rolle darf, legst du unter',
+      'Admin and crew are separate permissions. Admins are always visible here and can additionally be given crew access. You define what a role may do under',
+    )}
+    <a href="/admin/berechtigungen" class="text-accent hover:underline"
+      >{t('Rechte', 'Permissions')}</a
+    >{t(' fest.', '.')}
   </p>
 
   {#if errorMsg}
@@ -149,13 +177,15 @@
 
     <!-- Bestehenden Account zur Crew -->
     <section class="card mt-6 p-6">
-      <h2 class="text-lg font-semibold text-fg">Bestehenden Account wieder zur Crew</h2>
+      <h2 class="text-lg font-semibold text-fg">
+        {t('Bestehenden Account wieder zur Crew', 'Add existing account back to the crew')}
+      </h2>
       <input
         type="search"
         bind:value={search}
-        placeholder="Name, Handle oder E-Mail suchen …"
+        placeholder={t('Name, Handle oder E-Mail suchen …', 'Search name, handle or email …')}
         class="field mt-4"
-        aria-label="User suchen"
+        aria-label={t('User suchen', 'Search users')}
       />
       {#if search.trim()}
         <ul class="mt-3 flex flex-col">
@@ -173,11 +203,16 @@
                 disabled={actingOn === u.id}
                 onclick={() => setCrewFlag(u, true)}
               >
-                {actingOn === u.id ? '…' : 'Zur Crew'}
+                {actingOn === u.id ? '…' : t('Zur Crew', 'Add to crew')}
               </button>
             </li>
           {:else}
-            <li class="py-3 text-sm text-fg-muted">Niemand gefunden (oder schon in der Crew).</li>
+            <li class="py-3 text-sm text-fg-muted">
+              {t(
+                'Niemand gefunden (oder schon in der Crew).',
+                'Nobody found (or already in the crew).',
+              )}
+            </li>
           {/each}
         </ul>
       {/if}
@@ -186,11 +221,16 @@
     <!-- Aktive Crew -->
     <section class="mt-10">
       <h2 class="text-lg font-semibold text-fg">
-        Aktive Crew <span class="text-fg-muted">{crew.length}</span>
+        {t('Aktive Crew', 'Active crew')} <span class="text-fg-muted">{crew.length}</span>
       </h2>
       {#if crew.length === 0}
         <div class="card mt-4 p-6">
-          <p class="text-fg-muted">Noch niemand. Vergib oben die ersten Crew-Rechte.</p>
+          <p class="text-fg-muted">
+            {t(
+              'Noch niemand. Vergib oben die ersten Crew-Rechte.',
+              'Nobody yet. Grant the first crew access above.',
+            )}
+          </p>
         </div>
       {:else}
         <ul class="mt-4 flex flex-col gap-3">
@@ -204,7 +244,9 @@
                     <span class="font-medium text-fg">{label(m)}</span>
                     {#if m.role === 'admin'}<span class="badge badge-danger">Admin</span>{/if}
                     {#if m.is_crew}<span class="badge badge-accent">Crew</span>{/if}
-                    {#if m.id === auth.user?.id}<span class="text-xs text-fg-muted">(du)</span>{/if}
+                    {#if m.id === auth.user?.id}<span class="text-xs text-fg-muted"
+                        >{t('(du)', '(you)')}</span
+                      >{/if}
                   </div>
                   <p class="mt-1 break-all text-xs text-fg-muted">{m.email}</p>
                 </div>
@@ -217,10 +259,10 @@
                       customRole = '';
                     }}
                   >
-                    {editing ? 'Fertig' : 'Rollen bearbeiten'}
+                    {editing ? t('Fertig', 'Done') : t('Rollen bearbeiten', 'Edit roles')}
                   </button>
                   <button class="pill" disabled={busy} onclick={() => resendWelcome(m)}>
-                    Willkommensmail
+                    {t('Willkommensmail', 'Welcome email')}
                   </button>
                   {#if m.is_crew}
                     <button
@@ -228,7 +270,7 @@
                       disabled={busy}
                       onclick={() => setCrewFlag(m, false)}
                     >
-                      Crew entziehen
+                      {t('Crew entziehen', 'Revoke crew')}
                     </button>
                   {:else}
                     <button class="pill" disabled={busy} onclick={() => setCrewFlag(m, true)}>
@@ -263,13 +305,13 @@
                   <input
                     type="text"
                     bind:value={customRole}
-                    placeholder="Eigene Rolle, z.B. buehne"
+                    placeholder={t('Eigene Rolle, z.B. buehne', 'Custom role, e.g. stage')}
                     class="field"
                     maxlength="40"
-                    aria-label="Eigene Rolle"
+                    aria-label={t('Eigene Rolle', 'Custom role')}
                   />
                   <button class="pill shrink-0" type="submit" disabled={busy || !customRole.trim()}>
-                    Hinzufuegen
+                    {t('Hinzufuegen', 'Add')}
                   </button>
                 </form>
               {:else if m.crew_roles.length > 0}
@@ -279,7 +321,9 @@
                   {/each}
                 </div>
               {:else}
-                <p class="mt-3 text-xs text-fg-muted">Keine Rollen zugewiesen.</p>
+                <p class="mt-3 text-xs text-fg-muted">
+                  {t('Keine Rollen zugewiesen.', 'No roles assigned.')}
+                </p>
               {/if}
             </li>
           {/each}
